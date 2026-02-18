@@ -1,7 +1,7 @@
 ---
 id: 004
 title: Add pr_mode config — PR per plan or PR per phase
-status: active
+status: done
 priority: 2
 phase: phase-1
 branch: feature/pr-mode-config
