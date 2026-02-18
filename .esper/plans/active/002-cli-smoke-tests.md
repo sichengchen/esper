@@ -1,7 +1,7 @@
 ---
 id: 002
 title: Add CLI smoke tests
-status: pending
+status: active
 priority: 2
 phase: phase-1
 branch: feature/cli-smoke-tests

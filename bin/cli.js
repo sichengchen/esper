@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const PACKAGE_ROOT = join(__dirname, '..')
-const CLAUDE_SKILLS_DIR = join(homedir(), '.claude', 'skills')
+const CLAUDE_SKILLS_DIR = process.env.ESPER_SKILLS_DIR ?? join(homedir(), '.claude', 'skills')
 
 async function install() {
   console.log('Installing esper skills to ~/.claude/skills/...\n')
