@@ -53,7 +53,26 @@ Run `git status --porcelain`. If there are uncommitted changes:
 
 If there is nothing to commit, skip this step.
 
-## Step 4: Push the branch
+## Step 4: Archive the plan
+
+Move the plan file from `.esper/plans/active/<filename>` to `.esper/plans/done/<filename>` (same filename).
+
+Update the frontmatter of the moved file:
+```yaml
+status: done
+shipped_at: <today's date in YYYY-MM-DD format>
+```
+
+(Leave `pr:` out for now — the PR URL isn't known until Step 6.)
+
+Then commit the archive:
+```bash
+git add .esper/plans/done/<filename>
+git add .esper/plans/active/<filename>  # to stage the deletion
+git commit -m "chore: archive plan #<id> — <title>"
+```
+
+## Step 5: Push the branch
 
 ```bash
 git push -u origin <branch from plan frontmatter>
@@ -61,11 +80,11 @@ git push -u origin <branch from plan frontmatter>
 
 If the push fails (e.g. no remote, auth issue), report the error and stop.
 
-## Step 5: Open a PR
+## Step 6: Open a PR
 
 Read `type` from the plan frontmatter.
 
-**If `type: "feature"`**: Skip PR creation. Print: "Feature plan: PR will be opened when the full phase is complete." Then continue to Step 6.
+**If `type: "feature"`**: Skip PR creation. Print: "Feature plan: PR will be opened when the full phase is complete." Then continue to Step 7.
 
 **If `type: "fix"`**: Create the PR using the `gh` CLI:
 
@@ -90,15 +109,9 @@ EOF
 
 Print the PR URL returned by `gh pr create`.
 
-## Step 6: Archive the plan
-
-Move the plan file from `.esper/plans/active/<filename>` to `.esper/plans/done/<filename>` (same filename).
-
-Update the frontmatter of the moved file:
+After PR is opened, update the plan's `pr:` field in `done/` with the PR URL (no extra commit needed — this is local metadata):
 ```yaml
-status: done
-shipped_at: <today's date in YYYY-MM-DD format>
-pr: <PR URL from Step 5, or omit if type: "feature" — PR not opened yet>
+pr: <PR URL>
 ```
 
 If `type: "fix"` and `backlog_mode` is `"github"` in `esper.json` and `gh_issue` is set in the plan:

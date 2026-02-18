@@ -1,7 +1,7 @@
 ---
 id: 008
 title: Redesign PR strategy — per-plan type (fix vs feature) replaces global pr_mode
-status: active
+status: pending
 priority: 1
 phase: phase-1
 branch: feature/phase-1
