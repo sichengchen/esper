@@ -1,11 +1,12 @@
 ---
 id: 002
 title: Add CLI smoke tests
-status: active
+status: done
 priority: 2
 phase: phase-1
 branch: feature/cli-smoke-tests
 created: 2026-02-18
+shipped_at: 2026-02-18
 ---
 
 # Add CLI smoke tests
@@ -36,3 +37,11 @@ created: 2026-02-18
 - Run: `node --test test/`
 - Expected: All tests pass, output shows `pass` for each case
 - Edge cases: Test with a fresh temp dir (no existing skills) and a pre-populated temp dir (updating)
+
+## Progress
+
+- Modified `bin/cli.js`: added `ESPER_SKILLS_DIR` env var override (defaults to `~/.claude/skills`)
+- Created `test/cli.test.js`: 3 smoke tests using `node:test` — fresh install, update existing, exit code 0
+- Updated `package.json`: added `"test": "node --test test/cli.test.js"` (note: `test/` directory form fails on Node 24; explicit file path used)
+- Modified: bin/cli.js, test/cli.test.js, package.json
+- Verification: passed — all 3 tests pass via `npm test`
