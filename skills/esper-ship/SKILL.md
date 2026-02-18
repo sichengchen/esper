@@ -9,7 +9,7 @@ You are shipping the active backlog item.
 
 Read `.esper/plans/active/`. If the directory is empty or contains no `.md` files, tell the user "No active plan to ship." and stop.
 
-Read the active plan's full content and frontmatter (`id`, `title`, `branch`, `phase`, `gh_issue` if present).
+Read the active plan's full content and frontmatter (`id`, `title`, `type`, `branch`, `phase`, `gh_issue` if present).
 
 ## Step 2: Run full verification
 
@@ -63,11 +63,11 @@ If the push fails (e.g. no remote, auth issue), report the error and stop.
 
 ## Step 5: Open a PR
 
-Read `pr_mode` from `.esper/esper.json` (treat missing as `"plan"`).
+Read `type` from the plan frontmatter.
 
-**If `pr_mode: "phase"`**: Skip PR creation. Print: "Phase mode: PR will be opened when the full phase is complete." Then continue to Step 6.
+**If `type: "feature"`**: Skip PR creation. Print: "Feature plan: PR will be opened when the full phase is complete." Then continue to Step 6.
 
-**If `pr_mode: "plan"` (default)**: Create the PR using the `gh` CLI:
+**If `type: "fix"`**: Create the PR using the `gh` CLI:
 
 ```bash
 gh pr create \
@@ -98,10 +98,10 @@ Update the frontmatter of the moved file:
 ```yaml
 status: done
 shipped_at: <today's date in YYYY-MM-DD format>
-pr: <PR URL from Step 5>
+pr: <PR URL from Step 5, or omit if type: "feature" — PR not opened yet>
 ```
 
-If `backlog_mode` is `"github"` in `esper.json` and `gh_issue` is set in the plan:
+If `type: "fix"` and `backlog_mode` is `"github"` in `esper.json` and `gh_issue` is set in the plan:
 ```bash
 gh issue close <gh_issue> --comment "Shipped in <PR URL>"
 ```
@@ -113,8 +113,9 @@ Read all plan files across `pending/`, `active/`, and `done/` where `phase:` mat
 If all plans for the current phase are in `done/` (none remain in `pending/` or `active/`):
 - Print: "Phase <N> complete. All backlog items shipped."
 - Read `.esper/phases/<current_phase>.md` and display the acceptance criteria checklist
+- Open ONE PR summarizing the entire phase (targeting `main`):
 
-  **If `pr_mode: "phase"`**: Open one PR summarizing the entire phase:
+  Collect all plans where `type: "feature"` for the phase PR body. `type: "fix"` plans already have their own PRs and are excluded.
 
   ```bash
   gh pr create \
@@ -127,17 +128,19 @@ If all plans for the current phase are in `done/` (none remain in `pending/` or 
 
   ## Shipped plans
   - #<id> — <title>: <one-line approach summary>
-  - #<id> — <title>: <one-line approach summary>
   ...
 
   ## Acceptance criteria
   <paste acceptance criteria checklist from phase file>
+
+  <if backlog_mode is "github" and any feature plan has gh_issue set:>
+  Closes #<issue1>, Closes #<issue2>, ...
   EOF
   )"
   ```
 
-  Print the PR URL. Then ask: "Ready to plan the next phase? Run `/esper:new` to add items, or `/esper:init` to define a new phase."
+  Print the PR URL. After the PR is opened, update each feature plan in `done/` to add `pr: <PR URL>` to its frontmatter.
 
-  **If `pr_mode: "plan"` (default or missing)**: Just ask: "Ready to plan the next phase? Run `/esper:new` to add items, or `/esper:init` to define a new phase."
+  Ask: "Ready to plan the next phase? Run `/esper:new` to add items, or `/esper:init` to define a new phase."
 
 Otherwise, print how many items remain (pending + active) and suggest `/esper:build` to continue.
