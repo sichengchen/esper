@@ -1,0 +1,215 @@
+---
+name: esper:yolo
+description: Implement all pending plans for the current phase automatically — commits at milestones, opens the phase PR when done. No stopping between plans.
+---
+
+You are running YOLO mode: automated sequential implementation of every pending plan in the current phase.
+
+## Step 1: Check setup
+
+Verify `.esper/esper.json` exists. If not, tell the user to run `/esper:init` first and stop.
+
+Read `current_phase` from `esper.json`.
+
+Check if there is already an active plan in `.esper/plans/active/`. If there is:
+- Read the plan's `id:`, `title:`, `phase:`, and `branch:` from the frontmatter
+- If `phase:` does not match `current_phase`: tell the user the active plan belongs to a different phase. Ask them to ship or suspend it first, then stop.
+- If `phase:` matches: ask (using `AskUserQuestion`): "There is an active plan: [title]. Include it as the first plan in this YOLO run, or leave it alone and only run pending plans?"
+  - **Include**: add it to the front of the queue (do not move — it is already active)
+  - **Leave it**: do not include the active plan; process only pending plans
+
+## Step 2: Load the phase queue
+
+Read all `.md` files in `.esper/plans/pending/` where the `phase:` field matches `current_phase`.
+
+Sort by `priority` ascending, then `id` ascending.
+
+If the queue is empty (and no active plan was included from Step 1): print "No pending plans for phase [current_phase]." and suggest `/esper:new` to add one. Stop.
+
+Display the ordered queue:
+```
+YOLO queue for [current_phase]:
+  1. #<id> — <title> (p<priority>)
+  2. #<id> — <title> (p<priority>)
+  ...
+```
+
+## Step 3: Confirm
+
+Use `AskUserQuestion` to confirm: "YOLO will implement [N] plan(s) automatically — committing at milestones, no pauses between plans. Open the phase PR when all are done if the phase is complete. Proceed?"
+
+If declined: stop gracefully.
+
+## Step 4: Implement each plan (loop)
+
+Repeat the following for each plan in the queue, in order.
+
+Print a header at the start of each plan: `--- Plan #<id>: <title> ---`
+
+### 4a. Branch
+
+Read `branch:` from the plan frontmatter.
+
+```bash
+git checkout <branch>
+```
+
+If the branch does not exist, create it:
+```bash
+git checkout -b <branch>
+```
+
+If checkout fails for any other reason: stop the entire YOLO run and report the error. Do not continue to the next plan.
+
+### 4b. Activate
+
+If this plan came from `pending/` (not the pre-existing active plan from Step 1):
+- Copy the plan file to `.esper/plans/active/<filename>` and delete it from `pending/`
+- Update frontmatter: `status: active`
+
+If the plan was already active (the one included from Step 1): skip the move.
+
+### 4c. Read context
+
+Read:
+- The active plan file (full content)
+- `.esper/CONSTITUTION.md`
+- `.esper/phases/<current_phase>.md`
+
+### 4d. Implement with milestone commits
+
+Follow the plan's **Approach** section step by step.
+
+Rules during implementation:
+- Read each file before modifying it
+- Follow existing code patterns
+- Do not add features beyond what the plan describes
+- Keep the plan file as a living document — update `## Approach` or `## Files to change` if something unexpected is found
+
+**Milestone commits** — after each logical group of steps is complete (e.g., a file is created, a module is wired up, a section is finished), commit immediately **without pausing for user approval**. This is YOLO mode:
+
+```bash
+git add <specific files changed in this milestone>
+git commit -m "$(cat <<'EOF'
+feat: <what was just implemented>
+
+Plan: #<id> — <title> (milestone)
+EOF
+)"
+```
+
+Stage only files related to the current plan's changes. Do not use `git add -A` or `git add .`.
+
+If something unexpected is discovered that requires a significant change in approach (a missing dependency, a conflicting pattern):
+- Update the plan file to reflect the revised approach
+- Continue — do NOT stop to ask the user (YOLO mode)
+- Document the deviation in the `## Progress` section
+
+### 4e. Verify
+
+After implementation is complete for this plan:
+
+Run the verification steps from the plan's **Verification** section.
+
+Also run each command from `esper.json` if non-empty:
+- `commands.test`
+- `commands.lint`
+- `commands.typecheck`
+
+Skip any command that is an empty string or missing.
+
+If any verification fails: **STOP the entire YOLO run**. Report clearly:
+- Which plan failed
+- Which command failed and what the output was
+- What to do next (fix the issue, then run `/esper:continue` or `/esper:ship` to finish)
+
+Do NOT proceed to the next plan if verification fails. Leave the current plan in `active/`.
+
+### 4f. Update Progress
+
+Add or update the `## Progress` section in the active plan file:
+
+```markdown
+## Progress
+- Implemented [what was done, milestone by milestone]
+- Modified: [list of files changed]
+- Verification: [passed / failed with details]
+```
+
+### 4g. Archive
+
+Move the plan file from `.esper/plans/active/<filename>` to `.esper/plans/done/<filename>`.
+
+Update the frontmatter:
+```yaml
+status: done
+shipped_at: <today's date in YYYY-MM-DD>
+```
+
+Commit the archive:
+```bash
+git add .esper/plans/done/<filename>
+git add .esper/plans/active/<filename>   # stages the deletion
+git commit -m "chore: archive plan #<id> — <title>"
+```
+
+### 4h. Continue
+
+Move to the next plan in the queue. Repeat from 4a.
+
+---
+
+## Step 5: Push
+
+After all plans in the queue are archived:
+
+```bash
+git push -u origin <branch>
+```
+
+If push fails (no remote, auth issue, etc.): report the error clearly and stop. Do not proceed to Step 6.
+
+## Step 6: Phase check and PR
+
+Read all plan files across `.esper/plans/pending/`, `.esper/plans/active/`, and `.esper/plans/done/` where `phase:` matches `current_phase`.
+
+**If any plans remain in `pending/` or `active/`**: print how many remain and their titles. Skip PR creation — print: "Phase [N] not yet complete — [M] plan(s) remaining. Run `/esper:yolo` again or `/esper:build` to continue."
+
+**If all phase plans are in `done/`**: the phase is complete. Open ONE PR summarizing the entire phase:
+
+Collect all plans with `type: "feature"` for the phase (fix-type plans already have their own PRs).
+
+Read `.esper/phases/<current_phase>.md` for the phase title and acceptance criteria.
+
+```bash
+gh pr create \
+  --title "Phase <N>: <phase title>" \
+  --base main \
+  --body "$(cat <<'EOF'
+## Phase <N> — <phase title>
+
+<phase goal, 1-2 sentences from the phase file>
+
+## Shipped plans
+- #<id> — <title>: <one-line approach summary>
+...
+
+## Acceptance criteria
+<paste acceptance criteria checklist from phase file>
+EOF
+)"
+```
+
+Print the PR URL.
+
+After the PR is opened, update each feature plan's `pr:` field in `done/` with the PR URL (no extra commit needed — local metadata).
+
+## Step 7: Done
+
+Print a summary:
+- Plans shipped: N
+- Phase PR: <URL> (or "not opened — phase not yet complete")
+
+If the phase is complete, ask: "Ready to plan the next phase? Run `/esper:new` to add items, or `/esper:init` to define a new phase."
+
+Otherwise, suggest: "Run `/esper:yolo` again to continue with remaining plans, or `/esper:build` to pick them up one at a time."

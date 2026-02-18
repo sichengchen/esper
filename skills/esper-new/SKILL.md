@@ -22,6 +22,9 @@ Use `AskUserQuestion` to clarify the feature. This is scoped — not a full proj
 - Any constraints: performance, compatibility, design patterns to follow?
 - What does "done" look like — how will we verify it works?
 - Edge cases or risks to be aware of?
+- **Is this a fix or a feature?**
+  - `fix`: self-contained patch, gets its own PR immediately when shipped; use `branch: fix/[slug]`
+  - `feature`: part of the current phase, batched into the phase PR when all phase work is done; use `branch: feature/[current_phase]`
 
 Keep it to 1–2 rounds. Don't over-interview for small patches. If the initial `$ARGUMENTS` prompt already answers most of these, skip to Step 3.
 
@@ -47,18 +50,19 @@ Find the highest `id:` value in any frontmatter across all three directories. In
 
 Write `.esper/plans/pending/NNN-slug.md` where `NNN` is the next ID and `slug` is a short kebab-case name.
 
-Read `pr_mode` from `esper.json`. Set `branch:` accordingly:
-- `pr_mode: "plan"` (or missing): `branch: feature/[kebab-slug]`
-- `pr_mode: "phase"`: `branch: phase/[current_phase]` (e.g. `phase/phase-1`) — all plans in this phase share one branch
+Set `type:` and `branch:` based on the interview answer:
+- `type: "fix"` → `branch: fix/[kebab-slug]`
+- `type: "feature"` → `branch: feature/[current_phase from esper.json]` (e.g. `feature/phase-1`)
 
 ```markdown
 ---
 id: NNN
 title: [concise task title]
 status: pending
+type: [fix | feature]
 priority: [1 = urgent/blocking, 2 = normal, 3 = low — ask user or infer from urgency]
 phase: [current_phase from esper.json]
-branch: feature/[kebab-slug]
+branch: [fix/[kebab-slug] or feature/[current_phase]]
 created: [today's date in YYYY-MM-DD format]
 ---
 

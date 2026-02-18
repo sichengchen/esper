@@ -1,7 +1,7 @@
 ---
 id: 005
 title: Archive phase plans on phase completion to keep backlog reads efficient
-status: pending
+status: active
 priority: 2
 phase: phase-1
 branch: feature/phase-archiving
