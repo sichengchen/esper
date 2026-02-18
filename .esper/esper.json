@@ -1,0 +1,10 @@
+{
+  "backlog_mode": "local",
+  "current_phase": "phase-1",
+  "commands": {
+    "test": "node --test test/",
+    "lint": "",
+    "typecheck": "",
+    "dev": ""
+  }
+}

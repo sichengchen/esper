@@ -9,7 +9,9 @@ The user's initial prompt is: $ARGUMENTS
 
 ## Step 1: Check setup
 
-Verify `.esper/esper.json` exists. If not, tell the user to run `/esper:init` first.
+Verify `.esper/esper.json` exists. If not, tell the user to run `/esper:init` first and stop.
+
+Read `.esper/CONSTITUTION.md` to understand the project's scope and principles before interviewing.
 
 ## Step 2: Interview the user
 
@@ -21,40 +23,39 @@ Use `AskUserQuestion` to clarify the feature. This is scoped — not a full proj
 - What does "done" look like — how will we verify it works?
 - Edge cases or risks to be aware of?
 
-Keep it to 1-2 rounds. Don't over-interview for small patches.
+Keep it to 1–2 rounds. Don't over-interview for small patches. If the initial `$ARGUMENTS` prompt already answers most of these, skip to Step 3.
 
 ## Step 3: Explore the codebase
 
-Use a subagent to investigate the codebase relevant to this feature:
+Use the Task tool with `subagent_type: "Explore"` to investigate the codebase relevant to this feature:
 
 ```
-Use a subagent to investigate the codebase and find:
-- Existing files and patterns relevant to [feature]
-- Any similar features already implemented (for consistency)
-- Potential conflicts or dependencies
-Report back a concise summary — do not dump full file contents.
+Find existing files and patterns relevant to [feature being added].
+Look for similar features already implemented (for consistency).
+Identify potential conflicts or dependencies.
+Return a concise summary — do not include full file contents.
 ```
 
-Also read `.esper/CONSTITUTION.md` to ensure the feature aligns with the project's principles and is not out of scope.
+Cross-reference findings against `.esper/CONSTITUTION.md` to confirm the feature is in scope and doesn't violate any principles. If it's out of scope, tell the user and stop.
 
 ## Step 4: Determine next plan ID
 
 Read all files in `.esper/plans/pending/`, `.esper/plans/active/`, and `.esper/plans/done/`.
-Find the highest existing ID number and increment by 1. Zero-pad to 3 digits (e.g. `007`).
+Find the highest `id:` value in any frontmatter across all three directories. Increment by 1 and zero-pad to 3 digits (e.g. `007`). If no plans exist yet, start at `001`.
 
 ## Step 5: Write the plan file
 
-Write `.esper/plans/pending/NNN-slug.md`:
+Write `.esper/plans/pending/NNN-slug.md` where `NNN` is the next ID and `slug` is a short kebab-case name:
 
 ```markdown
 ---
 id: NNN
 title: [concise task title]
 status: pending
-priority: [ask user or infer from urgency — 1=highest]
+priority: [1 = urgent/blocking, 2 = normal, 3 = low — ask user or infer from urgency]
 phase: [current_phase from esper.json]
 branch: feature/[kebab-slug]
-created: [today's date]
+created: [today's date in YYYY-MM-DD format]
 ---
 
 # [Task title]
@@ -69,7 +70,7 @@ created: [today's date]
 - [file path] ([create/modify] — [brief reason])
 
 ## Verification
-- Run: [test command from esper.json]
+- Run: [test command from esper.json, or "manual" if no test command]
 - Expected: [what passing looks like]
 - Edge cases: [anything non-obvious]
 ```
@@ -78,13 +79,13 @@ created: [today's date]
 
 If `backlog_mode` is `"github"` in `esper.json`:
 ```bash
-gh issue create --title "[task title]" --body "[approach summary]"
+gh issue create --title "[task title]" --body "[approach summary, 2-4 sentences]"
 ```
-Store the returned issue number as `gh_issue: <number>` in the plan frontmatter.
+Store the returned issue number in the plan frontmatter as `gh_issue: <number>`.
 
 ## Step 7: Confirm
 
 Tell the user:
 - Plan file created: `.esper/plans/pending/NNN-slug.md`
-- Priority assigned
-- Next: `/esper:build` to start it, or `/esper:backlog` to review the queue
+- Priority assigned: p[N]
+- Next: `/esper:build` to start it immediately, or `/esper:backlog` to review the full queue
