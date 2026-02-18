@@ -69,7 +69,13 @@ Rules during implementation:
 - Do not add features beyond what the plan describes
 - Do not refactor surrounding code unless the plan explicitly requires it
 
-If you encounter something the plan didn't anticipate (a missing dependency, a conflicting pattern, an ambiguous requirement), stop and ask the user before continuing.
+If you encounter something the plan didn't anticipate (a missing dependency, a conflicting pattern, an ambiguous requirement):
+1. Stop and describe the discovery to the user
+2. Propose a revised approach using `AskUserQuestion`
+3. Once the user agrees on the revised approach, **update the plan file** — edit the relevant sections (`## Approach`, `## Files to change`, `## Verification`) to reflect what will actually be built
+4. Then continue implementation
+
+The plan is a living document. Keep it accurate as the implementation evolves.
 
 ## Step 7: Run verification
 

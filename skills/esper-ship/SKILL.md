@@ -19,7 +19,13 @@ Read `commands` from `.esper/esper.json`. For each of `test`, `lint`, and `typec
 
 If all three commands are empty or missing, print: "No verification commands configured — skipping. Add test/lint/typecheck commands to `.esper/esper.json` to enable verification." Then continue.
 
-If any non-empty command fails, stop and report the failures clearly. Do NOT proceed. Tell the user: "Fix the failures above, then run `/esper:ship` again."
+If any non-empty command fails, stop and report the failures clearly. Do NOT proceed.
+
+Fix the failures. If fixing them requires changes that go beyond what the plan originally described (new files, a different approach, additional scope):
+- Update the active plan file — edit `## Approach`, `## Files to change`, and/or `## Verification` to reflect what was actually done
+- Then run `/esper:ship` again
+
+If the fixes are minor and stay within the plan's described scope, just fix and re-run without updating the plan.
 
 ## Step 3: Commit remaining changes
 
