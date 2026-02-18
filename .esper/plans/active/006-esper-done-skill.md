@@ -1,7 +1,7 @@
 ---
 id: 006
 title: Add esper:done skill — finalize a plan with a guaranteed commit
-status: pending
+status: active
 priority: 2
 phase: phase-1
 branch: phase/phase-1
@@ -16,7 +16,7 @@ Currently the esper workflow has two commit-related commands:
 - `/esper:commit` — save partial progress anytime; only commits if there are changes
 - `/esper:ship` — verify + commit + push + open PR + archive
 
-There is no command that finalizes a plan (archives it to `done/`) without opening a PR. This gap matters most in `pr_mode: "phase"`, where per-plan PRs are skipped — the user needs a way to say "this plan is complete, commit my work and archive it" before moving on to the next plan. The phase PR is opened later by `esper:ship` when all phase plans are done.
+There is no command that finalizes a plan (archives it to `done/`) without opening a PR. This gap matters most in `type: "feature"` plans, where per-plan PRs are skipped — the user needs a way to say "this plan is complete, commit my work and archive it" before moving on to the next plan. The phase PR is opened later by `esper:ship` when all phase plans are done.
 
 The key difference from `/esper:commit`:
 - `/esper:commit`: partial save, can be called anytime, no-ops if nothing changed
@@ -35,7 +35,7 @@ Existing skills:
 **Step 1: Check setup**
 - Verify `.esper/esper.json` exists; if not, stop and tell user to run `/esper:init`
 - Read `.esper/plans/active/`. If no `.md` file exists, stop: "No active plan to finalize."
-- Read the active plan's full content and frontmatter (`id`, `title`, `branch`)
+- Read the active plan's full content and frontmatter (`id`, `title`, `branch`, `type`)
 
 **Step 2: Run verification**
 - Read `commands` from `esper.json`. For each of `test`, `lint`, `typecheck`:
@@ -76,8 +76,8 @@ Existing skills:
 
 **Step 5: Summary**
 - Print: "Plan #<id> — <title> archived to done/."
-- If `pr_mode: "phase"` in `esper.json`: print "Phase mode: run `/esper:build` to continue with the next plan. The phase PR will be opened by `/esper:ship` when all plans are done."
-- If `pr_mode: "plan"` (or missing): print "Next: run `/esper:ship` to push and open a PR."
+- If `type: "feature"`: print "Feature plan: run `/esper:build` to continue with the next plan. The phase PR will be opened by `/esper:ship` when all plans are done."
+- If `type: "fix"` (or missing): print "Next: run `/esper:ship` to push and open a PR."
 
 ### 2. Update `skills/esper-ship/SKILL.md` — Step 1
 
@@ -104,8 +104,8 @@ Change Step 6 to handle already-archived plans:
 
 - Run: manual
 - Expected:
-  - `pr_mode: "phase"` workflow: implement plan → `/esper:done` → plan is in `done/` with `status: done`, `shipped_at` set, no `pr` field; working tree committed → repeat for next plan → `/esper:ship` finds done plans, opens phase PR, adds `pr:` to each plan's frontmatter
-  - `pr_mode: "plan"` workflow: implement → `/esper:done` → `/esper:ship` finds the done plan, pushes, opens PR, updates plan frontmatter with `pr:` URL
+  - Feature plan workflow: implement plan → `/esper:done` → plan is in `done/` with `status: done`, `shipped_at` set, no `pr` field; working tree committed → repeat for next plan → `/esper:ship` finds done plans, opens phase PR, adds `pr:` to each plan's frontmatter
+  - Fix plan workflow: implement → `/esper:done` → `/esper:ship` finds the done plan, pushes, opens PR, updates plan frontmatter with `pr:` URL
   - `/esper:commit` behavior unchanged
 - Edge cases:
   - No active plan when running `/esper:done` → stop with clear message
