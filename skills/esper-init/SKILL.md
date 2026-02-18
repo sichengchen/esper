@@ -34,6 +34,9 @@ Use `AskUserQuestion` to interview the user. Cover these areas in 2–3 rounds �
 - Testing strategy: what gets tested, how, with what tooling?
 - Backlog mode: local files (`.esper/plans/`) or GitHub Issues?
   - If GitHub Issues: confirm `gh` CLI is installed and repo has a remote origin
+- **PR mode** (only ask if `backlog_mode: "local"`): Open a PR for each backlog item, or open one PR when the full phase is done?
+  - Options: `"plan"` (default — one PR per item) or `"phase"` (one PR per phase)
+  - If `backlog_mode: "github"`: do NOT ask — write `"pr_mode": "plan"` silently (GitHub Issues always implies per-plan PRs)
 
 ## Step 2: Write CONSTITUTION.md
 
@@ -69,6 +72,7 @@ Write `.esper/esper.json`:
 ```json
 {
   "backlog_mode": "local",
+  "pr_mode": "plan",
   "current_phase": "phase-1",
   "commands": {
     "test": "<from interview, or empty string>",
@@ -79,7 +83,7 @@ Write `.esper/esper.json`:
 }
 ```
 
-Set `backlog_mode` to `"github"` if the user chose GitHub Issues.
+Set `backlog_mode` to `"github"` if the user chose GitHub Issues. Set `pr_mode` to the user's choice (`"plan"` or `"phase"`); always `"plan"` when `backlog_mode` is `"github"`.
 
 ## Step 4: Define Phase 1
 
@@ -120,7 +124,11 @@ Break phase 1 into atomic tasks — each task is one PR worth of work.
 
 Create `.esper/plans/pending/`, `.esper/plans/active/`, `.esper/plans/done/` directories if they don't exist.
 
-For each task, write `.esper/plans/pending/NNN-slug.md` (NNN = zero-padded integer starting at 001):
+For each task, write `.esper/plans/pending/NNN-slug.md` (NNN = zero-padded integer starting at 001).
+
+Set `branch:` based on `pr_mode` from `esper.json`:
+- `pr_mode: "plan"` (or missing): `branch: feature/[kebab-slug]`
+- `pr_mode: "phase"`: `branch: phase/[current_phase]` (e.g. `phase/phase-1`) — all plans in this phase share one branch
 
 ```markdown
 ---

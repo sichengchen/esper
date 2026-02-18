@@ -1,11 +1,13 @@
 ---
 id: 001
 title: Audit and polish all 6 skill SKILL.md files
-status: active
+status: done
 priority: 1
 phase: phase-1
 branch: feature/polish-skills
 created: 2026-02-18
+shipped_at: 2026-02-18
+pr: https://github.com/sichengchen/esper/pull/1
 ---
 
 # Audit and polish all 6 skill SKILL.md files

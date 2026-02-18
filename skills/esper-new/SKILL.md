@@ -45,7 +45,11 @@ Find the highest `id:` value in any frontmatter across all three directories. In
 
 ## Step 5: Write the plan file
 
-Write `.esper/plans/pending/NNN-slug.md` where `NNN` is the next ID and `slug` is a short kebab-case name:
+Write `.esper/plans/pending/NNN-slug.md` where `NNN` is the next ID and `slug` is a short kebab-case name.
+
+Read `pr_mode` from `esper.json`. Set `branch:` accordingly:
+- `pr_mode: "plan"` (or missing): `branch: feature/[kebab-slug]`
+- `pr_mode: "phase"`: `branch: phase/[current_phase]` (e.g. `phase/phase-1`) — all plans in this phase share one branch
 
 ```markdown
 ---
