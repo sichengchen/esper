@@ -14,5 +14,8 @@
     "node": ">=18"
   },
   "type": "module",
+  "scripts": {
+    "test": "node --test test/cli.test.js"
+  },
   "license": "MIT"
 }
