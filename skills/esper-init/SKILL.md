@@ -1,0 +1,256 @@
+---
+name: esper:init
+description: Initialize esper in a project. Interviews the user, writes a constitutional document, defines the first phase, and creates a backlog. Run with a vague prompt — esper will ask the rest.
+---
+
+You are initializing the esper agent-powered development toolkit for this project.
+
+## Step 0: Detect existing setup
+
+Check if `.esper/esper.json` exists.
+
+- If it exists, use `AskUserQuestion` to ask:
+  - "Esper is already set up in this project. What would you like to do?"
+  - Options: "Update the constitution", "Add a new phase", "Reset everything"
+  - Proceed accordingly. For "Reset everything", confirm before deleting `.esper/`.
+
+## Step 1: Interview the user
+
+Use `AskUserQuestion` to interview the user. Cover these areas — ask in 2-3 rounds, not all at once:
+
+**Round 1 — Project vision:**
+- What is this project? What problem does it solve?
+- What is it explicitly NOT? (scope boundaries)
+- Who are the users?
+
+**Round 2 — Technical decisions:**
+- What is the tech stack? (language, frameworks, key libraries)
+- Any architectural patterns or constraints to follow?
+- What commands run tests, lint, and typecheck? (can be empty if not set up yet)
+- What command starts the dev server?
+
+**Round 3 — Process:**
+- Testing strategy: what gets tested, how, what tooling?
+- Backlog mode: local files, or GitHub Issues?
+  - If GitHub Issues: confirm `gh` CLI is installed and repo has a remote
+
+## Step 2: Write CONSTITUTION.md
+
+Write `.esper/CONSTITUTION.md` with this structure:
+
+```markdown
+# [Project Name] — Constitution
+
+## What This Is
+[1-3 sentences on the project's purpose and users]
+
+## What This Is NOT
+[Explicit scope boundaries — what we will never build here]
+
+## Technical Decisions
+- **Stack**: [language, framework, runtime]
+- **Architecture**: [key patterns, conventions]
+- **Key dependencies**: [important libs and why]
+
+## Testing Strategy
+- **What gets tested**: [unit / integration / e2e — and what doesn't]
+- **Tooling**: [test runner, assertion library]
+- **Commands**: [how to run tests]
+
+## Principles
+[3-5 development principles specific to this project, e.g. "prefer server-side rendering", "no external dependencies for core logic"]
+```
+
+## Step 3: Write esper.json
+
+Write `.esper/esper.json`:
+
+```json
+{
+  "backlog_mode": "local",
+  "current_phase": "phase-1",
+  "commands": {
+    "test": "<from interview, or empty string>",
+    "lint": "<from interview, or empty string>",
+    "typecheck": "<from interview, or empty string>",
+    "dev": "<from interview, or empty string>"
+  }
+}
+```
+
+Set `backlog_mode` to `"github"` if the user chose GitHub Issues.
+
+## Step 4: Define Phase 1
+
+Interview the user about MVP scope:
+- What is the minimum version that delivers real value?
+- What are the acceptance criteria — how do we know phase 1 is done?
+- What is explicitly deferred to later phases?
+
+Write `.esper/phases/phase-1.md`:
+
+```markdown
+---
+phase: phase-1
+title: MVP
+status: active
+---
+
+# Phase 1: MVP
+
+## Goal
+[What this phase delivers and why it matters]
+
+## In Scope
+- [feature or deliverable]
+- [feature or deliverable]
+
+## Out of Scope (deferred)
+- [explicitly deferred items]
+
+## Acceptance Criteria
+- [ ] [measurable criterion]
+- [ ] [measurable criterion]
+```
+
+## Step 5: Decompose into backlog items
+
+Break phase 1 into atomic tasks — each task is one PR worth of work.
+
+For each task, write `.esper/plans/pending/NNN-slug.md` (NNN = zero-padded id, e.g. `001`):
+
+```markdown
+---
+id: 001
+title: [task title]
+status: pending
+priority: 1
+phase: phase-1
+branch: feature/[slug]
+created: [today's date]
+---
+
+# [Task title]
+
+## Context
+[What exists in the codebase relevant to this task — explore before writing]
+
+## Approach
+[Step-by-step implementation plan]
+
+## Files to change
+- [file path] ([create/modify] — [why])
+
+## Verification
+- Run: [test command]
+- Expected: [what passing looks like]
+- Edge cases: [anything non-obvious to verify]
+```
+
+Assign priorities: 1 = must ship first (blocking), higher number = can wait.
+
+If `backlog_mode` is `"github"`, create a GitHub issue for each plan with `gh issue create` and store the issue number in the plan frontmatter as `gh_issue: <number>`.
+
+## Step 6: Install hooks
+
+Check if `.claude/settings.json` exists.
+
+- If it does not exist, create it.
+- If it exists, read it and merge — do not overwrite existing hooks.
+
+Add these hooks:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": "bash .esper/hooks/verify-quick.sh" }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{ "type": "command", "command": "bash .esper/hooks/session-reminder.sh" }]
+      }
+    ]
+  }
+}
+```
+
+Generate project-specific hook scripts with the actual commands hardcoded from the interview.
+Do NOT read esper.json at runtime or use eval — commands are written statically into the scripts.
+
+Create `.esper/hooks/verify-quick.sh`:
+
+```bash
+#!/usr/bin/env bash
+# Generated by esper:init. Commands are project-specific and static.
+FAILED=0
+
+<for each non-empty command (lint, typecheck) from the interview, emit a block like:>
+
+echo "--- esper: lint ---"
+<lint command exactly as the user provided>
+[ $? -ne 0 ] && FAILED=1
+
+echo "--- esper: typecheck ---"
+<typecheck command exactly as the user provided>
+[ $? -ne 0 ] && FAILED=1
+
+<end of generated blocks>
+
+if [ $FAILED -ne 0 ]; then
+  echo ""
+  echo "esper: verification failed — fix the errors above before continuing."
+fi
+
+exit 0
+```
+
+Omit blocks entirely for any command the user left empty. Do not use eval or variable interpolation for the commands — write them as literal strings.
+
+Create `.esper/hooks/session-reminder.sh`:
+
+```bash
+#!/usr/bin/env bash
+REMINDERS=()
+
+UNCOMMITTED=$(git status --porcelain 2>/dev/null)
+if [ -n "$UNCOMMITTED" ]; then
+  CHANGED=$(echo "$UNCOMMITTED" | wc -l | tr -d ' ')
+  REMINDERS+=("  ! $CHANGED uncommitted file(s) — run /esper:commit when ready")
+fi
+
+ACTIVE_PLANS=$(ls .esper/plans/active/*.md 2>/dev/null)
+if [ -n "$ACTIVE_PLANS" ]; then
+  PLAN=$(head -5 .esper/plans/active/*.md | grep '^title:' | head -1 | sed 's/title: //')
+  REMINDERS+=("  > active plan: $PLAN")
+fi
+
+PENDING=$(ls .esper/plans/pending/*.md 2>/dev/null | wc -l | tr -d ' ')
+if [ "$PENDING" -gt 0 ]; then
+  REMINDERS+=("  · $PENDING pending item(s) in backlog — run /esper:backlog to review")
+fi
+
+if [ ${#REMINDERS[@]} -gt 0 ]; then
+  echo ""
+  echo "esper:"
+  for r in "${REMINDERS[@]}"; do echo "$r"; done
+fi
+
+exit 0
+```
+
+Make both scripts executable:
+```bash
+chmod +x .esper/hooks/verify-quick.sh .esper/hooks/session-reminder.sh
+```
+
+## Step 7: Summary
+
+Print a summary:
+- Constitution written
+- Phase 1 defined with N backlog items
+- Hooks installed
+- Next step: `Run /esper:backlog to see your backlog, then /esper:build to start.`
