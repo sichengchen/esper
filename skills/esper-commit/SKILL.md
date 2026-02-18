@@ -7,23 +7,23 @@ You are creating a commit for the current work.
 
 ## Step 1: Check there is something to commit
 
-Run `git status --porcelain`. If the output is empty, tell the user there is nothing to commit and stop.
+Run `git status --porcelain`. If the output is empty, tell the user "Nothing to commit." and stop.
 
 ## Step 2: Read context
 
 Read:
-- The active plan from `.esper/plans/active/` (for title, approach, and progress)
-- `git diff` (staged and unstaged) to understand exactly what changed
+- `git diff HEAD` to see all staged and unstaged changes
+- `git status` to see which files are modified
+- The active plan from `.esper/plans/active/` (for title, approach, and progress) — if no active plan exists, proceed without plan context and draft a generic commit message
 
 ## Step 3: Stage relevant files
 
-Run `git status` to see what is modified. Stage files relevant to the current plan:
+If an active plan exists:
+- Stage files that are clearly related to the plan: `git add <files related to the active plan>`
+- If there are modified files that seem unrelated to the active plan, flag them and use `AskUserQuestion` to ask the user what to do: "Stage with this commit, skip for now, or discard changes?"
 
-```bash
-git add <files related to the active plan>
-```
-
-Do not stage unrelated files. If there are modified files that seem unrelated to the active plan, flag them and ask the user what to do with them.
+If no active plan exists:
+- Stage all modified files: `git add -A`
 
 ## Step 4: Draft the commit message
 
@@ -32,10 +32,12 @@ Write a commit message following this format:
 ```
 <type>: <concise description tied to plan title>
 
-<1-3 sentences on what changed and why, drawn from the plan's Approach>
+<1-3 sentences on what changed and why, drawn from the plan's Approach and Progress>
 
 Plan: #<plan id> — <plan title>
 ```
+
+Omit the `Plan:` line if there is no active plan.
 
 Types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`
 
@@ -63,5 +65,5 @@ EOF
 ```
 
 Confirm the commit hash and tell the user:
-- Committed: `<hash> <title>`
+- Committed: `<hash> <first line of message>`
 - Next: `/esper:ship` to push and open a PR, or continue working and commit again

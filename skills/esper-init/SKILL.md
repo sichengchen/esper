@@ -12,31 +12,32 @@ Check if `.esper/esper.json` exists.
 - If it exists, use `AskUserQuestion` to ask:
   - "Esper is already set up in this project. What would you like to do?"
   - Options: "Update the constitution", "Add a new phase", "Reset everything"
-  - Proceed accordingly. For "Reset everything", confirm before deleting `.esper/`.
+  - **Update the constitution**: Re-read the existing `.esper/CONSTITUTION.md`, then run Steps 1–2 only (re-interview and rewrite). Keep `esper.json`, phases, and plans untouched.
+  - **Add a new phase**: Skip to Step 4. Read the existing `esper.json` for `current_phase`, define the next phase number, and run Steps 4–5 only.
+  - **Reset everything**: Use `AskUserQuestion` to confirm ("This will delete all esper files. Are you sure?"). If confirmed, delete `.esper/` entirely and proceed from Step 1.
 
 ## Step 1: Interview the user
 
-Use `AskUserQuestion` to interview the user. Cover these areas — ask in 2-3 rounds, not all at once:
+Use `AskUserQuestion` to interview the user. Cover these areas in 2–3 rounds — do not ask everything at once.
 
-**Round 1 — Project vision:**
-- What is this project? What problem does it solve?
-- What is it explicitly NOT? (scope boundaries)
-- Who are the users?
+**Round 1 — Project vision** (use AskUserQuestion with these as questions):
+- What is this project and what problem does it solve?
+- What is it explicitly NOT? (scope boundaries — what will never be built here)
+- Who are the primary users?
 
-**Round 2 — Technical decisions:**
-- What is the tech stack? (language, frameworks, key libraries)
-- Any architectural patterns or constraints to follow?
-- What commands run tests, lint, and typecheck? (can be empty if not set up yet)
-- What command starts the dev server?
+**Round 2 — Technical decisions** (use AskUserQuestion):
+- What is the tech stack? (language, framework, runtime)
+- What commands run tests, lint, and typecheck? (can be empty strings if not set up yet)
+- What command starts the dev server? (can be empty)
 
-**Round 3 — Process:**
-- Testing strategy: what gets tested, how, what tooling?
-- Backlog mode: local files, or GitHub Issues?
-  - If GitHub Issues: confirm `gh` CLI is installed and repo has a remote
+**Round 3 — Process** (use AskUserQuestion):
+- Testing strategy: what gets tested, how, with what tooling?
+- Backlog mode: local files (`.esper/plans/`) or GitHub Issues?
+  - If GitHub Issues: confirm `gh` CLI is installed and repo has a remote origin
 
 ## Step 2: Write CONSTITUTION.md
 
-Write `.esper/CONSTITUTION.md` with this structure:
+Create `.esper/` directory if it doesn't exist. Write `.esper/CONSTITUTION.md`:
 
 ```markdown
 # [Project Name] — Constitution
@@ -58,7 +59,7 @@ Write `.esper/CONSTITUTION.md` with this structure:
 - **Commands**: [how to run tests]
 
 ## Principles
-[3-5 development principles specific to this project, e.g. "prefer server-side rendering", "no external dependencies for core logic"]
+[3-5 development principles specific to this project]
 ```
 
 ## Step 3: Write esper.json
@@ -82,12 +83,12 @@ Set `backlog_mode` to `"github"` if the user chose GitHub Issues.
 
 ## Step 4: Define Phase 1
 
-Interview the user about MVP scope:
+Use `AskUserQuestion` to ask the user about MVP scope:
 - What is the minimum version that delivers real value?
-- What are the acceptance criteria — how do we know phase 1 is done?
+- What are the acceptance criteria — how do we know this phase is done?
 - What is explicitly deferred to later phases?
 
-Write `.esper/phases/phase-1.md`:
+Create `.esper/phases/` if it doesn't exist. Write `.esper/phases/phase-1.md`:
 
 ```markdown
 ---
@@ -117,7 +118,9 @@ status: active
 
 Break phase 1 into atomic tasks — each task is one PR worth of work.
 
-For each task, write `.esper/plans/pending/NNN-slug.md` (NNN = zero-padded id, e.g. `001`):
+Create `.esper/plans/pending/`, `.esper/plans/active/`, `.esper/plans/done/` directories if they don't exist.
+
+For each task, write `.esper/plans/pending/NNN-slug.md` (NNN = zero-padded integer starting at 001):
 
 ```markdown
 ---
@@ -126,8 +129,8 @@ title: [task title]
 status: pending
 priority: 1
 phase: phase-1
-branch: feature/[slug]
-created: [today's date]
+branch: feature/[kebab-slug]
+created: [today's date in YYYY-MM-DD format]
 ---
 
 # [Task title]
@@ -149,14 +152,14 @@ created: [today's date]
 
 Assign priorities: 1 = must ship first (blocking), higher number = can wait.
 
-If `backlog_mode` is `"github"`, create a GitHub issue for each plan with `gh issue create` and store the issue number in the plan frontmatter as `gh_issue: <number>`.
+If `backlog_mode` is `"github"`, create a GitHub issue for each plan with `gh issue create --title "[title]" --body "[approach summary]"` and store the issue number in the plan frontmatter as `gh_issue: <number>`.
 
 ## Step 6: Install hooks
 
 Check if `.claude/settings.json` exists.
 
-- If it does not exist, create it.
-- If it exists, read it and merge — do not overwrite existing hooks.
+- If it does not exist, create it with the hooks below.
+- If it exists, read it first, then merge the hooks into the existing JSON — do not overwrite any existing keys.
 
 Add these hooks:
 
@@ -178,27 +181,22 @@ Add these hooks:
 }
 ```
 
-Generate project-specific hook scripts with the actual commands hardcoded from the interview.
-Do NOT read esper.json at runtime or use eval — commands are written statically into the scripts.
+Create `.esper/hooks/` directory if it doesn't exist.
 
-Create `.esper/hooks/verify-quick.sh`:
+Create `.esper/hooks/verify-quick.sh`. Write the actual commands from the interview as literal strings — do NOT use variable interpolation or eval. Omit any block for commands the user left empty:
 
 ```bash
 #!/usr/bin/env bash
 # Generated by esper:init. Commands are project-specific and static.
 FAILED=0
 
-<for each non-empty command (lint, typecheck) from the interview, emit a block like:>
-
 echo "--- esper: lint ---"
-<lint command exactly as the user provided>
+npm run lint
 [ $? -ne 0 ] && FAILED=1
 
 echo "--- esper: typecheck ---"
-<typecheck command exactly as the user provided>
+npm run typecheck
 [ $? -ne 0 ] && FAILED=1
-
-<end of generated blocks>
 
 if [ $FAILED -ne 0 ]; then
   echo ""
@@ -208,7 +206,7 @@ fi
 exit 0
 ```
 
-Omit blocks entirely for any command the user left empty. Do not use eval or variable interpolation for the commands — write them as literal strings.
+(The example above shows `npm run lint` and `npm run typecheck` — replace with the actual commands from the interview, or omit the block entirely if the user left that command empty.)
 
 Create `.esper/hooks/session-reminder.sh`:
 
@@ -249,8 +247,9 @@ chmod +x .esper/hooks/verify-quick.sh .esper/hooks/session-reminder.sh
 
 ## Step 7: Summary
 
-Print a summary:
-- Constitution written
-- Phase 1 defined with N backlog items
-- Hooks installed
-- Next step: `Run /esper:backlog to see your backlog, then /esper:build to start.`
+Print a summary covering:
+- Constitution written to `.esper/CONSTITUTION.md`
+- Phase 1 defined in `.esper/phases/phase-1.md`
+- N backlog items created in `.esper/plans/pending/`
+- Hooks installed in `.esper/hooks/` and `.claude/settings.json`
+- Next step: "Run `/esper:backlog` to see your backlog, then `/esper:build` to start."
