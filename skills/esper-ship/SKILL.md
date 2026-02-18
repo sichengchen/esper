@@ -63,7 +63,11 @@ If the push fails (e.g. no remote, auth issue), report the error and stop.
 
 ## Step 5: Open a PR
 
-Create the PR using the `gh` CLI:
+Read `pr_mode` from `.esper/esper.json` (treat missing as `"plan"`).
+
+**If `pr_mode: "phase"`**: Skip PR creation. Print: "Phase mode: PR will be opened when the full phase is complete." Then continue to Step 6.
+
+**If `pr_mode: "plan"` (default)**: Create the PR using the `gh` CLI:
 
 ```bash
 gh pr create \
@@ -109,6 +113,31 @@ Read all plan files across `pending/`, `active/`, and `done/` where `phase:` mat
 If all plans for the current phase are in `done/` (none remain in `pending/` or `active/`):
 - Print: "Phase <N> complete. All backlog items shipped."
 - Read `.esper/phases/<current_phase>.md` and display the acceptance criteria checklist
-- Ask: "Ready to plan the next phase? Run `/esper:new` to add items, or `/esper:init` to define a new phase."
+
+  **If `pr_mode: "phase"`**: Open one PR summarizing the entire phase:
+
+  ```bash
+  gh pr create \
+    --title "Phase <N>: <phase title from phases/phase-N.md>" \
+    --base main \
+    --body "$(cat <<'EOF'
+  ## Phase <N> — <phase title>
+
+  <phase goal, 1-2 sentences>
+
+  ## Shipped plans
+  - #<id> — <title>: <one-line approach summary>
+  - #<id> — <title>: <one-line approach summary>
+  ...
+
+  ## Acceptance criteria
+  <paste acceptance criteria checklist from phase file>
+  EOF
+  )"
+  ```
+
+  Print the PR URL. Then ask: "Ready to plan the next phase? Run `/esper:new` to add items, or `/esper:init` to define a new phase."
+
+  **If `pr_mode: "plan"` (default or missing)**: Just ask: "Ready to plan the next phase? Run `/esper:new` to add items, or `/esper:init` to define a new phase."
 
 Otherwise, print how many items remain (pending + active) and suggest `/esper:build` to continue.

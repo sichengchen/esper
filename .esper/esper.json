@@ -1,5 +1,6 @@
 {
   "backlog_mode": "local",
+  "pr_mode": "phase",
   "current_phase": "phase-1",
   "commands": {
     "test": "node --test test/",
