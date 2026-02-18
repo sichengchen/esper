@@ -118,7 +118,7 @@ status: active
 
 Break phase 1 into atomic tasks — each task is one PR worth of work.
 
-Create `.esper/plans/pending/`, `.esper/plans/active/`, `.esper/plans/done/` directories if they don't exist.
+Create `.esper/plans/pending/`, `.esper/plans/active/`, `.esper/plans/done/`, `.esper/plans/archived/` directories if they don't exist.
 
 For each task, write `.esper/plans/pending/NNN-slug.md` (NNN = zero-padded integer starting at 001).
 

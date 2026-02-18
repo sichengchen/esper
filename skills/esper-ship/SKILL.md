@@ -113,6 +113,8 @@ Read all plan files across `pending/`, `active/`, and `done/` where `phase:` mat
 If all plans for the current phase are in `done/` (none remain in `pending/` or `active/`):
 - Print: "Phase <N> complete. All backlog items shipped."
 - Read `.esper/phases/<current_phase>.md` and display the acceptance criteria checklist
+- **Archive the phase plans**: Move all `.md` files from `.esper/plans/done/` whose `phase:` frontmatter matches `current_phase` into `.esper/plans/archived/<current_phase>/` (create the directory if it doesn't exist). Only move plans matching the completed phase — leave any other-phase plans in `done/`.
+- Print: "Phase plans archived to `.esper/plans/archived/<current_phase>/`"
 - Open ONE PR summarizing the entire phase (targeting `main`):
 
   Collect all plans where `type: "feature"` for the phase PR body. `type: "fix"` plans already have their own PRs and are excluded.

@@ -9,9 +9,10 @@ Display the current esper backlog for this project.
 
 1. Check `.esper/esper.json` exists. If not, tell the user to run `/esper:init` first and stop.
 
-2. Read all `.md` files from `.esper/plans/active/`, `.esper/plans/pending/`, and `.esper/plans/done/`.
+2. Read all `.md` files from `.esper/plans/active/`, `.esper/plans/pending/`, and `.esper/plans/done/` only.
+   Do NOT read `.esper/plans/archived/` — archived phases are historical and not shown in the backlog.
    Parse the YAML frontmatter from each file (the block between the `---` delimiters at the top).
-   - For `done/`: sort by `shipped_at` descending (treat missing `shipped_at` as oldest). Show only the 3 most recent.
+   - For `done/`: sort by `shipped_at` descending (treat missing `shipped_at` as oldest). Show only the 3 most recent. If `done/` is empty, omit the DONE section entirely.
    - For `pending/`: sort by `priority` ascending, then `id` ascending for ties.
 
 3. If `backlog_mode` is `"github"` in `esper.json`, also run:
