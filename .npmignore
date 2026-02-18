@@ -1,0 +1,12 @@
+# Test files
+test/
+
+# Esper project files (not part of the published package)
+.esper/
+
+# Claude configuration
+.claude/
+
+# Git files
+.git/
+.gitignore
