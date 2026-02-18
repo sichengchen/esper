@@ -1,7 +1,7 @@
 ---
 id: 003
 title: Prepare package for npm publish
-status: pending
+status: active
 priority: 3
 phase: phase-1
 branch: feature/npm-publish-prep

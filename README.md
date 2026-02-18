@@ -1,5 +1,7 @@
 # esper
 
+[![npm](https://img.shields.io/npm/v/@sichengchen/esper)](https://www.npmjs.com/package/@sichengchen/esper)
+
 Vibe coding toolkit for Claude Code. Enforces a structured workflow: interview → plan → build → ship.
 
 ## Install
@@ -19,7 +21,9 @@ This installs esper skills globally to `~/.claude/skills/`.
 | `/esper:new <prompt>` | Interview → add a new plan to the backlog |
 | `/esper:build [item]` | Implement a plan (auto-picks highest priority if no argument) |
 | `/esper:commit` | Auto-draft a commit message from the active plan |
-| `/esper:ship` | Verify → commit → push → open PR → archive plan |
+| `/esper:done` | Verify → commit → archive plan to done/ (no PR; use for feature plans) |
+| `/esper:ship` | Verify → commit → archive → push → open PR |
+| `/esper:yolo` | Implement all pending phase plans automatically, committing at milestones |
 
 ## Workflow
 
@@ -58,7 +62,8 @@ For new features mid-project:
 ├── plans/
 │   ├── pending/        # queued backlog items
 │   ├── active/         # currently being built (max 1)
-│   └── done/           # shipped items
+│   ├── done/           # shipped items (current phase)
+│   └── archived/       # shipped items from completed phases
 └── hooks/
     ├── verify-quick.sh      # runs lint + typecheck after every file edit
     └── session-reminder.sh  # reminds about uncommitted changes on stop

@@ -2,8 +2,22 @@
   "name": "@sichengchen/esper",
   "version": "0.1.0",
   "description": "Agent-powered development toolkit for Claude Code",
+  "author": "Sicheng Chen",
+  "keywords": [
+    "claude-code",
+    "ai",
+    "developer-tools",
+    "vibe-coding",
+    "agent",
+    "workflow"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sichengchen/esper.git"
+  },
+  "homepage": "https://github.com/sichengchen/esper",
   "bin": {
-    "esper": "./bin/cli.js"
+    "esper": "bin/cli.js"
   },
   "files": [
     "bin/",
@@ -14,5 +28,8 @@
     "node": ">=18"
   },
   "type": "module",
+  "scripts": {
+    "test": "node --test test/cli.test.js"
+  },
   "license": "MIT"
 }
