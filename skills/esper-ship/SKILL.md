@@ -7,9 +7,13 @@ You are shipping the active backlog item.
 
 ## Step 1: Check there is an active plan
 
-Read `.esper/plans/active/`. If the directory is empty or contains no `.md` files, tell the user "No active plan to ship." and stop.
+Read `.esper/plans/active/`. If it contains a `.md` file, use that as the active plan.
 
-Read the active plan's full content and frontmatter (`id`, `title`, `type`, `branch`, `phase`, `gh_issue` if present).
+If `active/` is empty, check `.esper/plans/done/` for the most recently modified plan file that has **no `pr:` field** (or `pr:` is empty or blank). If found, use that plan — it was finalized with `/esper:done` but not yet pushed or PR'd.
+
+If neither is found, tell the user "No active or unshipped plan to ship." and stop.
+
+Read the plan's full content and frontmatter (`id`, `title`, `type`, `branch`, `phase`, `gh_issue` if present).
 
 ## Step 2: Run full verification
 
@@ -92,13 +96,16 @@ Print the PR URL returned by `gh pr create`.
 
 ## Step 6: Archive the plan
 
-Move the plan file from `.esper/plans/active/<filename>` to `.esper/plans/done/<filename>` (same filename).
-
-Update the frontmatter of the moved file:
+**If the plan file is in `active/`**: Move it to `.esper/plans/done/<filename>` (same filename). Update the frontmatter:
 ```yaml
 status: done
 shipped_at: <today's date in YYYY-MM-DD format>
 pr: <PR URL from Step 5, or omit if type: "feature" — PR not opened yet>
+```
+
+**If the plan file is already in `done/`** (was archived by `/esper:done`): Do not move it. Just update its frontmatter to add:
+```yaml
+pr: <PR URL from Step 5>
 ```
 
 If `type: "fix"` and `backlog_mode` is `"github"` in `esper.json` and `gh_issue` is set in the plan:
