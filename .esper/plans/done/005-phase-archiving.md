@@ -1,11 +1,12 @@
 ---
 id: 005
 title: Archive phase plans on phase completion to keep backlog reads efficient
-status: active
+status: done
 priority: 2
 phase: phase-1
 branch: feature/phase-archiving
 created: 2026-02-18
+shipped_at: 2026-02-18
 ---
 
 # Archive phase plans on phase completion to keep backlog reads efficient
@@ -58,3 +59,11 @@ Add `.esper/plans/archived/` to the list of directories created during init (alo
 - Edge cases:
   - `done/` contains plans from mixed phases — only archive the completed phase's plans, leave others
   - `archived/phase-N/` already exists (re-running after a partial archive) — overwrite gracefully without error
+
+## Progress
+
+- Updated `esper-ship/SKILL.md` Step 7: after phase complete detection, move done/ plans matching current_phase to archived/<current_phase>/; create dir if needed; only move matching phase's plans
+- Updated `esper-backlog/SKILL.md` Step 2: explicitly excludes archived/ from reads; notes omit DONE section if done/ is empty
+- Updated `esper-init/SKILL.md` Step 5: added archived/ to directory creation list
+- Modified: skills/esper-ship/SKILL.md, skills/esper-backlog/SKILL.md, skills/esper-init/SKILL.md
+- Verification: manual — changes are in skill files only
