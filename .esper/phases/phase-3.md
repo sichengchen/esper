@@ -33,3 +33,6 @@ Expand esperkit from Claude-only to support Codex workflows while preserving the
 ## Phase Notes
 
 Phase 2 delivered CLI primitives (`config`, `plan`, `backlog`) and consolidated plan/file operations. Phase 3 should reuse those primitives so Codex support is mostly adapter and packaging work, not a redesign.
+
+## Shipped Plans
+- #019 — Add Codex support across installer, assets, and docs: Define provider model and install targets. Files: cli.js, README.md, package.json, cli.test.js, config.test.js
