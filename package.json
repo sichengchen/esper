@@ -1,10 +1,12 @@
 {
   "name": "esperkit",
-  "version": "0.1.1",
-  "description": "Vibe coding toolkit for Claude Code",
+  "version": "0.1.2",
+  "description": "Vibe coding toolkit for Claude Code and Codex",
   "author": "Sicheng Chen",
   "keywords": [
     "claude-code",
+    "codex",
+    "openai-codex",
     "ai",
     "developer-tools",
     "vibe-coding",
