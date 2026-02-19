@@ -48,10 +48,15 @@ async function main() {
           const opts = parseFlags(rest)
           return plan.list(opts)
         }
-        case 'get':     return plan.get(rest[0])
-        case 'next-id': return plan.nextId()
+        case 'get':      return plan.get(rest[0])
+        case 'next-id':  return plan.nextId()
+        case 'activate': return plan.activate(rest[0])
+        case 'suspend':  return plan.suspend(rest[0])
+        case 'finish':   return plan.finish(rest[0])
+        case 'archive':  return plan.archive(rest[0])
+        case 'set':      return plan.set(rest[0], rest[1], rest[2])
         default:
-          console.error('Usage: esper plan <list|get|next-id>')
+          console.error('Usage: esper plan <list|get|next-id|activate|suspend|finish|archive|set>')
           process.exit(1)
       }
       break
