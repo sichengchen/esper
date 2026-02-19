@@ -9,9 +9,9 @@ The user's initial prompt: $ARGUMENTS
 
 ## Step 1: Check setup
 
-Run `esper config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
+Run `esperkit config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
 
-Run `esper config get current_phase` to get the current phase slug. Read `.esper/CONSTITUTION.md` and `.esper/phases/<current_phase>.md` to understand the project's scope and current phase goals.
+Run `esperkit config get current_phase` to get the current phase slug. Read `.esper/CONSTITUTION.md` and `.esper/phases/<current_phase>.md` to understand the project's scope and current phase goals.
 
 If the feature sounds out of scope for the current phase, flag it and use `AskUserQuestion` to ask whether to proceed anyway or defer it.
 
@@ -42,7 +42,7 @@ Cross-reference findings against `.esper/CONSTITUTION.md` to confirm the feature
 
 ## Step 4: Determine the next plan ID
 
-Run `esper plan next-id` — this scans all plan directories (including archived/) and prints the next available zero-padded ID (e.g. `007`).
+Run `esperkit plan next-id` — this scans all plan directories (including archived/) and prints the next available zero-padded ID (e.g. `007`).
 
 ## Step 5: Write the plan file
 

@@ -9,7 +9,7 @@ The user's initial prompt: $ARGUMENTS
 
 ## Step 1: Check setup
 
-Run `esper config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
+Run `esperkit config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
 
 Read `.esper/CONSTITUTION.md` to understand the project's scope and principles.
 
@@ -36,7 +36,7 @@ Cross-reference findings against `.esper/CONSTITUTION.md` to confirm the fix is 
 
 ## Step 4: Determine the next plan ID
 
-Run `esper plan next-id` — this scans all plan directories (including archived/) and prints the next available zero-padded ID (e.g. `007`).
+Run `esperkit plan next-id` — this scans all plan directories (including archived/) and prints the next available zero-padded ID (e.g. `007`).
 
 ## Step 5: Write the plan file
 
@@ -49,7 +49,7 @@ title: fix: [concise description of what's broken]
 status: pending
 type: fix
 priority: [1 | 2 | 3]
-phase: [current_phase from `esper config get current_phase`]
+phase: [current_phase from `esperkit config get current_phase`]
 branch: fix/[kebab-slug]
 created: [today YYYY-MM-DD]
 ---
@@ -73,9 +73,9 @@ created: [today YYYY-MM-DD]
 
 ## Step 6: GitHub Issues (if applicable)
 
-Run `esper config get backlog_mode`. If the output is `github`:
+Run `esperkit config get backlog_mode`. If the output is `github`:
 ```bash
-esper plan create-issue <filename>
+esperkit plan create-issue <filename>
 ```
 This creates a GH issue for the fix and stores the issue number as `gh_issue` in the plan frontmatter. Each fix gets its own issue (1 fix = 1 PR = 1 issue).
 

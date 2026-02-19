@@ -13,7 +13,7 @@ git status --porcelain
 ```
 If the working tree is dirty, stop: "Uncommitted changes found. Run `/esper:finish` first to commit and archive the plan."
 
-Run `esper plan list --dir done --format json` to get all done plans. Filter for plans that have **no `pr` field** (or `pr` is empty or blank). If found, use that plan — it was finalized with `/esper:finish` but not yet pushed or PR'd.
+Run `esperkit plan list --dir done --format json` to get all done plans. Filter for plans that have **no `pr` field** (or `pr` is empty or blank). If found, use that plan — it was finalized with `/esper:finish` but not yet pushed or PR'd.
 
 If no unshipped plan is found, tell the user "No finished plan to ship. Run `/esper:finish` first." and stop.
 
@@ -23,7 +23,7 @@ Read the plan's full content and frontmatter (`id`, `title`, `type`, `branch`, `
 
 ## Step 2: Run full verification
 
-Run `esper config get commands` to get the commands object. For each of `test`, `lint`, and `typecheck`:
+Run `esperkit config get commands` to get the commands object. For each of `test`, `lint`, and `typecheck`:
 - Skip it entirely if the value is an empty string or the key is missing
 - Run it if non-empty and capture the exit code
 
@@ -68,23 +68,30 @@ EOF
 
 Print the PR URL returned by `gh pr create`.
 
-Update the plan's `pr:` field: run `esper plan set <filename> pr <PR URL>` (no extra commit needed — local metadata).
+Update the plan's `pr:` field: run `esperkit plan set <filename> pr <PR URL>`.
 
 Close the fix's GitHub issue (no-op if backlog_mode is local or gh_issue is not set):
 ```bash
-esper plan close-issue <filename> --comment "Shipped in <PR URL>"
+esperkit plan close-issue <filename> --comment "Shipped in <PR URL>"
+```
+
+Commit and push the `pr:` field update:
+```bash
+git add .esper/plans/done/<filename>
+git commit -m "chore: record PR link for plan #<id>"
+git push
 ```
 
 ## Step 5: Phase check
 
-Run `esper config get current_phase` to get the current phase. Then run `esper plan list --dir pending --phase <phase> --format json`, `esper plan list --dir active --phase <phase> --format json`, and `esper plan list --dir done --phase <phase> --format json` to check plan status.
+Run `esperkit config get current_phase` to get the current phase. Then run `esperkit plan list --dir pending --phase <phase> --format json`, `esperkit plan list --dir active --phase <phase> --format json`, and `esperkit plan list --dir done --phase <phase> --format json` to check plan status.
 
 **If plans remain in `pending/` or `active/`**: print how many items remain and suggest `/esper:apply` to continue.
 
 **If all plans for the current phase are in `done/`**:
 - Print: "Phase <N> complete. All backlog items shipped."
 - Read `.esper/phases/<current_phase>.md` and display the acceptance criteria checklist
-- **Archive the phase plans**: Run `esper plan archive <current_phase>` to move all done plans for the phase to `archived/<current_phase>/`.
+- **Archive the phase plans**: Run `esperkit plan archive <current_phase>` to move all done plans for the phase to `archived/<current_phase>/`.
 - Commit the archive (stages both the new files in `archived/` and the deletions in `done/`):
   ```bash
   git add .esper/plans/archived/<current_phase>/
@@ -118,7 +125,11 @@ Run `esper config get current_phase` to get the current phase. Then run `esper p
   )"
   ```
 
-  Print the PR URL. After the PR is opened, update each feature plan in `archived/<current_phase>/` by running `esper plan set <filename> pr <PR URL>` for each.
+  Print the PR URL. After the PR is opened, update each feature plan in `archived/<current_phase>/` by running `esperkit plan set <filename> pr <PR URL>` for each. Then commit:
+  ```bash
+  git add .esper/plans/archived/<current_phase>/
+  git commit -m "chore: record PR link for <current_phase> feature plans"
+  ```
 
   **Update the phase file to mark it complete:**
   - Read `.esper/phases/<current_phase>.md`
