@@ -114,4 +114,12 @@ Run `esper config get current_phase` to get the current phase. Then run `esper p
 
   Print the PR URL. After the PR is opened, update each feature plan in `archived/<current_phase>/` by running `esper plan set <filename> pr <PR URL>` for each.
 
+  **Update the phase file to mark it complete:**
+  - Read `.esper/phases/<current_phase>.md`
+  - In the frontmatter, change `status: active` to `status: completed`
+  - In the body, change each `- [ ]` acceptance criterion to `- [x]`
+  - Write the updated content back to the file
+
+  No extra git commit is needed for this step.
+
   Print: "Ready to plan the next phase? Run `/esper:phase` to define Phase <N+1>."
