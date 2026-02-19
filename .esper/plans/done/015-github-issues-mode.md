@@ -1,14 +1,14 @@
 ---
 id: 15
 title: Implement GitHub Issues backlog mode
-status: active
+status: done
 type: feature
 priority: 2
 phase: phase-2
 branch: feature/phase-2
 created: 2026-02-18
----
-# Implement GitHub Issues backlog mode
+shipped_at: 2026-02-19
+---# Implement GitHub Issues backlog mode
 
 ## Context
 
@@ -68,3 +68,10 @@ The `gh` CLI is required and must be authenticated.
   - `gh` not authenticated → clear error message
   - `backlog_mode: "local"` → create-issue/close-issue are never called, no-op if called directly
   - Plan already has `gh_issue` set → skip create-issue (idempotent)
+
+## Progress
+- Milestone 1: Added create-issue, close-issue, and check-gh CLI subcommands
+- Milestone 2: Updated all skills for 1 issue = 1 PR model (phase issues for features, per-plan issues for fixes)
+- Milestone 3: Added 5 tests in test/github-issues.test.js
+- Modified: lib/plan.js, lib/config.js, bin/cli.js, 7 skill SKILL.md files, test/github-issues.test.js
+- Verification: npm test — 44 tests pass
