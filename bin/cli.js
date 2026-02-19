@@ -30,13 +30,14 @@ const [subcommand, action, ...rest] = process.argv.slice(2)
 async function main() {
   switch (subcommand) {
     case 'config': {
-      const { check, get, set } = await import('../lib/config.js')
+      const { check, get, set, checkGh } = await import('../lib/config.js')
       switch (action) {
-        case 'check': return check()
-        case 'get':   return get(rest[0])
-        case 'set':   return set(rest[0], rest[1])
+        case 'check':    return check()
+        case 'check-gh': return checkGh()
+        case 'get':      return get(rest[0])
+        case 'set':      return set(rest[0], rest[1])
         default:
-          console.error('Usage: esper config <check|get|set>')
+          console.error('Usage: esper config <check|check-gh|get|set>')
           process.exit(1)
       }
       break
@@ -54,9 +55,14 @@ async function main() {
         case 'suspend':  return plan.suspend(rest[0])
         case 'finish':   return plan.finish(rest[0])
         case 'archive':  return plan.archive(rest[0])
-        case 'set':      return plan.set(rest[0], rest[1], rest[2])
+        case 'set':           return plan.set(rest[0], rest[1], rest[2])
+        case 'create-issue':  return plan.createIssue(rest[0])
+        case 'close-issue': {
+          const opts = parseFlags(rest.slice(1))
+          return plan.closeIssue(rest[0], opts.comment)
+        }
         default:
-          console.error('Usage: esper plan <list|get|next-id|activate|suspend|finish|archive|set>')
+          console.error('Usage: esper plan <list|get|next-id|activate|suspend|finish|archive|set|create-issue|close-issue>')
           process.exit(1)
       }
       break
