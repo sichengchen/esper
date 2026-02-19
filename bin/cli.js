@@ -10,6 +10,36 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const PACKAGE_ROOT = join(__dirname, '..')
 const CLAUDE_SKILLS_DIR = process.env.ESPER_SKILLS_DIR ?? join(homedir(), '.claude', 'skills')
 
+// --- Subcommand routing ---
+
+const [subcommand, action, ...rest] = process.argv.slice(2)
+
+async function main() {
+  switch (subcommand) {
+    case 'config': {
+      const { check, get, set } = await import('../lib/config.js')
+      switch (action) {
+        case 'check': return check()
+        case 'get':   return get(rest[0])
+        case 'set':   return set(rest[0], rest[1])
+        default:
+          console.error('Usage: esper config <check|get|set>')
+          process.exit(1)
+      }
+      break
+    }
+    case undefined:
+    case 'install':
+      return install()
+    default:
+      console.error(`Unknown command: ${subcommand}`)
+      console.error('Usage: esper [install|config]')
+      process.exit(1)
+  }
+}
+
+// --- Install handler ---
+
 async function install() {
   console.log('Installing esper skills to ~/.claude/skills/...\n')
 
@@ -71,7 +101,7 @@ async function install() {
   }
 }
 
-install().catch(err => {
+main().catch(err => {
   console.error('Error:', err.message)
   process.exit(1)
 })
