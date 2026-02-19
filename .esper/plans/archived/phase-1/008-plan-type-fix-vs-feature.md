@@ -1,16 +1,13 @@
 ---
 id: 008
 title: Redesign PR strategy — per-plan type (fix vs feature) replaces global pr_mode
-<<<<<<<< HEAD:.esper/plans/done/008-plan-type-fix-vs-feature.md
 status: done
-========
-status: pending
->>>>>>>> fix/ship-archive-before-push:.esper/plans/pending/008-plan-type-fix-vs-feature.md
 priority: 1
 phase: phase-1
 branch: feature/phase-1
 created: 2026-02-18
 shipped_at: 2026-02-18
+pr: merged-to-main
 ---
 
 # Redesign PR strategy — per-plan type (fix vs feature) replaces global pr_mode

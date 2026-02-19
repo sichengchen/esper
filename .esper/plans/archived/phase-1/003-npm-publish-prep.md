@@ -7,6 +7,7 @@ phase: phase-1
 branch: feature/npm-publish-prep
 created: 2026-02-18
 shipped_at: 2026-02-18
+pr: merged-to-main
 ---
 
 # Prepare package for npm publish

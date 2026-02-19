@@ -7,6 +7,7 @@ phase: phase-1
 branch: feature/pr-mode-config
 created: 2026-02-18
 shipped_at: 2026-02-18
+pr: merged-to-main
 ---
 
 # Add pr_mode config — PR per plan or PR per phase

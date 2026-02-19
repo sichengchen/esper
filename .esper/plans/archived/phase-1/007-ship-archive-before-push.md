@@ -8,6 +8,7 @@ phase: phase-1
 branch: fix/ship-archive-before-push
 created: 2026-02-18
 shipped_at: 2026-02-18
+pr: merged-to-main
 ---
 
 # Fix esper:ship — archive plan before push so status change is in the PR

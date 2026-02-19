@@ -7,6 +7,7 @@ phase: phase-1
 branch: feature/phase-archiving
 created: 2026-02-18
 shipped_at: 2026-02-18
+pr: merged-to-main
 ---
 
 # Archive phase plans on phase completion to keep backlog reads efficient
