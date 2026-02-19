@@ -9,7 +9,7 @@ The user's initial prompt: $ARGUMENTS
 
 ## Step 1: Check setup
 
-Verify `.esper/esper.json` exists. If not, tell the user to run `/esper:init` first and stop.
+Run `esper config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
 
 Read `.esper/CONSTITUTION.md` to understand the project's scope and principles.
 
@@ -36,9 +36,7 @@ Cross-reference findings against `.esper/CONSTITUTION.md` to confirm the fix is 
 
 ## Step 4: Determine the next plan ID
 
-Read all `.md` files in `.esper/plans/pending/`, `.esper/plans/active/`, and `.esper/plans/done/`.
-Find the highest `id:` value in any frontmatter across all three directories.
-Increment by 1 and zero-pad to 3 digits (e.g. `007`). If no plans exist yet, start at `001`.
+Run `esper plan next-id` — this scans all plan directories (including archived/) and prints the next available zero-padded ID (e.g. `007`).
 
 ## Step 5: Write the plan file
 
@@ -51,7 +49,7 @@ title: fix: [concise description of what's broken]
 status: pending
 type: fix
 priority: [1 | 2 | 3]
-phase: [current_phase from esper.json]
+phase: [current_phase from `esper config get current_phase`]
 branch: fix/[kebab-slug]
 created: [today YYYY-MM-DD]
 ---
@@ -75,7 +73,7 @@ created: [today YYYY-MM-DD]
 
 ## Step 6: GitHub Issues (if applicable)
 
-If `backlog_mode` is `"github"` in `esper.json`:
+Run `esper config get backlog_mode`. If the output is `github`:
 ```bash
 gh issue create --title "fix: [title]" --body "[description and approach summary]" --label "bug"
 ```
