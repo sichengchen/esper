@@ -88,7 +88,11 @@ Append a compact one-liner to the current phase file so future agents can read w
      - #<id> — <title>: ...
      ```
 
-No extra git commit is needed for this step.
+Commit the phase file update:
+```bash
+git add .esper/phases/<current_phase>.md
+git commit -m "chore: update <current_phase> Shipped Plans index"
+```
 
 ## Step 5: Summary
 
