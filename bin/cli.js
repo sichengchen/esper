@@ -10,6 +10,19 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const PACKAGE_ROOT = join(__dirname, '..')
 const CLAUDE_SKILLS_DIR = process.env.ESPER_SKILLS_DIR ?? join(homedir(), '.claude', 'skills')
 
+// --- Flag parsing ---
+
+function parseFlags(args) {
+  const opts = {}
+  for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith('--') && i + 1 < args.length) {
+      const key = args[i].slice(2)
+      opts[key] = args[++i]
+    }
+  }
+  return opts
+}
+
 // --- Subcommand routing ---
 
 const [subcommand, action, ...rest] = process.argv.slice(2)
@@ -28,12 +41,27 @@ async function main() {
       }
       break
     }
+    case 'plan': {
+      const plan = await import('../lib/plan.js')
+      switch (action) {
+        case 'list': {
+          const opts = parseFlags(rest)
+          return plan.list(opts)
+        }
+        case 'get':     return plan.get(rest[0])
+        case 'next-id': return plan.nextId()
+        default:
+          console.error('Usage: esper plan <list|get|next-id>')
+          process.exit(1)
+      }
+      break
+    }
     case undefined:
     case 'install':
       return install()
     default:
       console.error(`Unknown command: ${subcommand}`)
-      console.error('Usage: esper [install|config]')
+      console.error('Usage: esper [install|config|plan]')
       process.exit(1)
   }
 }
