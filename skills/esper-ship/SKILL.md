@@ -68,11 +68,18 @@ EOF
 
 Print the PR URL returned by `gh pr create`.
 
-Update the plan's `pr:` field: run `esperkit plan set <filename> pr <PR URL>` (no extra commit needed — local metadata).
+Update the plan's `pr:` field: run `esperkit plan set <filename> pr <PR URL>`.
 
 Close the fix's GitHub issue (no-op if backlog_mode is local or gh_issue is not set):
 ```bash
 esperkit plan close-issue <filename> --comment "Shipped in <PR URL>"
+```
+
+Commit and push the `pr:` field update:
+```bash
+git add .esper/plans/done/<filename>
+git commit -m "chore: record PR link for plan #<id>"
+git push
 ```
 
 ## Step 5: Phase check
@@ -118,7 +125,11 @@ Run `esperkit config get current_phase` to get the current phase. Then run `espe
   )"
   ```
 
-  Print the PR URL. After the PR is opened, update each feature plan in `archived/<current_phase>/` by running `esperkit plan set <filename> pr <PR URL>` for each.
+  Print the PR URL. After the PR is opened, update each feature plan in `archived/<current_phase>/` by running `esperkit plan set <filename> pr <PR URL>` for each. Then commit:
+  ```bash
+  git add .esper/plans/archived/<current_phase>/
+  git commit -m "chore: record PR link for <current_phase> feature plans"
+  ```
 
   **Update the phase file to mark it complete:**
   - Read `.esper/phases/<current_phase>.md`

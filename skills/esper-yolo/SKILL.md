@@ -223,7 +223,12 @@ EOF
 
 Print the PR URL.
 
-After the PR is opened, update each feature plan's `pr:` field in `done/` with the PR URL (no extra commit needed — local metadata).
+After the PR is opened, update each feature plan's `pr:` field in `done/` with the PR URL by running `esperkit plan set <filename> pr <PR URL>` for each. Then commit and push:
+```bash
+git add .esper/plans/done/
+git commit -m "chore: record PR link for phase plans"
+git push
+```
 
 ## Step 7: Done
 
