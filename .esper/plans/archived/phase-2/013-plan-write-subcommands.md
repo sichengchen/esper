@@ -1,7 +1,8 @@
 ---
 id: 013
 title: Add esper plan mutation subcommands — activate, suspend, finish, archive, set
-status: pending
+status: done
+shipped_at: 2026-02-18
 type: feature
 priority: 1
 phase: phase-2
@@ -52,3 +53,12 @@ Depends on plan 012 for `lib/frontmatter.js` (parseFrontmatter, serializeFrontma
   - `archive` with plans from mixed phases → only moves matching ones
   - `set` on a plan in archived/phase-1/ → finds and updates it
   - `set` with a field that doesn't exist yet → adds it to frontmatter
+
+## Progress
+
+- Added 5 mutation functions to `lib/plan.js`: activate, suspend, finish, archive, set
+- All use clean read-write-delete pattern with top-level unlink import
+- Extended `bin/cli.js` plan routing for all 5 new actions
+- Created `test/plan-mutations.test.js`: 13 tests covering all operations and edge cases
+- Modified: lib/plan.js, bin/cli.js, test/plan-mutations.test.js
+- Verification: passed — all 39 tests pass

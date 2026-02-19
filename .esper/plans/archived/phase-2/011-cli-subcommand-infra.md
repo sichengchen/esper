@@ -1,7 +1,8 @@
 ---
 id: 011
 title: Add subcommand routing and esper config commands
-status: pending
+status: done
+shipped_at: 2026-02-18
 type: feature
 priority: 1
 phase: phase-2
@@ -55,3 +56,12 @@ created: 2026-02-18
   - `esper config get` with no key → prints full JSON
   - `esper config set current_phase phase-3` → updates the file
   - `esper config set` with a JSON value like `{"test":"npm test"}` → parses correctly
+
+## Progress
+
+- Refactored `bin/cli.js` as thin router: subcommand dispatch (config, install default), lazy imports
+- Created `lib/config.js`: check (exit 0/1), get (key or full JSON), set (JSON-aware value parsing)
+- Updated `package.json`: test script runs `test/*.test.js` glob; added `lib/` to files array
+- Created `test/config.test.js`: 9 tests covering check/get/set + backwards-compatible install
+- Modified: bin/cli.js, lib/config.js, test/config.test.js, package.json
+- Verification: passed — all 14 tests pass

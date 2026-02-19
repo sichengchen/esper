@@ -44,3 +44,6 @@ Phase 1 retrospective findings:
 - Skills accumulated stale references during rapid iteration (pr_mode, removed skill names)
 - File operations (frontmatter parsing, directory moves, status updates) are the #1 token cost in skills
 - esper.json still contains the deprecated `pr_mode` field from plan 004 (superseded by plan 008's per-plan `type` system)
+
+## Shipped Plans
+- #018 — Compact plan details into phase file on archive: Add a `## Shipped Plans` section to phase files. Files: esper-finish/SKILL.md, esper-yolo/SKILL.md, esper-ship/SKILL.md, esper-phase/SKILL.md

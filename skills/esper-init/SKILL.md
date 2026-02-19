@@ -7,11 +7,12 @@ You are initializing the esper agent-powered development toolkit for this projec
 
 ## Step 0: Detect existing setup
 
-Check if `.esper/esper.json` exists.
-
-- If it exists, use `AskUserQuestion` to ask:
+Run `esper config check`. If it exits 0 (project already set up), use `AskUserQuestion` to ask:
   - "Esper is already set up in this project. What would you like to do?"
   - Options: "Update the constitution", "Add a new phase", "Reset everything"
+- If it exits non-zero (not set up), proceed to Step 1.
+
+When already set up, the options are:
   - **Update the constitution**: Re-read the existing `.esper/CONSTITUTION.md`, then run Steps 1–2 only (re-interview and rewrite). Keep `esper.json`, phases, and plans untouched.
   - **Add a new phase**: Tell the user to run `/esper:phase` instead — it handles phase transitions properly (archives current plans, bumps phase number, interviews for new scope). Stop.
   - **Reset everything**: Use `AskUserQuestion` to confirm ("This will delete all esper files. Are you sure?"). If confirmed, delete `.esper/` entirely and proceed from Step 1.
@@ -157,7 +158,11 @@ created: [today's date in YYYY-MM-DD format]
 
 Assign priorities: 1 = must ship first (blocking), higher number = can wait.
 
-If `backlog_mode` is `"github"`, create a GitHub issue for each plan with `gh issue create --title "[title]" --body "[approach summary]"` and store the issue number in the plan frontmatter as `gh_issue: <number>`.
+If `backlog_mode` is `"github"`, create ONE GitHub issue for the entire phase (not per plan — features are batched into one phase PR):
+```bash
+gh issue create --title "Phase 1: [phase title]" --body "[phase goal and scope summary]"
+```
+Store the returned issue number as `gh_issue: <number>` in the phase file frontmatter (`.esper/phases/phase-1.md`).
 
 ## Step 6: Install hooks
 

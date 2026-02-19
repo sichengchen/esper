@@ -1,21 +1,21 @@
 ---
 name: esper:finish
-description: Complete the active plan — run verification, commit any remaining changes, and archive to done/. Run this when implementation is complete. Replaces esper:done and esper:commit.
+description: Complete the active plan — run verification, commit any remaining changes, and archive to done/. Run this when implementation is complete.
 ---
 
 You are finalizing the active backlog item.
 
 ## Step 1: Check setup
 
-Verify `.esper/esper.json` exists. If not, tell the user to run `/esper:init` first and stop.
+Run `esper config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
 
-Read `.esper/plans/active/`. If no `.md` file exists, stop: "No active plan to finish. Run `/esper:apply` to start one."
+Run `esper plan list --dir active --format json`. If the list is empty, stop: "No active plan to finish. Run `/esper:apply` to start one."
 
-Read the active plan's full content and frontmatter (`id`, `title`, `branch`, `type`, `phase`).
+The JSON output includes the frontmatter fields (`id`, `title`, `branch`, `type`, `phase`). Also read the active plan file's full content from `.esper/plans/active/<filename>` for the body sections.
 
 ## Step 2: Run verification
 
-Read `commands` from `esper.json`. For each of `test`, `lint`, and `typecheck`:
+Run `esper config get commands` to get the commands object as JSON. For each of `test`, `lint`, and `typecheck`:
 - Skip it entirely if the value is an empty string or the key is missing
 - Run it if non-empty and capture the exit code
 
@@ -54,13 +54,7 @@ Run `git status --porcelain` to check for uncommitted changes.
 
 ## Step 4: Archive the plan
 
-Move the plan file from `.esper/plans/active/<filename>` to `.esper/plans/done/<filename>` (same filename).
-
-Update the frontmatter of the moved file:
-```yaml
-status: done
-shipped_at: <today's date in YYYY-MM-DD format>
-```
+Run `esper plan finish <filename>` — this moves the file from `active/` to `done/`, sets `status: done` and `shipped_at: <today's date>` in the frontmatter.
 
 Do NOT add a `pr:` field — that is added by `/esper:ship` when the PR is opened.
 
@@ -71,12 +65,37 @@ git add .esper/plans/active/<filename>   # stages the deletion
 git commit -m "chore: archive plan #<id> — <title>"
 ```
 
+## Step 4.5: Update phase file with shipped plan summary
+
+Append a compact one-liner to the current phase file so future agents can read what was shipped without opening individual archived plan files.
+
+1. Run `esper config get current_phase` to get the phase name.
+2. From the archived plan file (now in `done/`), extract:
+   - `id` and `title` from frontmatter
+   - **First sentence** of the `## Approach` section (up to the first `.` or newline). If the section is absent, skip this part.
+   - **Filenames** from `## Files to change` (comma-separated bare filenames, e.g. `cli.js, plan.js`). If the section is absent, skip this part.
+3. Compose the one-liner:
+   - With approach and files: `- #<id> — <title>: <first sentence>. Files: <filenames>`
+   - With approach only: `- #<id> — <title>: <first sentence>.`
+   - With neither: `- #<id> — <title>`
+4. Read `.esper/phases/<current_phase>.md`:
+   - If the file is **missing**: print "Warning: phase file not found — skipping Shipped Plans update." and continue.
+   - If a `## Shipped Plans` section **exists**: append the one-liner as a new bullet under it.
+   - If it **does not exist**: append the following block to the end of the file:
+     ```
+
+     ## Shipped Plans
+     - #<id> — <title>: ...
+     ```
+
+No extra git commit is needed for this step.
+
 ## Step 5: Summary
 
 Print: "Plan #<id> — <title> finished and archived to `done/`."
 
 **If `type: "feature"`:**
-- Count `.md` files remaining in `.esper/plans/pending/` with matching `phase:` field
+- Run `esper plan list --dir pending --phase <phase> --format json` and count the entries
 - Print: "Feature plan archived. [N] plan(s) remaining in [current_phase]."
 - Next: "Run `/esper:apply` to continue with the next plan. The phase PR opens via `/esper:ship` when all plans are done."
 

@@ -7,12 +7,12 @@ You are running YOLO mode: automated sequential implementation of every pending 
 
 ## Step 1: Check setup
 
-Verify `.esper/esper.json` exists. If not, tell the user to run `/esper:init` first and stop.
+Run `esper config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
 
-Read `current_phase` from `esper.json`.
+Run `esper config get current_phase` to get the current phase.
 
-Check if there is already an active plan in `.esper/plans/active/`. If there is:
-- Read the plan's `id:`, `title:`, `phase:`, and `branch:` from the frontmatter
+Run `esper plan list --dir active --format json` to check for active plans. If the JSON contains any entries:
+- Read the plan's `id`, `title`, `phase`, and `branch` from the JSON
 - If `phase:` does not match `current_phase`: tell the user the active plan belongs to a different phase. Ask them to ship or suspend it first, then stop.
 - If `phase:` matches: ask (using `AskUserQuestion`): "There is an active plan: [title]. Include it as the first plan in this YOLO run, or leave it alone and only run pending plans?"
   - **Include**: add it to the front of the queue (do not move — it is already active)
@@ -20,9 +20,7 @@ Check if there is already an active plan in `.esper/plans/active/`. If there is:
 
 ## Step 2: Load the phase queue
 
-Read all `.md` files in `.esper/plans/pending/` where the `phase:` field matches `current_phase`.
-
-Sort by `priority` ascending, then `id` ascending.
+Run `esper plan list --dir pending --phase <current_phase> --format json` to get all pending plans for the current phase (already sorted by priority then id).
 
 If the queue is empty (and no active plan was included from Step 1): print "No pending plans for phase [current_phase]." and suggest `/esper:plan` to add one. Stop.
 
@@ -64,10 +62,9 @@ If checkout fails for any other reason: stop the entire YOLO run and report the 
 ### 4b. Activate
 
 If this plan came from `pending/` (not the pre-existing active plan from Step 1):
-- Copy the plan file to `.esper/plans/active/<filename>` and delete it from `pending/`
-- Update frontmatter: `status: active`
+- Run `esper plan activate <filename>` to move it from `pending/` to `active/` and set `status: active`.
 
-If the plan was already active (the one included from Step 1): skip the move.
+If the plan was already active (the one included from Step 1): skip the activation.
 
 ### 4c. Read context
 
@@ -113,12 +110,9 @@ After implementation is complete for this plan:
 
 Run the verification steps from the plan's **Verification** section.
 
-Also run each command from `esper.json` if non-empty:
-- `commands.test`
-- `commands.lint`
-- `commands.typecheck`
-
-Skip any command that is an empty string or missing.
+Also run `esper config get commands` to get the commands object. For each of `test`, `lint`, and `typecheck`:
+- Skip it if the value is an empty string or missing
+- Run it if non-empty and capture the exit code
 
 If any verification fails: **STOP the entire YOLO run**. Report clearly:
 - Which plan failed
@@ -140,13 +134,7 @@ Add or update the `## Progress` section in the active plan file:
 
 ### 4g. Archive
 
-Move the plan file from `.esper/plans/active/<filename>` to `.esper/plans/done/<filename>`.
-
-Update the frontmatter:
-```yaml
-status: done
-shipped_at: <today's date in YYYY-MM-DD>
-```
+Run `esper plan finish <filename>` to move the plan from `active/` to `done/` and set `status: done` with `shipped_at`.
 
 Commit the archive:
 ```bash
@@ -154,6 +142,30 @@ git add .esper/plans/done/<filename>
 git add .esper/plans/active/<filename>   # stages the deletion
 git commit -m "chore: archive plan #<id> — <title>"
 ```
+
+### 4g.5 Update phase file with shipped plan summary
+
+Append a compact one-liner to the current phase file so future agents can read what was shipped without opening individual archived plan files.
+
+1. From the archived plan file (now in `done/`), extract:
+   - `id` and `title` from frontmatter
+   - **First sentence** of the `## Approach` section (up to the first `.` or newline). If absent, skip.
+   - **Filenames** from `## Files to change` (comma-separated bare filenames). If absent, skip.
+2. Compose the one-liner:
+   - With approach and files: `- #<id> — <title>: <first sentence>. Files: <filenames>`
+   - With approach only: `- #<id> — <title>: <first sentence>.`
+   - With neither: `- #<id> — <title>`
+3. Read `.esper/phases/<current_phase>.md`:
+   - If the file is **missing**: print "Warning: phase file not found — skipping Shipped Plans update." and continue.
+   - If a `## Shipped Plans` section **exists**: append the one-liner as a new bullet under it.
+   - If it **does not exist**: append the following block to the end of the file:
+     ```
+
+     ## Shipped Plans
+     - #<id> — <title>: ...
+     ```
+
+No extra git commit is needed for this step.
 
 ### 4h. Continue
 
@@ -173,7 +185,7 @@ If push fails (no remote, auth issue, etc.): report the error clearly and stop. 
 
 ## Step 6: Phase check and PR
 
-Read all plan files across `.esper/plans/pending/`, `.esper/plans/active/`, and `.esper/plans/done/` where `phase:` matches `current_phase`.
+Run `esper plan list --dir pending --phase <current_phase> --format json`, `esper plan list --dir active --phase <current_phase> --format json`, and `esper plan list --dir done --phase <current_phase> --format json` to check plan status.
 
 **If any plans remain in `pending/` or `active/`**: print how many remain and their titles. Skip PR creation — print: "Phase [N] not yet complete — [M] plan(s) remaining. Run `/esper:yolo` again or `/esper:apply` to continue."
 
@@ -198,6 +210,9 @@ gh pr create \
 
 ## Acceptance criteria
 <paste acceptance criteria checklist from phase file>
+
+<if backlog_mode is "github" and the phase file has gh_issue set:>
+Closes #<phase_gh_issue>
 EOF
 )"
 ```

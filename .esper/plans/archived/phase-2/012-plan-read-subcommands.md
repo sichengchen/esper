@@ -1,7 +1,8 @@
 ---
 id: 012
 title: Add esper plan read subcommands — list, get, next-id
-status: pending
+status: done
+shipped_at: 2026-02-18
 type: feature
 priority: 1
 phase: phase-2
@@ -64,3 +65,12 @@ Plan directories: `.esper/plans/pending/`, `.esper/plans/active/`, `.esper/plans
   - `esper plan next-id` with no plans → returns `001`
   - `esper plan next-id` with plans up to 010 in archived → returns `011`
   - Frontmatter with missing optional fields (no `type:`, no `pr:`) → parsed as undefined, not error
+
+## Progress
+
+- Created `lib/frontmatter.js`: parseFrontmatter (--- delimiters, key: value parsing, numeric coercion, quote stripping) and serializeFrontmatter
+- Created `lib/plan.js`: list (--dir, --phase, --type, --format json|table, sorted by priority/id), get (search active > pending > done), nextId (scan all dirs including archived/*)
+- Updated `bin/cli.js`: added plan subcommand routing with parseFlags helper for --key value args
+- Created `test/plan.test.js`: 12 tests covering all subcommands and edge cases
+- Modified: lib/frontmatter.js, lib/plan.js, bin/cli.js, test/plan.test.js
+- Verification: passed — all 26 tests pass

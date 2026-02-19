@@ -1,24 +1,25 @@
 ---
-id: 015
+id: 15
 title: Implement GitHub Issues backlog mode
-status: pending
+status: done
 type: feature
 priority: 2
 phase: phase-2
 branch: feature/phase-2
 created: 2026-02-18
+shipped_at: 2026-02-19
 ---
-
 # Implement GitHub Issues backlog mode
 
 ## Context
 
-The skills already reference `backlog_mode: "github"` and `gh_issue:` frontmatter but the logic has never been exercised end-to-end. The rule is: 1 GH issue = 1 plan = 1 PR. When `backlog_mode` is `"github"`:
-- Plan creation → `gh issue create`
-- Plan shipped → `gh issue close` with PR URL
+The skills already reference `backlog_mode: "github"` and `gh_issue:` frontmatter but the logic has never been exercised end-to-end. The rule is: **1 GH issue = 1 PR**. Since 1 PR = 1 phase (for features) or 1 bugfix, that means:
+- Feature plans: 1 GH issue per **phase** (not per plan). Phase issue created by esper-phase/esper-init.
+- Fix plans: 1 GH issue per **fix**. Fix issue created by esper-fix.
 
-Skills that create plans: esper-init (Step 5), esper-plan (Step 6), esper-fix (Step 6), esper-phase (Step 8).
-Skills that close issues: esper-ship (Step 4, fix type only; Step 5, phase PR for features).
+Skills that create phase issues: esper-init (Step 5), esper-phase (Step 8).
+Skills that create fix issues: esper-fix (Step 6).
+Skills that close issues: esper-ship (Step 4, fix PR closes fix issue; Step 5, phase PR closes phase issue).
 
 The `gh` CLI is required and must be authenticated.
 
@@ -37,9 +38,11 @@ The `gh` CLI is required and must be authenticated.
    - Run `gh issue close <gh_issue> --comment "<text>"`
    - Print confirmation
 
-3. Update plan-creating skills (init, plan, fix, phase) to call `esper plan create-issue` after writing each plan file when `backlog_mode` is `"github"`.
+3. Update esper-fix to call `esper plan create-issue` after writing each fix plan when `backlog_mode` is `"github"`. Feature plans do NOT get individual issues (they're tracked under the phase issue).
 
-4. Update esper-ship to call `esper plan close-issue` when shipping fix-type plans, and to include `Closes #N` in phase PRs for feature-type plans.
+4. Update esper-init and esper-phase to create ONE GH issue per phase when `backlog_mode` is `"github"`, stored in the phase file frontmatter.
+
+5. Update esper-ship to call `esper plan close-issue` when shipping fix-type plans, and to include `Closes #<phase_gh_issue>` in the phase PR.
 
 5. Add a `esper config check-gh` subcommand that verifies `gh` CLI is available and authenticated (for use in esper-init when user selects github backlog mode).
 
@@ -66,3 +69,10 @@ The `gh` CLI is required and must be authenticated.
   - `gh` not authenticated → clear error message
   - `backlog_mode: "local"` → create-issue/close-issue are never called, no-op if called directly
   - Plan already has `gh_issue` set → skip create-issue (idempotent)
+
+## Progress
+- Milestone 1: Added create-issue, close-issue, and check-gh CLI subcommands
+- Milestone 2: Updated all skills for 1 issue = 1 PR model (phase issues for features, per-plan issues for fixes)
+- Milestone 3: Added 5 tests in test/github-issues.test.js
+- Modified: lib/plan.js, lib/config.js, bin/cli.js, 7 skill SKILL.md files, test/github-issues.test.js
+- Verification: npm test — 44 tests pass

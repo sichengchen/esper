@@ -13,9 +13,9 @@ git status --porcelain
 ```
 If the working tree is dirty, stop: "Uncommitted changes found. Run `/esper:finish` first to commit and archive the plan."
 
-Read `.esper/plans/done/` for a plan file that has **no `pr:` field** (or `pr:` is empty or blank). If found, use that plan — it was finalized with `/esper:finish` but not yet pushed or PR'd.
+Run `esper plan list --dir done --format json` to get all done plans. Filter for plans that have **no `pr` field** (or `pr` is empty or blank). If found, use that plan — it was finalized with `/esper:finish` but not yet pushed or PR'd.
 
-If no unshipped plan is found in `done/`, tell the user "No finished plan to ship. Run `/esper:finish` first." and stop.
+If no unshipped plan is found, tell the user "No finished plan to ship. Run `/esper:finish` first." and stop.
 
 If multiple unshipped plans are found, use `AskUserQuestion` to ask which one to ship.
 
@@ -23,7 +23,7 @@ Read the plan's full content and frontmatter (`id`, `title`, `type`, `branch`, `
 
 ## Step 2: Run full verification
 
-Read `commands` from `.esper/esper.json`. For each of `test`, `lint`, and `typecheck`:
+Run `esper config get commands` to get the commands object. For each of `test`, `lint`, and `typecheck`:
 - Skip it entirely if the value is an empty string or the key is missing
 - Run it if non-empty and capture the exit code
 
@@ -68,23 +68,23 @@ EOF
 
 Print the PR URL returned by `gh pr create`.
 
-Update the plan's `pr:` field in `done/<filename>` with the PR URL (no extra commit needed — local metadata).
+Update the plan's `pr:` field: run `esper plan set <filename> pr <PR URL>` (no extra commit needed — local metadata).
 
-If `backlog_mode` is `"github"` in `esper.json` and `gh_issue` is set in the plan:
+Close the fix's GitHub issue (no-op if backlog_mode is local or gh_issue is not set):
 ```bash
-gh issue close <gh_issue> --comment "Shipped in <PR URL>"
+esper plan close-issue <filename> --comment "Shipped in <PR URL>"
 ```
 
 ## Step 5: Phase check
 
-Read all plan files across `pending/`, `active/`, and `done/` where `phase:` matches `current_phase` from `esper.json`.
+Run `esper config get current_phase` to get the current phase. Then run `esper plan list --dir pending --phase <phase> --format json`, `esper plan list --dir active --phase <phase> --format json`, and `esper plan list --dir done --phase <phase> --format json` to check plan status.
 
 **If plans remain in `pending/` or `active/`**: print how many items remain and suggest `/esper:apply` to continue.
 
 **If all plans for the current phase are in `done/`**:
 - Print: "Phase <N> complete. All backlog items shipped."
 - Read `.esper/phases/<current_phase>.md` and display the acceptance criteria checklist
-- **Archive the phase plans**: Move all `.md` files from `.esper/plans/done/` whose `phase:` frontmatter matches `current_phase` into `.esper/plans/archived/<current_phase>/` (create the directory if it doesn't exist). Only move plans matching the completed phase — leave any other-phase plans in `done/`.
+- **Archive the phase plans**: Run `esper plan archive <current_phase>` to move all done plans for the phase to `archived/<current_phase>/`.
 - Print: "Phase plans archived to `.esper/plans/archived/<current_phase>/`"
 - Open ONE PR summarizing the entire phase (targeting `main`):
 
@@ -106,12 +106,20 @@ Read all plan files across `pending/`, `active/`, and `done/` where `phase:` mat
   ## Acceptance criteria
   <paste acceptance criteria checklist from phase file>
 
-  <if backlog_mode is "github" and any feature plan has gh_issue set:>
-  Closes #<issue1>, Closes #<issue2>, ...
+  <if backlog_mode is "github" and the phase file has gh_issue set:>
+  Closes #<phase_gh_issue>
   EOF
   )"
   ```
 
-  Print the PR URL. After the PR is opened, update each feature plan in `archived/<current_phase>/` to add `pr: <PR URL>` to its frontmatter.
+  Print the PR URL. After the PR is opened, update each feature plan in `archived/<current_phase>/` by running `esper plan set <filename> pr <PR URL>` for each.
+
+  **Update the phase file to mark it complete:**
+  - Read `.esper/phases/<current_phase>.md`
+  - In the frontmatter, change `status: active` to `status: completed`
+  - In the body, change each `- [ ]` acceptance criterion to `- [x]`
+  - Write the updated content back to the file
+
+  No extra git commit is needed for this step.
 
   Print: "Ready to plan the next phase? Run `/esper:phase` to define Phase <N+1>."
