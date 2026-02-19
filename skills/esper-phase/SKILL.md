@@ -27,9 +27,12 @@ If any matching plans remain, stop:
 Read:
 - `.esper/CONSTITUTION.md` — project principles and scope
 - `.esper/phases/<current_phase>.md` — what was just completed
-- Run `esper plan list --dir done --phase <current_phase> --format json` to get completed plan titles for a retrospective summary
 
-Summarize for the user: "Phase <N> (<title>) is complete. You shipped: [list of done plan titles]."
+For the retrospective summary of what was shipped:
+- If the phase file contains a `## Shipped Plans` section, use it directly — it is already a compact per-plan summary.
+- If the section is absent (older phase that predates this feature), fall back to: `esper plan list --dir done --phase <current_phase> --format json` and extract titles.
+
+Summarize for the user: "Phase <N> (<title>) is complete. You shipped: [list from Shipped Plans or done list]."
 
 ## Step 4: Interview for the new phase
 
