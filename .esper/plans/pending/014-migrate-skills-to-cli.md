@@ -1,0 +1,76 @@
+---
+id: 014
+title: Migrate all skills to use CLI subcommands
+status: pending
+type: feature
+priority: 2
+phase: phase-2
+branch: feature/phase-2
+created: 2026-02-18
+---
+
+# Migrate all skills to use CLI subcommands
+
+## Context
+
+With `esper config` and `esper plan` subcommands built (plans 011-013), every skill can replace its inline file operations with CLI calls. This is the migration step — update all 10 SKILL.md files to use the new subcommands.
+
+Current skills: esper-init, esper-apply, esper-backlog, esper-continue, esper-finish, esper-fix, esper-phase, esper-plan, esper-ship, esper-yolo.
+
+The highest-impact replacements (by token savings):
+1. **Setup guard** (every skill Step 1): replace `existsSync` check with `esper config check`
+2. **Plan listing** (backlog, apply, phase, ship, yolo): replace multi-file reads with `esper plan list`
+3. **Plan activation/finish/archive** (apply, finish, yolo, phase, ship): replace move+rewrite with single CLI call
+4. **Next ID** (init, plan, fix, phase): replace directory scan with `esper plan next-id`
+5. **Frontmatter updates** (ship, fix, plan): replace read-modify-write with `esper plan set`
+6. **Config reads** (every skill): replace JSON.parse of esper.json with `esper config get`
+
+## Approach
+
+For each skill, replace inline file operations with the equivalent CLI subcommand. Preserve all skill logic — only the mechanics of reading/writing plan files change. The skill's decision-making, user interaction, and git operations stay the same.
+
+1. **All skills Step 1**: Replace `.esper/esper.json` existence check with:
+   ```bash
+   esper config check
+   ```
+   If exit code is 1, stop with the existing error message.
+
+2. **esper-apply**: Replace plan listing in Step 2 with `esper plan list --dir pending --phase <phase> --format json`. Replace activation in Step 4 with `esper plan activate <filename>`.
+
+3. **esper-backlog**: Replace multi-directory reads with `esper plan list` calls (one per dir).
+
+4. **esper-continue**: Replace active plan lookup with `esper plan list --dir active --format json`.
+
+5. **esper-finish**: Replace archive operation with `esper plan finish <filename>`. Replace remaining-plans count with `esper plan list --dir pending --phase <phase> --format json`.
+
+6. **esper-fix**: Replace next-id scan with `esper plan next-id`. Replace config reads with `esper config get`.
+
+7. **esper-init**: Replace next-id logic with `esper plan next-id`. Replace esper.json creation with guidance to use `esper config set` (or keep direct write for init since it creates the file).
+
+8. **esper-phase**: Replace plan archiving with `esper plan archive <phase>`. Replace phase bump with `esper config set current_phase <new_phase>`. Replace next-id with `esper plan next-id`.
+
+9. **esper-plan**: Replace next-id and config reads with CLI calls.
+
+10. **esper-ship**: Replace unshipped-plan lookup with `esper plan list --dir done --format json` and filter for missing `pr`. Replace phase check with `esper plan list`. Replace pr field update with `esper plan set <file> pr <url>`.
+
+11. **esper-yolo**: Replace queue loading with `esper plan list`. Replace activate/finish with CLI calls.
+
+## Files to change
+
+- `skills/esper-init/SKILL.md` (modify)
+- `skills/esper-apply/SKILL.md` (modify)
+- `skills/esper-backlog/SKILL.md` (modify)
+- `skills/esper-continue/SKILL.md` (modify)
+- `skills/esper-finish/SKILL.md` (modify)
+- `skills/esper-fix/SKILL.md` (modify)
+- `skills/esper-phase/SKILL.md` (modify)
+- `skills/esper-plan/SKILL.md` (modify)
+- `skills/esper-ship/SKILL.md` (modify)
+- `skills/esper-yolo/SKILL.md` (modify)
+
+## Verification
+
+- Run: `npm test` (CLI tests still pass)
+- Manual: run `/esper:backlog` in a test project to verify the migrated skill works correctly with the new subcommands
+- Edge cases:
+  - Skills must still work if `esper` CLI is not on PATH (skills run inside Claude Code where `node bin/cli.js` is available but `esper` might not be a global command) — use `npx esper` or direct `node` invocation as needed

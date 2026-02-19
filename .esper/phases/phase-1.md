@@ -1,7 +1,7 @@
 ---
 phase: phase-1
 title: Polish and Publish
-status: active
+status: completed
 ---
 
 # Phase 1: Polish and Publish

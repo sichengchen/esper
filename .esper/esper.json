@@ -1,7 +1,6 @@
 {
   "backlog_mode": "local",
-  "pr_mode": "phase",
-  "current_phase": "phase-1",
+  "current_phase": "phase-2",
   "commands": {
     "test": "",
     "lint": "",
