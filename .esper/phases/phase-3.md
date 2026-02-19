@@ -36,3 +36,4 @@ Phase 2 delivered CLI primitives (`config`, `plan`, `backlog`) and consolidated 
 
 ## Shipped Plans
 - #019 — Add Codex support across installer, assets, and docs: Define provider model and install targets. Files: cli.js, README.md, package.json, cli.test.js, config.test.js
+- #020 — fix: skill files reference `esper` instead of `esperkit` for CLI commands: In each SKILL.md file, replace all backtick-wrapped and code-block CLI command references from `esper <subcommand>` to `esperkit <subcommand>`. Files: SKILL.md (all 10 skill directories)
