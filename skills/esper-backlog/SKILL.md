@@ -9,11 +9,11 @@ Display the current esper backlog for this project.
 
 1. Run `esper config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
 
-2. Run the backlog display script:
+2. Run the backlog display subcommand:
    ```bash
-   bash ~/.claude/skills/esper-backlog/backlog.sh
+   esper backlog
    ```
-   Print the script's output verbatim. The script reads all plan files from `.esper/plans/{active,pending,done}/`, parses their frontmatter, and formats a table.
+   Print the output verbatim. Shows ACTIVE, PENDING, and DONE (last 3) sections.
 
 3. Run `esper config get backlog_mode`. If the output is `github`, also run:
    ```bash

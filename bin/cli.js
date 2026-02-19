@@ -67,12 +67,17 @@ async function main() {
       }
       break
     }
+    case 'backlog': {
+      const { display } = await import('../lib/backlog.js')
+      const opts = parseFlags([action, ...rest].filter(Boolean))
+      return display(opts)
+    }
     case undefined:
     case 'install':
       return install()
     default:
       console.error(`Unknown command: ${subcommand}`)
-      console.error('Usage: esper [install|config|plan]')
+      console.error('Usage: esper [install|config|plan|backlog]')
       process.exit(1)
   }
 }
