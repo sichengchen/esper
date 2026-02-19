@@ -1,5 +1,8 @@
 ---
-id: 014
+status: done
+shipped_at: 2026-02-19
+------
+id: 14
 title: Migrate all skills to use CLI subcommands
 status: pending
 type: feature
@@ -7,9 +10,7 @@ priority: 2
 phase: phase-2
 branch: feature/phase-2
 created: 2026-02-18
----
-
-# Migrate all skills to use CLI subcommands
+---# Migrate all skills to use CLI subcommands
 
 ## Context
 
@@ -74,3 +75,10 @@ For each skill, replace inline file operations with the equivalent CLI subcomman
 - Manual: run `/esper:backlog` in a test project to verify the migrated skill works correctly with the new subcommands
 - Edge cases:
   - Skills must still work if `esper` CLI is not on PATH (skills run inside Claude Code where `node bin/cli.js` is available but `esper` might not be a global command) — use `npx esper` or direct `node` invocation as needed
+
+## Progress
+- Milestone 1: Migrated esper-apply, esper-finish, esper-continue to CLI subcommands
+- Milestone 2: Migrated esper-backlog, esper-fix, esper-plan to CLI subcommands
+- Milestone 3: Migrated esper-init, esper-ship, esper-phase, esper-yolo to CLI subcommands
+- Modified: all 10 skills/*/SKILL.md files
+- Verification: npm test — 39 tests pass
