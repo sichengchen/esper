@@ -143,6 +143,30 @@ git add .esper/plans/active/<filename>   # stages the deletion
 git commit -m "chore: archive plan #<id> — <title>"
 ```
 
+### 4g.5 Update phase file with shipped plan summary
+
+Append a compact one-liner to the current phase file so future agents can read what was shipped without opening individual archived plan files.
+
+1. From the archived plan file (now in `done/`), extract:
+   - `id` and `title` from frontmatter
+   - **First sentence** of the `## Approach` section (up to the first `.` or newline). If absent, skip.
+   - **Filenames** from `## Files to change` (comma-separated bare filenames). If absent, skip.
+2. Compose the one-liner:
+   - With approach and files: `- #<id> — <title>: <first sentence>. Files: <filenames>`
+   - With approach only: `- #<id> — <title>: <first sentence>.`
+   - With neither: `- #<id> — <title>`
+3. Read `.esper/phases/<current_phase>.md`:
+   - If the file is **missing**: print "Warning: phase file not found — skipping Shipped Plans update." and continue.
+   - If a `## Shipped Plans` section **exists**: append the one-liner as a new bullet under it.
+   - If it **does not exist**: append the following block to the end of the file:
+     ```
+
+     ## Shipped Plans
+     - #<id> — <title>: ...
+     ```
+
+No extra git commit is needed for this step.
+
 ### 4h. Continue
 
 Move to the next plan in the queue. Repeat from 4a.
