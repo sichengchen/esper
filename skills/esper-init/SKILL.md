@@ -158,7 +158,11 @@ created: [today's date in YYYY-MM-DD format]
 
 Assign priorities: 1 = must ship first (blocking), higher number = can wait.
 
-If `backlog_mode` is `"github"`, create a GitHub issue for each plan with `gh issue create --title "[title]" --body "[approach summary]"` and store the issue number in the plan frontmatter as `gh_issue: <number>`.
+If `backlog_mode` is `"github"`, create ONE GitHub issue for the entire phase (not per plan — features are batched into one phase PR):
+```bash
+gh issue create --title "Phase 1: [phase title]" --body "[phase goal and scope summary]"
+```
+Store the returned issue number as `gh_issue: <number>` in the phase file frontmatter (`.esper/phases/phase-1.md`).
 
 ## Step 6: Install hooks
 

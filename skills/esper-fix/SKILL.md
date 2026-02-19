@@ -75,9 +75,9 @@ created: [today YYYY-MM-DD]
 
 Run `esper config get backlog_mode`. If the output is `github`:
 ```bash
-gh issue create --title "fix: [title]" --body "[description and approach summary]" --label "bug"
+esper plan create-issue <filename>
 ```
-Store the returned issue number as `gh_issue: <number>` in the plan frontmatter.
+This creates a GH issue for the fix and stores the issue number as `gh_issue` in the plan frontmatter. Each fix gets its own issue (1 fix = 1 PR = 1 issue).
 
 ## Step 7: Confirm
 

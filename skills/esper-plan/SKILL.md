@@ -79,15 +79,7 @@ created: [today YYYY-MM-DD]
 - Edge cases: [anything non-obvious to verify]
 ```
 
-## Step 6: GitHub Issues (if applicable)
-
-Run `esper config get backlog_mode`. If the output is `github`:
-```bash
-gh issue create --title "[task title]" --body "[approach summary, 2-4 sentences]"
-```
-Store the returned issue number as `gh_issue: <number>` in the plan frontmatter.
-
-## Step 7: Confirm
+## Step 6: Confirm
 
 Tell the user:
 - Plan file created: `.esper/plans/pending/NNN-slug.md`

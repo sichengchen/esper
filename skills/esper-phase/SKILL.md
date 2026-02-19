@@ -130,11 +130,11 @@ created: [today YYYY-MM-DD]
 - Edge cases: [anything non-obvious]
 ```
 
-Run `esper config get backlog_mode`. If the output is `github`, create a GitHub issue for each plan:
+Run `esper config get backlog_mode`. If the output is `github`, create ONE GitHub issue for the entire phase (not per plan — features are batched into one phase PR):
 ```bash
-gh issue create --title "[title]" --body "[approach summary]"
+gh issue create --title "Phase <N>: <phase title>" --body "<phase goal and scope summary>"
 ```
-Store the returned issue number as `gh_issue: <number>` in the plan frontmatter.
+Store the returned issue number as `gh_issue: <number>` in the phase file frontmatter (`.esper/phases/<new_phase>.md`).
 
 ## Step 9: Summary
 

@@ -186,6 +186,9 @@ gh pr create \
 
 ## Acceptance criteria
 <paste acceptance criteria checklist from phase file>
+
+<if backlog_mode is "github" and the phase file has gh_issue set:>
+Closes #<phase_gh_issue>
 EOF
 )"
 ```

@@ -70,9 +70,9 @@ Print the PR URL returned by `gh pr create`.
 
 Update the plan's `pr:` field: run `esper plan set <filename> pr <PR URL>` (no extra commit needed — local metadata).
 
-Run `esper config get backlog_mode`. If the output is `github` and `gh_issue` is set in the plan:
+Close the fix's GitHub issue (no-op if backlog_mode is local or gh_issue is not set):
 ```bash
-gh issue close <gh_issue> --comment "Shipped in <PR URL>"
+esper plan close-issue <filename> --comment "Shipped in <PR URL>"
 ```
 
 ## Step 5: Phase check
@@ -106,8 +106,8 @@ Run `esper config get current_phase` to get the current phase. Then run `esper p
   ## Acceptance criteria
   <paste acceptance criteria checklist from phase file>
 
-  <if backlog_mode is "github" and any feature plan has gh_issue set:>
-  Closes #<issue1>, Closes #<issue2>, ...
+  <if backlog_mode is "github" and the phase file has gh_issue set:>
+  Closes #<phase_gh_issue>
   EOF
   )"
   ```

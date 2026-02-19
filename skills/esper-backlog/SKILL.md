@@ -19,7 +19,7 @@ Display the current esper backlog for this project.
    ```bash
    gh issue list --state open --json number,title,labels
    ```
-   Cross-reference with local plan files by `gh_issue` field. Flag any GitHub issues that have no matching local plan file.
+   Cross-reference open issues with: the current phase file's `gh_issue` field (1 issue per phase for features), and fix plan files' `gh_issue` fields (1 issue per fix). Flag any open GitHub issues that have no matching phase or fix plan.
 
 4. Print at the bottom:
    - Current phase: run `esper config get current_phase` and display as `Phase: <output>`
