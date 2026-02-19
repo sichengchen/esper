@@ -2,7 +2,7 @@
   "backlog_mode": "local",
   "current_phase": "phase-2",
   "commands": {
-    "test": "",
+    "test": "npm test",
     "lint": "",
     "typecheck": "",
     "dev": ""

@@ -1,6 +1,6 @@
 ---
 name: esper:finish
-description: Complete the active plan — run verification, commit any remaining changes, and archive to done/. Run this when implementation is complete. Replaces esper:done and esper:commit.
+description: Complete the active plan — run verification, commit any remaining changes, and archive to done/. Run this when implementation is complete.
 ---
 
 You are finalizing the active backlog item.
