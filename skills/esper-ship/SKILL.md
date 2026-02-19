@@ -120,6 +120,11 @@ Run `esper config get current_phase` to get the current phase. Then run `esper p
   - In the body, change each `- [ ]` acceptance criterion to `- [x]`
   - Write the updated content back to the file
 
-  No extra git commit is needed for this step.
+  Commit and push the phase file update:
+  ```bash
+  git add .esper/phases/<current_phase>.md .esper/plans/archived/<current_phase>/
+  git commit -m "chore: mark <current_phase> completed — all criteria checked, PR linked"
+  git push
+  ```
 
   Print: "Ready to plan the next phase? Run `/esper:phase` to define Phase <N+1>."
