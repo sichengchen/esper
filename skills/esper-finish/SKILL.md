@@ -7,15 +7,15 @@ You are finalizing the active backlog item.
 
 ## Step 1: Check setup
 
-Verify `.esper/esper.json` exists. If not, tell the user to run `/esper:init` first and stop.
+Run `esper config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
 
-Read `.esper/plans/active/`. If no `.md` file exists, stop: "No active plan to finish. Run `/esper:apply` to start one."
+Run `esper plan list --dir active --format json`. If the list is empty, stop: "No active plan to finish. Run `/esper:apply` to start one."
 
-Read the active plan's full content and frontmatter (`id`, `title`, `branch`, `type`, `phase`).
+The JSON output includes the frontmatter fields (`id`, `title`, `branch`, `type`, `phase`). Also read the active plan file's full content from `.esper/plans/active/<filename>` for the body sections.
 
 ## Step 2: Run verification
 
-Read `commands` from `esper.json`. For each of `test`, `lint`, and `typecheck`:
+Run `esper config get commands` to get the commands object as JSON. For each of `test`, `lint`, and `typecheck`:
 - Skip it entirely if the value is an empty string or the key is missing
 - Run it if non-empty and capture the exit code
 
@@ -54,13 +54,7 @@ Run `git status --porcelain` to check for uncommitted changes.
 
 ## Step 4: Archive the plan
 
-Move the plan file from `.esper/plans/active/<filename>` to `.esper/plans/done/<filename>` (same filename).
-
-Update the frontmatter of the moved file:
-```yaml
-status: done
-shipped_at: <today's date in YYYY-MM-DD format>
-```
+Run `esper plan finish <filename>` — this moves the file from `active/` to `done/`, sets `status: done` and `shipped_at: <today's date>` in the frontmatter.
 
 Do NOT add a `pr:` field — that is added by `/esper:ship` when the PR is opened.
 
@@ -76,7 +70,7 @@ git commit -m "chore: archive plan #<id> — <title>"
 Print: "Plan #<id> — <title> finished and archived to `done/`."
 
 **If `type: "feature"`:**
-- Count `.md` files remaining in `.esper/plans/pending/` with matching `phase:` field
+- Run `esper plan list --dir pending --phase <phase> --format json` and count the entries
 - Print: "Feature plan archived. [N] plan(s) remaining in [current_phase]."
 - Next: "Run `/esper:apply` to continue with the next plan. The phase PR opens via `/esper:ship` when all plans are done."
 

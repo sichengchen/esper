@@ -9,30 +9,30 @@ The user's argument (if any): $ARGUMENTS
 
 ## Step 1: Check setup
 
-Verify `.esper/esper.json` exists. If not, tell the user to run `/esper:init` first and stop.
+Run `esper config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
 
-Check if there is already an active plan in `.esper/plans/active/`. If there is:
-- Read the plan's `title:` and `branch:` from the frontmatter
+Run `esper plan list --dir active --format json` to check for active plans. If the JSON contains any entries:
+- The JSON includes `title` and `branch` fields.
 - Tell the user: "There is already an active plan: [title] on branch [branch]."
 - Ask (using `AskUserQuestion`): "Continue with it, or suspend it and start a new one?"
   - **Continue**: Skip to Step 6 (skip the plan-mode gate — infer progress from `git log --oneline -10` and the plan's `## Progress` section, then resume from remaining steps)
-  - **Suspend**: Move the plan file back to `.esper/plans/pending/`, update frontmatter `status: pending`, then continue to Step 2
+  - **Suspend**: Run `esper plan suspend <filename>`, then continue to Step 2
 
 ## Step 2: Select the plan
 
-Read all `.md` files in `.esper/plans/pending/` and parse their frontmatter.
+Run `esper plan list --dir pending --format json` to get all pending plans (already sorted by priority then id).
 
-**If pending is empty**: "No pending items in the backlog." Suggest `/esper:plan` or `/esper:fix` to add one. Stop.
+**If the list is empty**: "No pending items in the backlog." Suggest `/esper:plan` or `/esper:fix` to add one. Stop.
 
-**If an argument was given**: Match against plan `id` or `title` (substring, case-insensitive). If no match, list all pending items and ask the user to clarify.
+**If an argument was given**: Match against each plan's `id` or `title` field (substring, case-insensitive). If no match, display the list and ask the user to clarify.
 
-**If no argument**: Select the plan with the lowest `priority` number. If priorities are equal, pick the lowest `id`.
+**If no argument**: Select the first plan in the list (already sorted by lowest priority, then lowest id).
 
 Show the selected plan title and use `AskUserQuestion` to confirm before proceeding.
 
 ## Step 3: Create the git branch
 
-Read the `branch:` field from the selected plan's frontmatter. Attempt BEFORE modifying plan state:
+Use the `branch` field from the plan JSON obtained in Step 2. Attempt BEFORE modifying plan state:
 
 ```bash
 git checkout -b <branch-name>
@@ -48,15 +48,15 @@ If checkout fails for any other reason, stop and report the error. Do NOT procee
 ## Step 4: Activate the plan
 
 Only after the git branch is confirmed:
-- Move the plan file from `pending/` to `active/` (same filename)
-- Update frontmatter: `status: active`
+
+Run `esper plan activate <filename>` — this moves the file from `pending/` to `active/` and sets `status: active`.
 
 ## Step 5: Read plan context
 
 Read:
 - The active plan file (full content)
 - `.esper/CONSTITUTION.md`
-- `.esper/phases/<current_phase from esper.json>.md`
+- `.esper/phases/<current_phase>.md` (get current_phase by running `esper config get current_phase`)
 
 ## Step 6: Plan-mode gate — generate todo list
 

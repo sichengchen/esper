@@ -7,14 +7,14 @@ You are resuming an interrupted implementation session.
 
 ## Step 1: Check setup
 
-Verify `.esper/esper.json` exists. If not, tell the user to run `/esper:init` first and stop.
+Run `esper config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
 
-Read `.esper/plans/active/`. Count the `.md` files:
+Run `esper plan list --dir active --format json` to get active plans. Count the entries:
 - **None found**: Tell the user "No active plan to continue. Run `/esper:apply` to start a new plan." and stop.
 - **Multiple found**: Tell the user there are multiple active plans (shouldn't happen) and list them. Ask which one to work on, or suggest cleaning up manually. Stop until resolved.
 - **Exactly one found**: Continue — this is the plan to resume.
 
-Read the active plan's full content including all frontmatter fields (`id`, `title`, `type`, `branch`, `phase`) and all sections.
+The JSON output includes the frontmatter fields (`id`, `title`, `type`, `branch`, `phase`). Also read the active plan file's full content from `.esper/plans/active/<filename>` for all sections.
 
 ## Step 2: Assess current state
 
@@ -85,7 +85,7 @@ EOF
 
 Run verification steps from the plan's **Verification** section.
 
-Read `commands` from `esper.json`. For each of `test`, `lint`, `typecheck`:
+Run `esper config get commands` to get the commands object as JSON. For each of `test`, `lint`, `typecheck`:
 - Skip if empty or missing
 - Run if non-empty; capture exit code
 
