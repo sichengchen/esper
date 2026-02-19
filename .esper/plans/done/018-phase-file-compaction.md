@@ -1,12 +1,13 @@
 ---
 id: 18
 title: Compact plan details into phase file on archive
-status: active
+status: done
 type: feature
 priority: 2
 phase: phase-2
 branch: feature/phase-2
 created: 2026-02-18
+shipped_at: 2026-02-19
 ---
 # Compact plan details into phase file on archive
 
