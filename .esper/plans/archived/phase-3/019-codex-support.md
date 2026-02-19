@@ -8,6 +8,7 @@ phase: phase-3
 branch: feature/phase-3
 created: 2026-02-19
 shipped_at: 2026-02-19
+pr: https://github.com/sichengchen/esper/pull/6
 ---
 # Add Codex support across installer, assets, and docs
 

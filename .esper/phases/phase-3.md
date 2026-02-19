@@ -1,7 +1,7 @@
 ---
 phase: phase-3
 title: Add Codex Support
-status: active
+status: completed
 ---
 
 # Phase 3: Add Codex Support
@@ -25,10 +25,10 @@ Expand esperkit from Claude-only to support Codex workflows while preserving the
 
 ## Acceptance Criteria
 
-- [ ] `esperkit` installs artifacts required for Codex in addition to Claude
-- [ ] Existing Claude workflows remain backward compatible
-- [ ] README documents setup and end-to-end flow for Codex users
-- [ ] Tests cover provider-aware install and command behavior
+- [x] `esperkit` installs artifacts required for Codex in addition to Claude
+- [x] Existing Claude workflows remain backward compatible
+- [x] README documents setup and end-to-end flow for Codex users
+- [x] Tests cover provider-aware install and command behavior
 
 ## Phase Notes
 
