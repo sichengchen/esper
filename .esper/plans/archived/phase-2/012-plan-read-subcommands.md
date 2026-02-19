@@ -1,5 +1,5 @@
 ---
-id: 012
+id: 12
 title: Add esper plan read subcommands — list, get, next-id
 status: done
 shipped_at: 2026-02-18
@@ -8,8 +8,8 @@ priority: 1
 phase: phase-2
 branch: feature/phase-2
 created: 2026-02-18
+pr: https://github.com/sichengchen/esper/pull/4
 ---
-
 # Add esper plan read subcommands — list, get, next-id
 
 ## Context

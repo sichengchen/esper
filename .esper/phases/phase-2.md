@@ -1,7 +1,7 @@
 ---
 phase: phase-2
 title: CLI Subcommands and GitHub Issues Mode
-status: active
+status: completed
 ---
 
 # Phase 2: CLI Subcommands and GitHub Issues Mode
@@ -28,15 +28,15 @@ Replace token-heavy inline file operations in skills with proper CLI subcommands
 
 ## Acceptance Criteria
 
-- [ ] `esper config check` exits 0 in an esper project, exits 1 otherwise
-- [ ] `esper config get current_phase` prints `phase-2`
-- [ ] `esper plan list --phase phase-2 --format json` returns valid JSON with all phase-2 plans
-- [ ] `esper plan next-id` returns the correct next ID across all directories including archived
-- [ ] `esper plan activate`, `finish`, `archive` correctly move files and update frontmatter
-- [ ] All skills use CLI subcommands for file operations (no inline frontmatter parsing)
-- [ ] `backlog_mode: "github"` creates GH issues on plan creation and closes them on ship
-- [ ] `pr_mode` is removed from `esper.json` schema and all skill references
-- [ ] All smoke tests pass (`npm test`)
+- [x] `esper config check` exits 0 in an esper project, exits 1 otherwise
+- [x] `esper config get current_phase` prints `phase-2`
+- [x] `esper plan list --phase phase-2 --format json` returns valid JSON with all phase-2 plans
+- [x] `esper plan next-id` returns the correct next ID across all directories including archived
+- [x] `esper plan activate`, `finish`, `archive` correctly move files and update frontmatter
+- [x] All skills use CLI subcommands for file operations (no inline frontmatter parsing)
+- [x] `backlog_mode: "github"` creates GH issues on plan creation and closes them on ship
+- [x] `pr_mode` is removed from `esper.json` schema and all skill references
+- [x] All smoke tests pass (`npm test`)
 
 ## Phase Notes
 
