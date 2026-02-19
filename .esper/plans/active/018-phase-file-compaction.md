@@ -1,7 +1,7 @@
 ---
 id: 18
 title: Compact plan details into phase file on archive
-status: pending
+status: active
 type: feature
 priority: 2
 phase: phase-2
@@ -48,3 +48,8 @@ Currently, phase files only have the original goal/scope/acceptance criteria. Af
   - `## Shipped Plans` section doesn't exist yet → create it
   - Plan has no `## Approach` section → use title only
   - Phase file is missing → skip gracefully (shouldn't happen but don't crash)
+
+## Progress
+- Milestones: 4 commits
+- Modified: skills/esper-finish/SKILL.md, skills/esper-yolo/SKILL.md, skills/esper-ship/SKILL.md, skills/esper-phase/SKILL.md
+- Verification: not yet run — run /esper:finish to verify and archive
