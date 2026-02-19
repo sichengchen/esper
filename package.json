@@ -1,5 +1,5 @@
 {
-  "name": "@sichengchen/esper",
+  "name": "esperkit",
   "version": "0.1.0",
   "description": "Agent-powered development toolkit for Claude Code",
   "author": "Sicheng Chen",
@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/sichengchen/esper",
   "bin": {
-    "esper": "bin/cli.js"
+    "esperkit": "bin/cli.js"
   },
   "files": [
     "bin/",

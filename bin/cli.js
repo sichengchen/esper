@@ -37,7 +37,7 @@ async function main() {
         case 'get':      return get(rest[0])
         case 'set':      return set(rest[0], rest[1])
         default:
-          console.error('Usage: esper config <check|check-gh|get|set>')
+          console.error('Usage: esperkit config <check|check-gh|get|set>')
           process.exit(1)
       }
       break
@@ -62,7 +62,7 @@ async function main() {
           return plan.closeIssue(rest[0], opts.comment)
         }
         default:
-          console.error('Usage: esper plan <list|get|next-id|activate|suspend|finish|archive|set|create-issue|close-issue>')
+          console.error('Usage: esperkit plan <list|get|next-id|activate|suspend|finish|archive|set|create-issue|close-issue>')
           process.exit(1)
       }
       break
@@ -77,7 +77,7 @@ async function main() {
       return install()
     default:
       console.error(`Unknown command: ${subcommand}`)
-      console.error('Usage: esper [install|config|plan|backlog]')
+      console.error('Usage: esperkit [install|config|plan|backlog]')
       process.exit(1)
   }
 }
@@ -85,7 +85,7 @@ async function main() {
 // --- Install handler ---
 
 async function install() {
-  console.log('Installing esper skills to ~/.claude/skills/...\n')
+  console.log('Installing esperkit skills to ~/.claude/skills/...\n')
 
   const skillsSource = join(PACKAGE_ROOT, 'skills')
   const skillDirs = await readdir(skillsSource)

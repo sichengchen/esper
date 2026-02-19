@@ -1,13 +1,13 @@
 # esper
 
-[![npm](https://img.shields.io/npm/v/@sichengchen/esper)](https://www.npmjs.com/package/@sichengchen/esper)
+[![npm](https://img.shields.io/npm/v/esperkit)](https://www.npmjs.com/package/esperkit)
 
 Vibe coding toolkit for Claude Code. Enforces a structured workflow: interview → plan → build → ship.
 
 ## Install
 
 ```bash
-npx @sichengchen/esper
+npx esperkit
 ```
 
 This installs esper skills globally to `~/.claude/skills/`.
@@ -32,7 +32,7 @@ This installs esper skills globally to `~/.claude/skills/`.
 ### 1. Initialize
 
 ```bash
-npx @sichengchen/esper        # install skills globally
+npx esperkit        # install skills globally
 ```
 
 ```
