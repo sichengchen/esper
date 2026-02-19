@@ -8,7 +8,8 @@ phase: phase-2
 branch: feature/phase-2
 created: 2026-02-18
 shipped_at: 2026-02-19
----# Rewrite backlog display as Node.js subcommand
+---
+# Rewrite backlog display as Node.js subcommand
 
 ## Context
 
