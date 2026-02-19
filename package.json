@@ -1,7 +1,7 @@
 {
   "name": "esperkit",
-  "version": "0.1.0",
-  "description": "Agent-powered development toolkit for Claude Code",
+  "version": "0.1.1",
+  "description": "Vibe coding toolkit for Claude Code",
   "author": "Sicheng Chen",
   "keywords": [
     "claude-code",
