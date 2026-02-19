@@ -24,7 +24,7 @@ Read all `.md` files in `.esper/plans/pending/` where the `phase:` field matches
 
 Sort by `priority` ascending, then `id` ascending.
 
-If the queue is empty (and no active plan was included from Step 1): print "No pending plans for phase [current_phase]." and suggest `/esper:new` to add one. Stop.
+If the queue is empty (and no active plan was included from Step 1): print "No pending plans for phase [current_phase]." and suggest `/esper:plan` to add one. Stop.
 
 Display the ordered queue:
 ```
@@ -76,7 +76,9 @@ Read:
 - `.esper/CONSTITUTION.md`
 - `.esper/phases/<current_phase>.md`
 
-### 4d. Implement with milestone commits
+### 4d. Generate todo list and implement with milestone commits
+
+Before writing any code for this plan, use `TodoWrite` to generate a checklist of implementation steps from the plan's `## Approach` section. Convert each approach step into a concrete, actionable todo item. Do NOT enter plan mode (no EnterPlanMode/ExitPlanMode) — this is YOLO, no pauses.
 
 Follow the plan's **Approach** section step by step.
 
@@ -86,7 +88,7 @@ Rules during implementation:
 - Do not add features beyond what the plan describes
 - Keep the plan file as a living document — update `## Approach` or `## Files to change` if something unexpected is found
 
-**Milestone commits** — after each logical group of steps is complete (e.g., a file is created, a module is wired up, a section is finished), commit immediately **without pausing for user approval**. This is YOLO mode:
+**Milestone commits** — after each todo item is completed, commit immediately **without pausing for user approval**. This is YOLO mode:
 
 ```bash
 git add <specific files changed in this milestone>
@@ -121,7 +123,7 @@ Skip any command that is an empty string or missing.
 If any verification fails: **STOP the entire YOLO run**. Report clearly:
 - Which plan failed
 - Which command failed and what the output was
-- What to do next (fix the issue, then run `/esper:continue` or `/esper:ship` to finish)
+- What to do next (fix the issue, then run `/esper:continue` or `/esper:finish` to complete)
 
 Do NOT proceed to the next plan if verification fails. Leave the current plan in `active/`.
 
@@ -173,7 +175,7 @@ If push fails (no remote, auth issue, etc.): report the error clearly and stop. 
 
 Read all plan files across `.esper/plans/pending/`, `.esper/plans/active/`, and `.esper/plans/done/` where `phase:` matches `current_phase`.
 
-**If any plans remain in `pending/` or `active/`**: print how many remain and their titles. Skip PR creation — print: "Phase [N] not yet complete — [M] plan(s) remaining. Run `/esper:yolo` again or `/esper:build` to continue."
+**If any plans remain in `pending/` or `active/`**: print how many remain and their titles. Skip PR creation — print: "Phase [N] not yet complete — [M] plan(s) remaining. Run `/esper:yolo` again or `/esper:apply` to continue."
 
 **If all phase plans are in `done/`**: the phase is complete. Open ONE PR summarizing the entire phase:
 
@@ -210,6 +212,6 @@ Print a summary:
 - Plans shipped: N
 - Phase PR: <URL> (or "not opened — phase not yet complete")
 
-If the phase is complete, ask: "Ready to plan the next phase? Run `/esper:new` to add items, or `/esper:init` to define a new phase."
+If the phase is complete, print: "Ready to plan the next phase? Run `/esper:phase` to define Phase <N+1>. Or use `/esper:plan` to add feature items and `/esper:fix` to log bugs."
 
-Otherwise, suggest: "Run `/esper:yolo` again to continue with remaining plans, or `/esper:build` to pick them up one at a time."
+Otherwise, suggest: "Run `/esper:yolo` again to continue with remaining plans, or `/esper:apply` to pick them up one at a time."

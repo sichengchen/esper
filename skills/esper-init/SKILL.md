@@ -13,7 +13,7 @@ Check if `.esper/esper.json` exists.
   - "Esper is already set up in this project. What would you like to do?"
   - Options: "Update the constitution", "Add a new phase", "Reset everything"
   - **Update the constitution**: Re-read the existing `.esper/CONSTITUTION.md`, then run Steps 1–2 only (re-interview and rewrite). Keep `esper.json`, phases, and plans untouched.
-  - **Add a new phase**: Skip to Step 4. Read the existing `esper.json` for `current_phase`, define the next phase number, and run Steps 4–5 only.
+  - **Add a new phase**: Tell the user to run `/esper:phase` instead — it handles phase transitions properly (archives current plans, bumps phase number, interviews for new scope). Stop.
   - **Reset everything**: Use `AskUserQuestion` to confirm ("This will delete all esper files. Are you sure?"). If confirmed, delete `.esper/` entirely and proceed from Step 1.
 
 ## Step 1: Interview the user
@@ -222,7 +222,7 @@ REMINDERS=()
 UNCOMMITTED=$(git status --porcelain 2>/dev/null)
 if [ -n "$UNCOMMITTED" ]; then
   CHANGED=$(echo "$UNCOMMITTED" | wc -l | tr -d ' ')
-  REMINDERS+=("  ! $CHANGED uncommitted file(s) — run /esper:commit when ready")
+  REMINDERS+=("  ! $CHANGED uncommitted file(s) — run /esper:finish when ready")
 fi
 
 ACTIVE_PLANS=$(ls .esper/plans/active/*.md 2>/dev/null)
@@ -257,4 +257,5 @@ Print a summary covering:
 - Phase 1 defined in `.esper/phases/phase-1.md`
 - N backlog items created in `.esper/plans/pending/`
 - Hooks installed in `.esper/hooks/` and `.claude/settings.json`
-- Next step: "Run `/esper:backlog` to see your backlog, then `/esper:build` to start."
+- Next step: "Run `/esper:backlog` to see your backlog, then `/esper:apply` to start building."
+- Note: "For future phases, use `/esper:phase` when Phase 1 is complete."

@@ -51,6 +51,54 @@ test('updates existing skill directories without error', async () => {
   }
 })
 
+test('removes stale skill directories from previous versions', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'esper-test-'))
+  try {
+    // Simulate stale skills from a previous version being present
+    const staleSkills = ['esper-build', 'esper-new', 'esper-done', 'esper-commit']
+    for (const skill of staleSkills) {
+      const { mkdir: mkdirSync } = await import('node:fs/promises')
+      await mkdirSync(join(tmp, skill), { recursive: true })
+    }
+
+    const result = runCLI(tmp)
+    assert.equal(result.status, 0, `CLI exited with ${result.status}\n${result.stderr}`)
+
+    // Stale skills should be removed
+    for (const skill of staleSkills) {
+      assert.ok(!existsSync(join(tmp, skill)), `Expected stale skill ${skill} to be removed`)
+    }
+    assert.ok(result.stdout.includes('(removed'), 'Expected removal message in output')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('installs .sh scripts with execute permissions', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'esper-test-'))
+  try {
+    const result = runCLI(tmp)
+    assert.equal(result.status, 0, `CLI exited with ${result.status}\n${result.stderr}`)
+
+    // Check that any .sh files in installed skills are executable
+    const { stat } = await import('node:fs/promises')
+    const installedSkills = await readdir(tmp)
+    for (const skill of installedSkills) {
+      const skillDir = join(tmp, skill)
+      const files = await readdir(skillDir)
+      for (const file of files) {
+        if (file.endsWith('.sh')) {
+          const s = await stat(join(skillDir, file))
+          // Check owner execute bit (0o100)
+          assert.ok(s.mode & 0o100, `Expected ${skill}/${file} to be executable`)
+        }
+      }
+    }
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
 test('exits with code 0 on success', async () => {
   const tmp = await mkdtemp(join(tmpdir(), 'esper-test-'))
   try {

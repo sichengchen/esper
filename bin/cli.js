@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readdir, cp, mkdir } from 'fs/promises'
+import { readdir, cp, mkdir, chmod, rm } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join, dirname } from 'path'
 import { homedir } from 'os'
@@ -28,6 +28,28 @@ async function install() {
 
     await mkdir(dest, { recursive: true })
     await cp(src, dest, { recursive: true })
+
+    // Make any .sh files executable
+    const files = await readdir(dest)
+    for (const file of files) {
+      if (file.endsWith('.sh')) {
+        await chmod(join(dest, file), 0o755)
+      }
+    }
+  }
+
+  // Remove stale skills from previous versions
+  const REMOVED_SKILLS = ['esper-build', 'esper-new', 'esper-done', 'esper-commit']
+  const anyRemoved = REMOVED_SKILLS.some(s => existsSync(join(CLAUDE_SKILLS_DIR, s)))
+  if (anyRemoved) {
+    console.log('')
+    for (const skill of REMOVED_SKILLS) {
+      const dest = join(CLAUDE_SKILLS_DIR, skill)
+      if (existsSync(dest)) {
+        console.log(`  - ${skill} (removed — replaced in this version)`)
+        await rm(dest, { recursive: true, force: true })
+      }
+    }
   }
 
   const inGitRepo = existsSync(join(process.cwd(), '.git'))
@@ -37,7 +59,7 @@ async function install() {
 
   if (alreadyInit) {
     console.log('Done. esper is already set up in this project.')
-    console.log('Open Claude Code here and run /esper:backlog to continue.')
+    console.log('Open Claude Code here and run /esper:backlog to see your queue.')
   } else if (inGitRepo) {
     console.log('Done. Open Claude Code in this directory and run:')
     console.log('')

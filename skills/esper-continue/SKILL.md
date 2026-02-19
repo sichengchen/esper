@@ -10,7 +10,7 @@ You are resuming an interrupted implementation session.
 Verify `.esper/esper.json` exists. If not, tell the user to run `/esper:init` first and stop.
 
 Read `.esper/plans/active/`. Count the `.md` files:
-- **None found**: Tell the user "No active plan to continue. Run `/esper:build` to start a new plan." and stop.
+- **None found**: Tell the user "No active plan to continue. Run `/esper:apply` to start a new plan." and stop.
 - **Multiple found**: Tell the user there are multiple active plans (shouldn't happen) and list them. Ask which one to work on, or suggest cleaning up manually. Stop until resolved.
 - **Exactly one found**: Continue — this is the plan to resume.
 
@@ -64,7 +64,7 @@ Use `AskUserQuestion` to ask: "Does this assessment look right? Proceed with the
 
 ## Step 4: Continue implementation
 
-Resume from the remaining Approach steps. Follow the same rules as `/esper:build`:
+Resume from the remaining Approach steps. Follow the same rules as `/esper:apply`:
 - Read each file before modifying it
 - Follow existing code patterns
 - Do not add features beyond what the plan describes
@@ -110,7 +110,7 @@ Add or update the `## Progress` section in the active plan file:
 Print a summary of what was completed in this session.
 
 If the plan's Approach is fully implemented and verification passed:
-- Print: "Implementation complete. Run `/esper:ship` to push and archive this plan."
+- Print: "Implementation complete. Run `/esper:finish` to verify, commit, and archive this plan. Then `/esper:ship` to push and open a PR."
 
 If there is still work remaining (you stopped early):
 - Print: "Partial progress committed. Run `/esper:continue` again to resume."
