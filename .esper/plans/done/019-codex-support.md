@@ -1,12 +1,13 @@
 ---
 id: 19
 title: Add Codex support across installer, assets, and docs
-status: active
+status: done
 type: feature
 priority: 1
 phase: phase-3
 branch: feature/phase-3
 created: 2026-02-19
+shipped_at: 2026-02-19
 ---
 # Add Codex support across installer, assets, and docs
 
@@ -79,5 +80,6 @@ Phase 3 requires Codex support without breaking the current Claude workflow. The
 - Added modern installer TUI in `bin/cli.js` for interactive provider selection and styled install progress
 - TUI now supports multi-select controls: arrow keys move, `space` toggles provider(s), `enter` starts install
 - Added `--interactive` / `--no-tui` behavior and documented both in README
+- README install section updated with provider-specific commands, targets, and env overrides
 - Updated `test/config.test.js` assertion for installer banner text
 - Verification: `npm test` passes (53/53)
