@@ -132,7 +132,7 @@ test('install remains the default when no subcommand given', async () => {
       encoding: 'utf8',
     })
     assert.equal(result.status, 0)
-    assert.ok(result.stdout.includes('Installing esper skills'))
+    assert.ok(result.stdout.includes('Installing esperkit skills'))
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }

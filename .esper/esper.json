@@ -1,6 +1,6 @@
 {
   "backlog_mode": "local",
-  "current_phase": "phase-2",
+  "current_phase": "phase-3",
   "commands": {
     "test": "npm test",
     "lint": "",
