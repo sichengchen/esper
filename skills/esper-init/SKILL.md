@@ -7,11 +7,12 @@ You are initializing the esper agent-powered development toolkit for this projec
 
 ## Step 0: Detect existing setup
 
-Check if `.esper/esper.json` exists.
-
-- If it exists, use `AskUserQuestion` to ask:
+Run `esper config check`. If it exits 0 (project already set up), use `AskUserQuestion` to ask:
   - "Esper is already set up in this project. What would you like to do?"
   - Options: "Update the constitution", "Add a new phase", "Reset everything"
+- If it exits non-zero (not set up), proceed to Step 1.
+
+When already set up, the options are:
   - **Update the constitution**: Re-read the existing `.esper/CONSTITUTION.md`, then run Steps 1–2 only (re-interview and rewrite). Keep `esper.json`, phases, and plans untouched.
   - **Add a new phase**: Tell the user to run `/esper:phase` instead — it handles phase transitions properly (archives current plans, bumps phase number, interviews for new scope). Stop.
   - **Reset everything**: Use `AskUserQuestion` to confirm ("This will delete all esper files. Are you sure?"). If confirmed, delete `.esper/` entirely and proceed from Step 1.
