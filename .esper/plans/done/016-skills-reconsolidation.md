@@ -1,15 +1,14 @@
 ---
-id: 016
+id: 16
 title: Skills re-consolidation and cleanup
-status: pending
+status: done
 type: feature
 priority: 3
 phase: phase-2
 branch: feature/phase-2
 created: 2026-02-18
----
-
-# Skills re-consolidation and cleanup
+shipped_at: 2026-02-19
+---# Skills re-consolidation and cleanup
 
 ## Context
 
@@ -49,3 +48,13 @@ This plan is a thorough audit and cleanup pass, run after the CLI migration (pla
 - Run: `grep -r 'pr_mode' skills/` → should return no matches
 - Run: `grep -r 'esper:build\|esper:new\|esper:done\|esper:commit' skills/` → should return no matches (except in REMOVED_SKILLS or historical context)
 - Manual: skim each SKILL.md for coherence
+
+## Progress
+- Audit complete: no stale pr_mode or removed-skill references in skills/
+- Removed "Replaces esper:done and esper:commit" from esper-finish description
+- Updated esper.json commands.test to "npm test" (was empty string)
+- REMOVED_SKILLS list in cli.js verified correct
+- Frontmatter templates consistent: all plan-creating skills include type field
+- Branch conventions consistent: fix/<slug> for fixes, feature/<phase> for features
+- README.md is current — no updates needed
+- Verification: npm test — 49 tests pass, grep confirms 0 stale references
