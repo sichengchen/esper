@@ -85,6 +85,12 @@ Run `esper config get current_phase` to get the current phase. Then run `esper p
 - Print: "Phase <N> complete. All backlog items shipped."
 - Read `.esper/phases/<current_phase>.md` and display the acceptance criteria checklist
 - **Archive the phase plans**: Run `esper plan archive <current_phase>` to move all done plans for the phase to `archived/<current_phase>/`.
+- Commit the archive (stages both the new files in `archived/` and the deletions in `done/`):
+  ```bash
+  git add .esper/plans/archived/<current_phase>/
+  git add .esper/plans/done/
+  git commit -m "chore: archive <current_phase> plans to archived/<current_phase>/"
+  ```
 - Print: "Phase plans archived to `.esper/plans/archived/<current_phase>/`"
 - Open ONE PR summarizing the entire phase (targeting `main`):
 
