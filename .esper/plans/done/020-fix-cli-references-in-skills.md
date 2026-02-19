@@ -8,6 +8,7 @@ phase: phase-3
 branch: fix/cli-references-in-skills
 created: 2026-02-19
 shipped_at: 2026-02-19
+pr: https://github.com/sichengchen/esper/pull/7
 ---
 # fix: skill files reference `esper` instead of `esperkit` for CLI commands
 
