@@ -7,7 +7,7 @@ You are initializing the esper agent-powered development toolkit for this projec
 
 ## Step 0: Detect existing setup
 
-Run `esper config check`. If it exits 0 (project already set up), use `AskUserQuestion` to ask:
+Run `esperkit config check`. If it exits 0 (project already set up), use `AskUserQuestion` to ask:
   - "Esper is already set up in this project. What would you like to do?"
   - Options: "Update the constitution", "Add a new phase", "Reset everything"
 - If it exits non-zero (not set up), proceed to Step 1.

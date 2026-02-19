@@ -7,9 +7,9 @@ You are resuming an interrupted implementation session.
 
 ## Step 1: Check setup
 
-Run `esper config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
+Run `esperkit config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
 
-Run `esper plan list --dir active --format json` to get active plans. Count the entries:
+Run `esperkit plan list --dir active --format json` to get active plans. Count the entries:
 - **None found**: Tell the user "No active plan to continue. Run `/esper:apply` to start a new plan." and stop.
 - **Multiple found**: Tell the user there are multiple active plans (shouldn't happen) and list them. Ask which one to work on, or suggest cleaning up manually. Stop until resolved.
 - **Exactly one found**: Continue — this is the plan to resume.
@@ -85,7 +85,7 @@ EOF
 
 Run verification steps from the plan's **Verification** section.
 
-Run `esper config get commands` to get the commands object as JSON. For each of `test`, `lint`, `typecheck`:
+Run `esperkit config get commands` to get the commands object as JSON. For each of `test`, `lint`, `typecheck`:
 - Skip if empty or missing
 - Run if non-empty; capture exit code
 

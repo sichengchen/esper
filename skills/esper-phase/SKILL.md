@@ -9,13 +9,13 @@ The user's initial prompt (if any): $ARGUMENTS
 
 ## Step 1: Check setup
 
-Run `esper config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
+Run `esperkit config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
 
-Run `esper config get current_phase` to get the current phase (e.g. `"phase-1"`).
+Run `esperkit config get current_phase` to get the current phase (e.g. `"phase-1"`).
 
 ## Step 2: Verify current phase is complete
 
-Run `esper plan list --dir pending --phase <current_phase> --format json` and `esper plan list --dir active --phase <current_phase> --format json`.
+Run `esperkit plan list --dir pending --phase <current_phase> --format json` and `esperkit plan list --dir active --phase <current_phase> --format json`.
 
 Check if any plans are returned.
 
@@ -30,7 +30,7 @@ Read:
 
 For the retrospective summary of what was shipped:
 - If the phase file contains a `## Shipped Plans` section, use it directly — it is already a compact per-plan summary.
-- If the section is absent (older phase that predates this feature), fall back to: `esper plan list --dir done --phase <current_phase> --format json` and extract titles.
+- If the section is absent (older phase that predates this feature), fall back to: `esperkit plan list --dir done --phase <current_phase> --format json` and extract titles.
 
 Summarize for the user: "Phase <N> (<title>) is complete. You shipped: [list from Shipped Plans or done list]."
 
@@ -50,7 +50,7 @@ Use `AskUserQuestion` in 2 rounds:
 
 ## Step 5: Archive current phase plans
 
-Run `esper plan archive <current_phase>` to move all done plans for the phase to `archived/<current_phase>/`.
+Run `esperkit plan archive <current_phase>` to move all done plans for the phase to `archived/<current_phase>/`.
 
 Print: "Archived completed plans to `.esper/plans/archived/<current_phase>/`"
 
@@ -60,7 +60,7 @@ Parse `current_phase` to get the next phase slug:
 - If `current_phase` matches the pattern `phase-N` (where N is an integer), the next phase is `phase-<N+1>`
 - If it does not match (custom naming), use `AskUserQuestion` to ask: "What should the new phase be named? (e.g. `phase-2`)"
 
-Run `esper config set current_phase <new_phase>` to update the current phase.
+Run `esperkit config set current_phase <new_phase>` to update the current phase.
 
 ## Step 7: Write the new phase file
 
@@ -100,7 +100,7 @@ All plans in this phase get:
 - `phase: <new_phase>`
 - `branch: feature/<new_phase>`
 
-Run `esper plan next-id` to get the next available plan ID. Continue incrementing for each subsequent plan.
+Run `esperkit plan next-id` to get the next available plan ID. Continue incrementing for each subsequent plan.
 
 Write `.esper/plans/pending/NNN-slug.md` for each plan:
 
@@ -133,7 +133,7 @@ created: [today YYYY-MM-DD]
 - Edge cases: [anything non-obvious]
 ```
 
-Run `esper config get backlog_mode`. If the output is `github`, create ONE GitHub issue for the entire phase (not per plan — features are batched into one phase PR):
+Run `esperkit config get backlog_mode`. If the output is `github`, create ONE GitHub issue for the entire phase (not per plan — features are batched into one phase PR):
 ```bash
 gh issue create --title "Phase <N>: <phase title>" --body "<phase goal and scope summary>"
 ```

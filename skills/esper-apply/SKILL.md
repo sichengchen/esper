@@ -9,18 +9,18 @@ The user's argument (if any): $ARGUMENTS
 
 ## Step 1: Check setup
 
-Run `esper config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
+Run `esperkit config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
 
-Run `esper plan list --dir active --format json` to check for active plans. If the JSON contains any entries:
+Run `esperkit plan list --dir active --format json` to check for active plans. If the JSON contains any entries:
 - The JSON includes `title` and `branch` fields.
 - Tell the user: "There is already an active plan: [title] on branch [branch]."
 - Ask (using `AskUserQuestion`): "Continue with it, or suspend it and start a new one?"
   - **Continue**: Skip to Step 6 (skip the plan-mode gate — infer progress from `git log --oneline -10` and the plan's `## Progress` section, then resume from remaining steps)
-  - **Suspend**: Run `esper plan suspend <filename>`, then continue to Step 2
+  - **Suspend**: Run `esperkit plan suspend <filename>`, then continue to Step 2
 
 ## Step 2: Select the plan
 
-Run `esper plan list --dir pending --format json` to get all pending plans (already sorted by priority then id).
+Run `esperkit plan list --dir pending --format json` to get all pending plans (already sorted by priority then id).
 
 **If the list is empty**: "No pending items in the backlog." Suggest `/esper:plan` or `/esper:fix` to add one. Stop.
 
@@ -49,14 +49,14 @@ If checkout fails for any other reason, stop and report the error. Do NOT procee
 
 Only after the git branch is confirmed:
 
-Run `esper plan activate <filename>` — this moves the file from `pending/` to `active/` and sets `status: active`.
+Run `esperkit plan activate <filename>` — this moves the file from `pending/` to `active/` and sets `status: active`.
 
 ## Step 5: Read plan context
 
 Read:
 - The active plan file (full content)
 - `.esper/CONSTITUTION.md`
-- `.esper/phases/<current_phase>.md` (get current_phase by running `esper config get current_phase`)
+- `.esper/phases/<current_phase>.md` (get current_phase by running `esperkit config get current_phase`)
 
 ## Step 6: Plan-mode gate — generate todo list
 
