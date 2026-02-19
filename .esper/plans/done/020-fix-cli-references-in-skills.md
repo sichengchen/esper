@@ -1,12 +1,13 @@
 ---
 id: 20
 title: fix: skill files reference `esper` instead of `esperkit` for CLI commands
-status: active
+status: done
 type: fix
 priority: 1
 phase: phase-3
 branch: fix/cli-references-in-skills
 created: 2026-02-19
+shipped_at: 2026-02-19
 ---
 # fix: skill files reference `esper` instead of `esperkit` for CLI commands
 
