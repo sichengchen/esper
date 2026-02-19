@@ -2,15 +2,13 @@
 
 [![npm](https://img.shields.io/npm/v/esperkit)](https://www.npmjs.com/package/esperkit)
 
-Vibe coding toolkit for Claude Code. Enforces a structured workflow: interview → plan → build → ship.
+Vibe coding toolkit for Claude Code and Codex. Enforces a structured workflow: interview → plan → build → ship.
 
 ## Install
 
 ```bash
 npx esperkit
 ```
-
-This installs esper skills globally to `~/.claude/skills/`.
 
 ## Commands
 
@@ -139,7 +137,7 @@ Use `/esper:plan` to add features and `/esper:fix` to log bugs. The type is set 
     └── session-reminder.sh  # reminds about uncommitted changes on stop
 
 .claude/
-└── settings.json       # hooks config (merged, not overwritten)
+└── settings.json       # Claude Code hooks config (merged, not overwritten)
 ```
 
 ## Backlog modes
@@ -151,7 +149,7 @@ During `/esper:init` you choose how to manage the backlog:
 
 ## Philosophy
 
-- **Constitution first** — every project has a written document defining what it is and is not. Claude reads it every session.
+- **Constitution first** — every project has a written document defining what it is and is not. Your coding agent reads it every session.
 - **Plan before build** — no code is written without an approved plan and todo list.
 - **Phase-based** — work is organized into phases with explicit acceptance criteria.
 - **Verified shipping** — `/esper:finish` and `/esper:ship` run full verification before proceeding. Failures block progress.
