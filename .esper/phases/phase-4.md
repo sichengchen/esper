@@ -38,3 +38,4 @@ Phase 3 wrapped cleanly. No carry-forward items. The three new skills follow the
 
 ## Shipped Plans
 - #021 — Add esper:explore skill for pre-planning investigation: Create esper-explore SKILL.md with 5-step workflow plus lib/exploration.js CLI module. Files: SKILL.md, exploration.js, cli.js, exploration.test.js
+- #022 — Add esper:review skill for code quality review: Create esper-review SKILL.md with 6-step workflow for branch/PR diff review with fix batching. Files: SKILL.md
