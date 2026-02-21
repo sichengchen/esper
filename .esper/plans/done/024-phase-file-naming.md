@@ -1,12 +1,13 @@
 ---
 id: 24
 title: Rename phase files and references from phase-N to NNN-slug format
-status: active
+status: done
 type: feature
 priority: 2
 phase: 004-exploration-and-review-skills
 branch: feature/phase-4
 created: 2026-02-21
+shipped_at: 2026-02-21
 ---
 # Rename phase files and references from phase-N to NNN-slug format
 
@@ -92,3 +93,15 @@ This is a full rename: `current_phase` config value, plan frontmatter, archive d
 - Run: `node --test test/*.test.js`
 - Expected: all tests pass with new naming convention
 - Edge cases: archived plan directories rename correctly, `esper-phase` correctly parses NNN prefix to compute next phase number, branch names with new format work with git
+
+## Progress
+- Renamed all 4 phase files to NNN-slug format with updated frontmatter
+- Updated current_phase config to 004-exploration-and-review-skills
+- Updated phase: field in all 25 plan files (done, active, pending, archived)
+- Renamed 3 archive directories (phase-1→001-polish-and-publish, etc.)
+- Updated esper-init/SKILL.md to create 001-<slug>.md format
+- Updated esper-phase/SKILL.md Step 6 to parse NNN prefix
+- Fixed hardcoded phase-N references in esper-revise and esper-ship
+- Updated all 6 test files with NNN-slug phase names
+- Modified: 4 phase files, esper.json, 25 plan files, 3 archive dirs, 4 skill files, 6 test files
+- Verification: 64/64 tests pass
