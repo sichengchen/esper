@@ -23,8 +23,8 @@ title: Test plan
 status: pending
 type: feature
 priority: 2
-phase: phase-2
-branch: feature/phase-2
+phase: 002-test-phase
+branch: feature/002-test-phase
 created: 2026-02-18
 ---
 
@@ -37,8 +37,8 @@ title: Active plan
 status: active
 type: feature
 priority: 1
-phase: phase-2
-branch: feature/phase-2
+phase: 002-test-phase
+branch: feature/002-test-phase
 created: 2026-02-18
 ---
 
@@ -47,32 +47,32 @@ created: 2026-02-18
 
 const PLAN_DONE_P1 = `---
 id: 003
-title: Done phase-1 plan
+title: Done 001-test-phase plan
 status: done
 type: feature
 priority: 1
-phase: phase-1
-branch: feature/phase-1
+phase: 001-test-phase
+branch: feature/001-test-phase
 created: 2026-02-18
 shipped_at: 2026-02-18
 ---
 
-# Done phase-1 plan
+# Done 001-test-phase plan
 `
 
 const PLAN_DONE_P2 = `---
 id: 004
-title: Done phase-2 plan
+title: Done 002-test-phase plan
 status: done
 type: feature
 priority: 1
-phase: phase-2
-branch: feature/phase-2
+phase: 002-test-phase
+branch: feature/002-test-phase
 created: 2026-02-18
 shipped_at: 2026-02-18
 ---
 
-# Done phase-2 plan
+# Done 002-test-phase plan
 `
 
 async function setupProject(plans = {}) {
@@ -80,7 +80,7 @@ async function setupProject(plans = {}) {
   await mkdir(join(tmp, '.esper'), { recursive: true })
   await writeFile(join(tmp, '.esper', 'esper.json'), JSON.stringify({
     backlog_mode: 'local',
-    current_phase: 'phase-2',
+    current_phase: '002-test-phase',
     commands: {}
   }, null, 2) + '\n')
 
@@ -185,15 +185,15 @@ test('plan archive — moves matching phase plans from done to archived', async 
     done: { '003-done-p1.md': PLAN_DONE_P1, '004-done-p2.md': PLAN_DONE_P2 },
   })
   try {
-    const result = runCLI(['plan', 'archive', 'phase-1'], tmp)
+    const result = runCLI(['plan', 'archive', '001-test-phase'], tmp)
     assert.equal(result.status, 0)
     assert.ok(result.stdout.includes('1 plans archived'))
 
-    // phase-1 plan moved to archived
-    assert.ok(existsSync(join(tmp, '.esper', 'plans', 'archived', 'phase-1', '003-done-p1.md')))
+    // 001-test-phase plan moved to archived
+    assert.ok(existsSync(join(tmp, '.esper', 'plans', 'archived', '001-test-phase', '003-done-p1.md')))
     assert.ok(!existsSync(join(tmp, '.esper', 'plans', 'done', '003-done-p1.md')))
 
-    // phase-2 plan stays in done
+    // 002-test-phase plan stays in done
     assert.ok(existsSync(join(tmp, '.esper', 'plans', 'done', '004-done-p2.md')))
   } finally {
     await rm(tmp, { recursive: true, force: true })
@@ -203,7 +203,7 @@ test('plan archive — moves matching phase plans from done to archived', async 
 test('plan archive — prints 0 when no matching plans', async () => {
   const tmp = await setupProject({ done: { '004-done-p2.md': PLAN_DONE_P2 } })
   try {
-    const result = runCLI(['plan', 'archive', 'phase-1'], tmp)
+    const result = runCLI(['plan', 'archive', '001-test-phase'], tmp)
     assert.equal(result.status, 0)
     assert.ok(result.stdout.includes('0 plans archived'))
   } finally {
@@ -214,7 +214,7 @@ test('plan archive — prints 0 when no matching plans', async () => {
 test('plan archive — handles empty done directory', async () => {
   const tmp = await setupProject({})
   try {
-    const result = runCLI(['plan', 'archive', 'phase-1'], tmp)
+    const result = runCLI(['plan', 'archive', '001-test-phase'], tmp)
     assert.equal(result.status, 0)
     assert.ok(result.stdout.includes('0 plans archived'))
   } finally {
@@ -253,13 +253,13 @@ test('plan set — adds new frontmatter field', async () => {
 
 test('plan set — finds plans in archived directories', async () => {
   const tmp = await setupProject({})
-  await mkdir(join(tmp, '.esper', 'plans', 'archived', 'phase-1'), { recursive: true })
-  await writeFile(join(tmp, '.esper', 'plans', 'archived', 'phase-1', '003-done.md'), PLAN_DONE_P1)
+  await mkdir(join(tmp, '.esper', 'plans', 'archived', '001-test-phase'), { recursive: true })
+  await writeFile(join(tmp, '.esper', 'plans', 'archived', '001-test-phase', '003-done.md'), PLAN_DONE_P1)
   try {
     const result = runCLI(['plan', 'set', '003-done.md', 'pr', 'https://example.com'], tmp)
     assert.equal(result.status, 0)
 
-    const content = await readFile(join(tmp, '.esper', 'plans', 'archived', 'phase-1', '003-done.md'), 'utf8')
+    const content = await readFile(join(tmp, '.esper', 'plans', 'archived', '001-test-phase', '003-done.md'), 'utf8')
     assert.ok(content.includes('pr: https://example.com'))
   } finally {
     await rm(tmp, { recursive: true, force: true })
