@@ -40,3 +40,4 @@ Phase 3 wrapped cleanly. No carry-forward items. The three new skills follow the
 - #021 — Add esper:explore skill for pre-planning investigation: Create esper-explore SKILL.md with 5-step workflow plus lib/exploration.js CLI module. Files: SKILL.md, exploration.js, cli.js, exploration.test.js
 - #022 — Add esper:review skill for code quality review: Create esper-review SKILL.md with 6-step workflow for branch/PR diff review with fix batching. Files: SKILL.md
 - #023 — Add esper:revise skill for user-driven document revision: Create esper-revise SKILL.md with 6-step workflow for user feedback and iterative edits. Files: SKILL.md
+- #024 — Rename phase files and references from phase-N to NNN-slug format: Rename all 4 phase files, update config/frontmatter/archives/skills/tests. Files: phase files, esper.json, plan files, SKILL.md (4), test files (6)
