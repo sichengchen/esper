@@ -11,7 +11,7 @@ The user's initial prompt (if any): $ARGUMENTS
 
 Run `esperkit config check`. If it exits non-zero, tell the user to run `/esper:init` first and stop.
 
-Run `esperkit config get current_phase` to get the current phase (e.g. `"phase-1"`).
+Run `esperkit config get current_phase` to get the current phase (e.g. `"004-exploration-and-review-skills"`).
 
 ## Step 2: Verify current phase is complete
 
@@ -66,15 +66,17 @@ Print: "Archived completed plans to `.esper/plans/archived/<current_phase>/`"
 
 ## Step 6: Compute the next phase number and update config
 
-Parse `current_phase` to get the next phase slug:
-- If `current_phase` matches the pattern `phase-N` (where N is an integer), the next phase is `phase-<N+1>`
-- If it does not match (custom naming), use `AskUserQuestion` to ask: "What should the new phase be named? (e.g. `phase-2`)"
+Parse `current_phase` to get the next phase number:
+- Extract the zero-padded numeric prefix (e.g. `004` from `004-exploration-and-review-skills`)
+- Increment by 1 and zero-pad to 3 digits (e.g. `004` → `005`)
+
+The new phase slug will be `<NNN>-<kebab-slug>` where `<kebab-slug>` is derived from the phase title chosen during the interview (e.g. title "Better Testing" → `005-better-testing`).
 
 Run `esperkit config set current_phase <new_phase>` to update the current phase.
 
 ## Step 7: Write the new phase file
 
-Create `.esper/phases/<new_phase>.md`:
+Create `.esper/phases/<new_phase>.md` (e.g. `.esper/phases/005-better-testing.md`):
 
 ```markdown
 ---
