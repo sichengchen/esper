@@ -3,7 +3,7 @@ id: 006
 title: Add esper:done skill — finalize a plan with a guaranteed commit
 status: done
 priority: 2
-phase: phase-1
+phase: 001-polish-and-publish
 branch: phase/phase-1
 created: 2026-02-18
 shipped_at: 2026-02-18

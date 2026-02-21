@@ -1,6 +1,6 @@
 {
   "backlog_mode": "local",
-  "current_phase": "phase-3",
+  "current_phase": "004-exploration-and-review-skills",
   "commands": {
     "test": "npm test",
     "lint": "",

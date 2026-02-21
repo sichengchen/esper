@@ -4,7 +4,7 @@ title: Add Codex support across installer, assets, and docs
 status: done
 type: feature
 priority: 1
-phase: phase-3
+phase: 003-codex-support
 branch: feature/phase-3
 created: 2026-02-19
 shipped_at: 2026-02-19

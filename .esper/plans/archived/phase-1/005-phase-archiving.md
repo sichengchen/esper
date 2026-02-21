@@ -3,7 +3,7 @@ id: 005
 title: Archive phase plans on phase completion to keep backlog reads efficient
 status: done
 priority: 2
-phase: phase-1
+phase: 001-polish-and-publish
 branch: feature/phase-archiving
 created: 2026-02-18
 shipped_at: 2026-02-18

@@ -3,7 +3,7 @@ id: 008
 title: Redesign PR strategy — per-plan type (fix vs feature) replaces global pr_mode
 status: done
 priority: 1
-phase: phase-1
+phase: 001-polish-and-publish
 branch: feature/phase-1
 created: 2026-02-18
 shipped_at: 2026-02-18

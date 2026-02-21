@@ -4,7 +4,7 @@ title: Add esper:continue skill to resume interrupted builds
 status: done
 type: feature
 priority: 2
-phase: phase-1
+phase: 001-polish-and-publish
 branch: feature/phase-1
 created: 2026-02-18
 shipped_at: 2026-02-18

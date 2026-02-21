@@ -5,7 +5,7 @@ status: done
 shipped_at: 2026-02-18
 type: feature
 priority: 1
-phase: phase-2
+phase: 002-cli-subcommands-and-github-issues
 branch: feature/phase-2
 created: 2026-02-18
 pr: https://github.com/sichengchen/esper/pull/4

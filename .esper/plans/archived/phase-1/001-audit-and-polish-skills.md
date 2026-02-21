@@ -3,7 +3,7 @@ id: 001
 title: Audit and polish all 6 skill SKILL.md files
 status: done
 priority: 1
-phase: phase-1
+phase: 001-polish-and-publish
 branch: feature/polish-skills
 created: 2026-02-18
 shipped_at: 2026-02-18

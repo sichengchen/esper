@@ -4,7 +4,7 @@ title: Fix esper:ship — archive plan before push so status change is in the PR
 status: done
 type: fix
 priority: 2
-phase: phase-1
+phase: 001-polish-and-publish
 branch: fix/ship-archive-before-push
 created: 2026-02-18
 shipped_at: 2026-02-18

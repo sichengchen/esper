@@ -4,7 +4,7 @@ title: Add esper:review skill for code quality review
 status: done
 type: feature
 priority: 2
-phase: phase-4
+phase: 004-exploration-and-review-skills
 branch: feature/phase-4
 created: 2026-02-21
 shipped_at: 2026-02-21

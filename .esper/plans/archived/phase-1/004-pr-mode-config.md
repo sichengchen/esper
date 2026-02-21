@@ -3,7 +3,7 @@ id: 004
 title: Add pr_mode config — PR per plan or PR per phase
 status: done
 priority: 2
-phase: phase-1
+phase: 001-polish-and-publish
 branch: feature/pr-mode-config
 created: 2026-02-18
 shipped_at: 2026-02-18

@@ -3,7 +3,7 @@ id: 003
 title: Prepare package for npm publish
 status: done
 priority: 3
-phase: phase-1
+phase: 001-polish-and-publish
 branch: feature/npm-publish-prep
 created: 2026-02-18
 shipped_at: 2026-02-18
