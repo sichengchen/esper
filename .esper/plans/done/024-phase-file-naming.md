@@ -8,6 +8,7 @@ phase: 004-exploration-and-review-skills
 branch: feature/phase-4
 created: 2026-02-21
 shipped_at: 2026-02-21
+pr: https://github.com/sichengchen/esper/pull/8
 ---
 # Rename phase files and references from phase-N to NNN-slug format
 

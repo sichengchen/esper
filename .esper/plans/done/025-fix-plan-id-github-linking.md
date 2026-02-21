@@ -8,6 +8,7 @@ phase: 004-exploration-and-review-skills
 branch: feature/phase-4
 created: 2026-02-21
 shipped_at: 2026-02-21
+pr: https://github.com/sichengchen/esper/pull/8
 ---
 # fix: stop plan #N references from triggering GitHub auto-linking
 
