@@ -21,7 +21,7 @@ async function setupPlansProject(plans = {}) {
   await mkdir(join(tmp, '.esper'), { recursive: true })
   await writeFile(join(tmp, '.esper', 'esper.json'), JSON.stringify({
     backlog_mode: 'local',
-    current_phase: 'phase-2',
+    current_phase: '002-test-phase',
     commands: {}
   }, null, 2) + '\n')
 
@@ -40,8 +40,8 @@ title: First plan
 status: pending
 type: feature
 priority: 2
-phase: phase-2
-branch: feature/phase-2
+phase: 002-test-phase
+branch: feature/002-test-phase
 created: 2026-02-18
 ---
 
@@ -54,7 +54,7 @@ title: Second plan
 status: pending
 type: fix
 priority: 1
-phase: phase-2
+phase: 002-test-phase
 branch: fix/second-plan
 created: 2026-02-18
 ---
@@ -68,8 +68,8 @@ title: Active plan
 status: active
 type: feature
 priority: 1
-phase: phase-2
-branch: feature/phase-2
+phase: 002-test-phase
+branch: feature/002-test-phase
 created: 2026-02-18
 ---
 
@@ -118,8 +118,8 @@ title: Other phase
 status: pending
 type: feature
 priority: 1
-phase: phase-1
-branch: feature/phase-1
+phase: 001-test-phase
+branch: feature/001-test-phase
 created: 2026-02-18
 ---
 `
@@ -127,7 +127,7 @@ created: 2026-02-18
     pending: { '001-first.md': PLAN_A, '099-other.md': otherPhasePlan },
   })
   try {
-    const result = runCLI(['plan', 'list', '--phase', 'phase-2', '--format', 'json'], tmp)
+    const result = runCLI(['plan', 'list', '--phase', '002-test-phase', '--format', 'json'], tmp)
     const plans = JSON.parse(result.stdout)
     assert.equal(plans.length, 1)
     assert.equal(plans[0].id, 1)
@@ -168,15 +168,15 @@ title: Archived plan
 status: done
 type: feature
 priority: 1
-phase: phase-1
-branch: feature/phase-1
+phase: 001-test-phase
+branch: feature/001-test-phase
 created: 2026-02-18
 shipped_at: 2026-02-18
 ---
 `
   const tmp = await setupPlansProject({})
-  await mkdir(join(tmp, '.esper', 'plans', 'archived', 'phase-1'), { recursive: true })
-  await writeFile(join(tmp, '.esper', 'plans', 'archived', 'phase-1', '010-archived.md'), archivedPlan)
+  await mkdir(join(tmp, '.esper', 'plans', 'archived', '001-test-phase'), { recursive: true })
+  await writeFile(join(tmp, '.esper', 'plans', 'archived', '001-test-phase', '010-archived.md'), archivedPlan)
   try {
     const result = runCLI(['plan', 'list', '--dir', 'archived', '--format', 'json'], tmp)
     const plans = JSON.parse(result.stdout)
@@ -197,7 +197,7 @@ test('plan get — returns frontmatter as JSON', async () => {
     const fm = JSON.parse(result.stdout)
     assert.equal(fm.id, 1)
     assert.equal(fm.title, 'First plan')
-    assert.equal(fm.phase, 'phase-2')
+    assert.equal(fm.phase, '002-test-phase')
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }
@@ -244,12 +244,12 @@ test('plan next-id — scans archived directories', async () => {
 id: 010
 title: Archived
 status: done
-phase: phase-1
+phase: 001-test-phase
 ---
 `
   const tmp = await setupPlansProject({})
-  await mkdir(join(tmp, '.esper', 'plans', 'archived', 'phase-1'), { recursive: true })
-  await writeFile(join(tmp, '.esper', 'plans', 'archived', 'phase-1', '010-x.md'), archivedPlan)
+  await mkdir(join(tmp, '.esper', 'plans', 'archived', '001-test-phase'), { recursive: true })
+  await writeFile(join(tmp, '.esper', 'plans', 'archived', '001-test-phase', '010-x.md'), archivedPlan)
   try {
     const result = runCLI(['plan', 'next-id'], tmp)
     assert.equal(result.stdout.trim(), '011')

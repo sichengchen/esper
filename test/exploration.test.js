@@ -22,7 +22,7 @@ async function setupExplorationsProject(explorations = {}) {
   await mkdir(join(tmp, '.esper'), { recursive: true })
   await writeFile(join(tmp, '.esper', 'esper.json'), JSON.stringify({
     backlog_mode: 'local',
-    current_phase: 'phase-1',
+    current_phase: '001-test-phase',
     commands: {}
   }, null, 2) + '\n')
 

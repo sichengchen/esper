@@ -21,7 +21,7 @@ async function setupBacklogProject(plans = {}) {
   await mkdir(join(tmp, '.esper'), { recursive: true })
   await writeFile(join(tmp, '.esper', 'esper.json'), JSON.stringify({
     backlog_mode: 'local',
-    current_phase: 'phase-1',
+    current_phase: '001-test-phase',
     commands: { test: '', lint: '', typecheck: '', dev: '' }
   }, null, 2) + '\n')
 
@@ -50,11 +50,11 @@ test('backlog — empty backlog prints message', async () => {
 test('backlog — shows active, pending, and done sections', async () => {
   const tmp = await setupBacklogProject({
     active: {
-      '002-feature.md': '---\nid: 2\ntitle: Build feature X\nstatus: active\nphase: phase-1\nbranch: feature/phase-1\n---\n',
+      '002-feature.md': '---\nid: 2\ntitle: Build feature X\nstatus: active\nphase: 001-test-phase\nbranch: feature/001-test-phase\n---\n',
     },
     pending: {
-      '003-another.md': '---\nid: 3\ntitle: Another feature\nstatus: pending\npriority: 2\nphase: phase-1\n---\n',
-      '001-urgent.md': '---\nid: 1\ntitle: Urgent fix\nstatus: pending\npriority: 1\nphase: phase-1\n---\n',
+      '003-another.md': '---\nid: 3\ntitle: Another feature\nstatus: pending\npriority: 2\nphase: 001-test-phase\n---\n',
+      '001-urgent.md': '---\nid: 1\ntitle: Urgent fix\nstatus: pending\npriority: 1\nphase: 001-test-phase\n---\n',
     },
     done: {
       '000-setup.md': '---\nid: 0\ntitle: Initial setup\nstatus: done\nshipped_at: 2026-02-17\n---\n',
@@ -82,7 +82,7 @@ test('backlog — shows active, pending, and done sections', async () => {
 test('backlog --format json — returns valid JSON', async () => {
   const tmp = await setupBacklogProject({
     pending: {
-      '001-test.md': '---\nid: 1\ntitle: Test plan\nstatus: pending\npriority: 2\nphase: phase-1\n---\n',
+      '001-test.md': '---\nid: 1\ntitle: Test plan\nstatus: pending\npriority: 2\nphase: 001-test-phase\n---\n',
     },
   })
   try {

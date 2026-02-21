@@ -21,7 +21,7 @@ async function setupEsperProject() {
   await mkdir(join(tmp, '.esper'), { recursive: true })
   await writeFile(join(tmp, '.esper', 'esper.json'), JSON.stringify({
     backlog_mode: 'local',
-    current_phase: 'phase-2',
+    current_phase: '002-test-phase',
     commands: { test: '', lint: '', typecheck: '', dev: '' }
   }, null, 2) + '\n')
   return tmp
@@ -53,7 +53,7 @@ test('config get — prints full JSON when no key given', async () => {
     const result = runCLI(['config', 'get'], tmp)
     assert.equal(result.status, 0)
     const json = JSON.parse(result.stdout)
-    assert.equal(json.current_phase, 'phase-2')
+    assert.equal(json.current_phase, '002-test-phase')
     assert.equal(json.backlog_mode, 'local')
   } finally {
     await rm(tmp, { recursive: true, force: true })
@@ -65,7 +65,7 @@ test('config get — prints string value for a key', async () => {
   try {
     const result = runCLI(['config', 'get', 'current_phase'], tmp)
     assert.equal(result.status, 0)
-    assert.equal(result.stdout.trim(), 'phase-2')
+    assert.equal(result.stdout.trim(), '002-test-phase')
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }
@@ -96,14 +96,14 @@ test('config get — exits 1 for unknown key', async () => {
 test('config set — updates a string value', async () => {
   const tmp = await setupEsperProject()
   try {
-    const result = runCLI(['config', 'set', 'current_phase', 'phase-3'], tmp)
+    const result = runCLI(['config', 'set', 'current_phase', '003-test-phase'], tmp)
     assert.equal(result.status, 0)
-    assert.equal(result.stdout.trim(), 'phase-3')
+    assert.equal(result.stdout.trim(), '003-test-phase')
 
     // Verify the file was updated
     const raw = await readFile(join(tmp, '.esper', 'esper.json'), 'utf8')
     const json = JSON.parse(raw)
-    assert.equal(json.current_phase, 'phase-3')
+    assert.equal(json.current_phase, '003-test-phase')
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }
