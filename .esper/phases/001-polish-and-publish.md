@@ -1,5 +1,5 @@
 ---
-phase: phase-1
+phase: 001-polish-and-publish
 title: Polish and Publish
 status: completed
 ---

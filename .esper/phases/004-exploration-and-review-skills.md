@@ -1,5 +1,5 @@
 ---
-phase: phase-4
+phase: 004-exploration-and-review-skills
 title: Exploration & Review Skills
 status: active
 ---

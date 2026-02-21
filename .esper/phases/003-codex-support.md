@@ -1,5 +1,5 @@
 ---
-phase: phase-3
+phase: 003-codex-support
 title: Add Codex Support
 status: completed
 ---

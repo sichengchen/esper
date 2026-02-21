@@ -1,5 +1,5 @@
 ---
-phase: phase-2
+phase: 002-cli-subcommands-and-github-issues
 title: CLI Subcommands and GitHub Issues Mode
 status: completed
 ---
