@@ -18,7 +18,7 @@ Read `.esper/CONSTITUTION.md` for project principles.
 If `$ARGUMENTS` specifies a target, resolve it:
 
 - **Plan ID** (e.g. `21`, `#021`): run `esperkit plan list --format json` to find the matching plan. Look across pending, active, and done directories. Resolve to the file path.
-- **Phase name** (e.g. `phase-4`): resolve to `.esper/phases/phase-4.md`
+- **Phase name** (e.g. `004-exploration-and-review-skills`): resolve to `.esper/phases/004-exploration-and-review-skills.md`
 - **File path** (e.g. `.esper/plans/pending/021-explore-skill.md`): use directly
 
 If no argument or the argument is ambiguous, use `AskUserQuestion`:

@@ -105,7 +105,7 @@ Run `esperkit config get current_phase` to get the current phase. Then run `espe
 
   ```bash
   gh pr create \
-    --title "Phase <N>: <phase title from phases/phase-N.md>" \
+    --title "Phase <N>: <phase title from phase file>" \
     --base main \
     --body "$(cat <<'EOF'
   ## Phase <N> — <phase title>
