@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/esperkit)](https://www.npmjs.com/package/esperkit)
 
-Vibe coding toolkit for Claude Code and Codex. Enforces a structured workflow: interview → plan → build → ship.
+Vibe coding toolkit for Claude Code and Codex. Enforces a structured workflow: explore → plan → build → review → ship.
 
 ## Install
 
@@ -16,10 +16,13 @@ npx esperkit
 |---|---|
 | `/esper:init <prompt>` | Interview → write constitution → define phase → create backlog → install hooks |
 | `/esper:backlog` | Show pending and active plans sorted by priority |
+| `/esper:explore <prompt>` | Investigate an idea before committing — codebase-aware or open-ended brainstorming |
 | `/esper:plan <prompt>` | Interview → add a feature plan to the current phase backlog |
 | `/esper:fix <prompt>` | Interview → add a bug fix plan with its own branch and PR |
+| `/esper:revise [target]` | Give feedback on a plan, phase, or fix document — you comment, agent edits |
 | `/esper:apply [item]` | Select a plan, get todo list approved, then implement with milestone commits |
 | `/esper:continue` | Resume an interrupted build from where it left off |
+| `/esper:review [pr]` | Code review on branch/PR diffs — bugs, security, style, complexity |
 | `/esper:finish` | Verify → commit remaining changes → archive plan to `done/` |
 | `/esper:ship` | Push → open PR → archive phase when all plans are done |
 | `/esper:phase` | Archive current phase, bump phase number, interview for next phase scope |
@@ -41,7 +44,17 @@ Interviews you, writes a constitution, defines Phase 1 with acceptance criteria,
 
 ---
 
-### 2. Create a phase or a fix
+### 2. Explore an idea (optional)
+
+```
+/esper:explore "what if we added webhooks?"
+```
+
+Investigates feasibility and trade-offs — codebase-aware or open-ended brainstorming. Saves findings to `.esper/explorations/` for future `/esper:phase` intake.
+
+---
+
+### 3. Create a phase or a fix
 
 **Next phase** — when Phase N is done:
 
@@ -61,7 +74,7 @@ Scoped interview → fix plan on its own branch. Ships its own standalone PR.
 
 ---
 
-### 3. Add a plan to the current phase
+### 4. Add a plan to the current phase
 
 ```
 /esper:plan "add rate limiting"
@@ -75,7 +88,7 @@ Interviews you, explores the codebase, and writes a detailed plan file in `pendi
 
 ---
 
-### 4. Implement
+### 5. Implement
 
 **Option A — one at a time:**
 
@@ -92,23 +105,24 @@ Interviews you, explores the codebase, and writes a detailed plan file in `pendi
 
 ---
 
-### 5. Finish a plan
+### 6. Review and finish a plan
 
 ```
+/esper:review                   # code review on branch diff (optional)
 /esper:finish
 ```
 
-Runs verification, commits remaining changes, and archives the plan to `done/`. Repeat Steps 3–5 for each plan in the phase.
+Review analyzes code quality — bugs, security, style, complexity — and offers to batch issues into `/esper:fix` plans. Finish runs verification, commits remaining changes, and archives the plan to `done/`. Repeat Steps 4–6 for each plan in the phase.
 
 ---
 
-### 6. Finish the phase
+### 7. Finish the phase
 
 ```
 /esper:ship
 ```
 
-Pushes the branch and opens a PR. When all phase plans are done, opens the phase PR and archives the phase — then go back to Step 2.
+Pushes the branch and opens a PR. When all phase plans are done, opens the phase PR and archives the phase — then go back to Step 3.
 
 ## Plan types
 
@@ -126,12 +140,13 @@ Use `/esper:plan` to add features and `/esper:fix` to log bugs. The type is set 
 ├── esper.json          # config: backlog mode, commands, current phase
 ├── CONSTITUTION.md     # vision, tech decisions, testing strategy
 ├── phases/
-│   └── phase-1.md      # MVP scope and acceptance criteria
+│   └── 001-mvp.md      # MVP scope and acceptance criteria
 ├── plans/
 │   ├── pending/        # queued backlog items
 │   ├── active/         # currently being built (max 1)
 │   ├── done/           # finished items (current phase, not yet shipped)
 │   └── archived/       # shipped items from completed phases
+├── explorations/       # saved exploration findings from /esper:explore
 └── hooks/
     ├── verify-quick.sh      # runs lint + typecheck after every file edit
     └── session-reminder.sh  # reminds about uncommitted changes on stop
