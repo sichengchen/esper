@@ -34,6 +34,16 @@ For the retrospective summary of what was shipped:
 
 Summarize for the user: "Phase <N> (<title>) is complete. You shipped: [list from Shipped Plans or done list]."
 
+## Step 3b: Read explorations
+
+Run `esperkit exploration list --format json`. If the output is an empty array (`[]`), skip this step silently.
+
+If explorations exist, list them for the user with their titles and a one-line summary from each file. Use `AskUserQuestion` to ask: "These explorations are on file. Which ones (if any) should inform this next phase?" Allow multi-select.
+
+Selected explorations will be read in full and used as input during the interview and plan decomposition steps. After the phase is fully defined (Step 8), archive each selected exploration by running `esperkit exploration archive <filename>` so they don't resurface in future phases.
+
+If no explorations exist, skip this step silently.
+
 ## Step 4: Interview for the new phase
 
 Use `AskUserQuestion` in 2 rounds:

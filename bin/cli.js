@@ -302,6 +302,22 @@ async function main() {
       }
       break
     }
+    case 'exploration': {
+      const exploration = await import('../lib/exploration.js')
+      switch (action) {
+        case 'list': {
+          const opts = parseFlags(rest)
+          return exploration.list(opts)
+        }
+        case 'next-id':  return exploration.nextId()
+        case 'get':      return exploration.get(rest[0])
+        case 'archive':  return exploration.archive(rest[0])
+        default:
+          console.error('Usage: esperkit exploration <list|next-id|get|archive>')
+          process.exit(1)
+      }
+      break
+    }
     case 'backlog': {
       const { display } = await import('../lib/backlog.js')
       const opts = parseFlags([action, ...rest].filter(Boolean))
@@ -309,7 +325,7 @@ async function main() {
     }
     default:
       console.error(`Unknown command: ${subcommand}`)
-      console.error('Usage: esperkit [install --provider claude|codex|all --interactive|config|plan|backlog]')
+      console.error('Usage: esperkit [install --provider claude|codex|all --interactive|config|plan|exploration|backlog]')
       process.exit(1)
   }
 }
