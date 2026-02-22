@@ -291,13 +291,15 @@ async function main() {
         case 'finish':   return plan.finish(rest[0])
         case 'archive':  return plan.archive(rest[0])
         case 'set':           return plan.set(rest[0], rest[1], rest[2])
-        case 'create-issue':  return plan.createIssue(rest[0])
+        case 'create-issue':      return plan.createIssue(rest[0])
+        case 'create-sub-issue':  return plan.createSubIssue(rest[0])
         case 'close-issue': {
           const opts = parseFlags(rest.slice(1))
           return plan.closeIssue(rest[0], opts.comment)
         }
+        case 'reopen-issue':      return plan.reopenIssue(rest[0])
         default:
-          console.error('Usage: esperkit plan <list|get|next-id|activate|suspend|finish|archive|set|create-issue|close-issue>')
+          console.error('Usage: esperkit plan <list|get|next-id|activate|suspend|finish|archive|set|create-issue|create-sub-issue|close-issue|reopen-issue>')
           process.exit(1)
       }
       break
