@@ -37,3 +37,4 @@ Phase 4 wrapped cleanly. No carry-forward items. The sub-issue API requires a tw
 
 ## Shipped Plans
 - Plan 26 — Add sub-issue creation and lifecycle sync to lib/plan.js: Add a helper `readBacklogMode()` that reads `backlog_mode` from `.esper/esper.json`. Files: plan.js, cli.js, plan.test.js
+- Plan 27 — Update plan-creation skills to use sub-issues: Updated esper-phase, esper-plan, esper-fix, and esper-init to call `create-sub-issue` after plan creation. Files: SKILL.md (x4)
