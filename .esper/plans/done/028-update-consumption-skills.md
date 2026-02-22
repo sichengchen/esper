@@ -1,12 +1,13 @@
 ---
 id: 28
 title: Update plan-consumption skills for sub-issue lifecycle
-status: active
+status: done
 type: feature
 priority: 2
 phase: 005-github-sub-issues
 branch: feature/005-github-sub-issues
 created: 2026-02-22
+shipped_at: 2026-02-22
 ---
 # Update plan-consumption skills for sub-issue lifecycle
 
@@ -37,3 +38,10 @@ With lifecycle sync built into `activate()`, `suspend()`, and `finish()` (Plan 0
 - Run: manual — ship a phase with `backlog_mode: github` and verify the PR body includes plan sub-issue references; verify `esperkit backlog` shows sub-issue numbers
 - Expected: PR body lists plan sub-issues; backlog display shows issue numbers for all plans
 - Edge cases: Plans without `gh_issue` (local mode or pre-existing plans) — display gracefully without issue numbers
+
+## Progress
+- Updated esper-ship: added plan sub-issue numbers to phase PR body; removed explicit close-issue call (lifecycle sync handles it)
+- Updated esper-backlog skill: updated cross-reference description to include all plan sub-issues
+- Updated lib/backlog.js: all three sections (active, pending, done) now show gh_issue numbers when present
+- Modified: SKILL.md (esper-ship, esper-backlog), lib/backlog.js
+- Verification: passed — 73/73 tests pass
