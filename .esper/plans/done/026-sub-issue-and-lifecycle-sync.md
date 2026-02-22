@@ -8,6 +8,7 @@ phase: 005-github-sub-issues
 branch: feature/005-github-sub-issues
 created: 2026-02-22
 shipped_at: 2026-02-22
+pr: https://github.com/sichengchen/esper/pull/9
 ---
 # Add sub-issue creation and lifecycle sync to lib/plan.js
 
