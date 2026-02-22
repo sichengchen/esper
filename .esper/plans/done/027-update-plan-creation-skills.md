@@ -1,12 +1,13 @@
 ---
 id: 27
 title: Update plan-creation skills to use sub-issues
-status: active
+status: done
 type: feature
 priority: 2
 phase: 005-github-sub-issues
 branch: feature/005-github-sub-issues
 created: 2026-02-22
+shipped_at: 2026-02-22
 ---
 # Update plan-creation skills to use sub-issues
 
@@ -39,3 +40,11 @@ Four skills create plans: `esper-phase` (bulk plan creation), `esper-plan` (sing
 - Run: manual — create a test phase with `backlog_mode: github` and verify sub-issues appear under the phase issue on GitHub
 - Expected: Each plan shows as a sub-issue of the phase's parent issue; `gh_issue` is stored in each plan's frontmatter
 - Edge cases: Phase without `gh_issue` (local mode) — no sub-issues created, no errors
+
+## Progress
+- Updated esper-phase Step 8: added sub-issue creation loop after phase issue creation
+- Updated esper-plan: added new Step 6 for GitHub sub-issue creation
+- Updated esper-fix Step 6: replaced create-issue with create-sub-issue
+- Updated esper-init Step 5: added sub-issue creation loop after phase plans
+- Modified: SKILL.md in esper-phase, esper-plan, esper-fix, esper-init
+- Verification: passed — 73/73 tests pass, skill files validated manually
