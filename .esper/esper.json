@@ -1,6 +1,6 @@
 {
   "backlog_mode": "local",
-  "current_phase": "004-exploration-and-review-skills",
+  "current_phase": "005-github-sub-issues",
   "commands": {
     "test": "npm test",
     "lint": "",
