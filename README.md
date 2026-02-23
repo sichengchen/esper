@@ -23,6 +23,7 @@ npx esperkit
 | `/esper:apply [item]` | Select a plan, get todo list approved, then implement with milestone commits |
 | `/esper:continue` | Resume an interrupted build from where it left off |
 | `/esper:review [pr]` | Code review on branch/PR diffs — bugs, security, style, complexity |
+| `/esper:audit` | Full project audit — health, architecture, phase retrospective, codebase quality |
 | `/esper:finish` | Verify → commit remaining changes → archive plan to `done/` |
 | `/esper:ship` | Push → open PR → archive phase when all plans are done |
 | `/esper:phase` | Archive current phase, bump phase number, interview for next phase scope |
@@ -113,6 +114,16 @@ Interviews you, explores the codebase, and writes a detailed plan file in `pendi
 ```
 
 Review analyzes code quality — bugs, security, style, complexity — and offers to batch issues into `/esper:fix` plans. Finish runs verification, commits remaining changes, and archives the plan to `done/`. Repeat Steps 4–6 for each plan in the phase.
+
+---
+
+### 6b. Audit the project (optional)
+
+```
+/esper:audit
+```
+
+Full project review across 8 dimensions — health, phase retrospective, dependencies, architecture, codebase quality, security, developer experience, and API consistency. Launches five parallel audits as specialized roles (architect, senior engineer, security engineer, new team member, API reviewer), then produces a scannable report with traffic-light ratings and actionable recommendations. Useful mid-phase to course-correct or end-of-phase as a retrospective before `/esper:phase`.
 
 ---
 
