@@ -19,7 +19,7 @@ function runCLI(args, cwd) {
 async function setupEsperProject(config) {
   const tmp = await mkdtemp(join(tmpdir(), 'esper-config-test-'))
   await mkdir(join(tmp, '.esper'), { recursive: true })
-  await writeFile(join(tmp, '.esper', 'esper.json'), JSON.stringify(config ?? {
+  const esperConfig = config ?? {
     schema_version: 1,
     backlog_mode: 'local',
     spec_root: 'specs',
@@ -35,6 +35,16 @@ async function setupEsperProject(config) {
       auto_review_before_sync: false,
       increment_retention_policy: 'keep',
     },
+  }
+  await writeFile(join(tmp, '.esper', 'esper.json'), JSON.stringify(esperConfig, null, 2) + '\n')
+  await writeFile(join(tmp, '.esper', 'context.json'), JSON.stringify({
+    schema_version: esperConfig.schema_version ?? 1,
+    spec_root: esperConfig.spec_root ?? 'specs',
+    constitution_path: null,
+    active_increment: null,
+    active_increment_scope: [],
+    workflow_mode: esperConfig.workflow_defaults?.default_work_mode ?? 'atom',
+    commands: esperConfig.commands ?? { test: '', lint: '', typecheck: '', dev: '' },
   }, null, 2) + '\n')
   return tmp
 }
@@ -130,6 +140,9 @@ test('config set — updates a string value', async () => {
     const raw = await readFile(join(tmp, '.esper', 'esper.json'), 'utf8')
     const json = JSON.parse(raw)
     assert.equal(json.spec_root, 'docs/specs')
+
+    const ctx = JSON.parse(await readFile(join(tmp, '.esper', 'context.json'), 'utf8'))
+    assert.equal(ctx.spec_root, 'docs/specs')
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }
@@ -145,6 +158,28 @@ test('config set — parses JSON values', async () => {
     const json = JSON.parse(raw)
     assert.equal(json.commands.test, 'npm test')
     assert.equal(json.commands.lint, '')
+
+    const ctx = JSON.parse(await readFile(join(tmp, '.esper', 'context.json'), 'utf8'))
+    assert.equal(ctx.commands.test, 'npm test')
+    assert.equal(ctx.commands.lint, '')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('config set — refreshes workflow mode in context.json', async () => {
+  const tmp = await setupEsperProject()
+  try {
+    const result = runCLI([
+      'config',
+      'set',
+      'workflow_defaults',
+      '{"default_work_mode":"batch","commit_granularity":"per-increment"}',
+    ], tmp)
+    assert.equal(result.status, 0)
+
+    const ctx = JSON.parse(await readFile(join(tmp, '.esper', 'context.json'), 'utf8'))
+    assert.equal(ctx.workflow_mode, 'batch')
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }

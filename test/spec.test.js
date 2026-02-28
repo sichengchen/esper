@@ -26,6 +26,15 @@ async function setupProject() {
     commands: { test: '', lint: '', typecheck: '', dev: '' },
     workflow_defaults: {},
   }, null, 2) + '\n')
+  await writeFile(join(tmp, '.esper', 'context.json'), JSON.stringify({
+    schema_version: 1,
+    spec_root: 'specs',
+    constitution_path: null,
+    active_increment: null,
+    active_increment_scope: [],
+    workflow_mode: 'atom',
+    commands: { test: '', lint: '', typecheck: '', dev: '' },
+  }, null, 2) + '\n')
   // Create spec tree
   for (const d of ['system', 'product', 'interfaces', '_work']) {
     await mkdir(join(tmp, 'specs', d), { recursive: true })
@@ -114,20 +123,30 @@ test('spec set-root — updates esper.json', async () => {
     const raw = await readFile(join(tmp, '.esper', 'esper.json'), 'utf8')
     const json = JSON.parse(raw)
     assert.equal(json.spec_root, 'custom-specs')
-    assert.ok(existsSync(join(tmp, 'custom-specs')))
+
+    const ctx = JSON.parse(await readFile(join(tmp, '.esper', 'context.json'), 'utf8'))
+    assert.equal(ctx.spec_root, 'custom-specs')
+
+    assert.ok(existsSync(join(tmp, 'custom-specs', 'index.md')))
+    assert.ok(existsSync(join(tmp, 'custom-specs', 'system')))
+    assert.ok(existsSync(join(tmp, 'custom-specs', 'product')))
+    assert.ok(existsSync(join(tmp, 'custom-specs', 'interfaces')))
+    assert.ok(existsSync(join(tmp, 'custom-specs', '_work')))
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }
 })
 
-test('spec archive — moves file and updates status', async () => {
+test('spec archive — moves file and preserves relative path', async () => {
   const tmp = await setupProject()
+  await writeFile(join(tmp, 'specs', 'product', 'architecture.md'), '---\nstatus: draft\ncreated: 2026-02-28\n---\n\n# architecture\n')
   try {
     const result = runCLI(['spec', 'archive', 'system/architecture.md'], tmp)
     assert.equal(result.status, 0)
     assert.ok(!existsSync(join(tmp, 'specs', 'system', 'architecture.md')))
-    assert.ok(existsSync(join(tmp, 'specs', '_archived', 'architecture.md')))
-    const content = await readFile(join(tmp, 'specs', '_archived', 'architecture.md'), 'utf8')
+    assert.ok(existsSync(join(tmp, 'specs', '_archived', 'system', 'architecture.md')))
+    assert.ok(existsSync(join(tmp, 'specs', 'product', 'architecture.md')))
+    const content = await readFile(join(tmp, 'specs', '_archived', 'system', 'architecture.md'), 'utf8')
     assert.ok(content.includes('status: archived'))
   } finally {
     await rm(tmp, { recursive: true, force: true })
