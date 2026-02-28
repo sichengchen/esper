@@ -1,10 +1,15 @@
 {
+  "schema_version": 1,
   "backlog_mode": "local",
-  "current_phase": "005-github-sub-issues",
+  "spec_root": "specs",
   "commands": {
-    "test": "npm test",
-    "lint": "",
-    "typecheck": "",
-    "dev": ""
+    "test": "npm test"
+  },
+  "workflow_defaults": {
+    "work_mode": "atom",
+    "commit_granularity": "per-increment",
+    "pr_policy": "auto-per-increment",
+    "validation_mode": "blocking",
+    "spec_sync_mode": "proactive"
   }
 }
