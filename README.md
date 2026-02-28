@@ -2,9 +2,9 @@
 
 [![npm](https://img.shields.io/npm/v/esperkit)](https://www.npmjs.com/package/esperkit)
 
-Tool-neutral workflow layer for AI-assisted software development. Gives coding agents a durable project constitution, system specs, structured increments, and verifiable delivery rules.
+Tool-neutral, simple workflow layer for spec-driven software development. Gives coding agents a durable project constitution, system specs, structured increments, and verifiable delivery rules.
 
-Works with Claude Code and Codex. Zero runtime dependencies.
+Works with Claude Code and Codex.
 
 ## Install
 
