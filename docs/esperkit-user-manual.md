@@ -1,17 +1,17 @@
-# Esperkit User Manual
+# EsperKit User Manual
 
-This manual introduces the revised Esperkit workflow for AI-assisted software development.
+This manual introduces the revised EsperKit workflow for AI-assisted software development.
 It tracks the workflow model defined in `specs/esperkit-spec.md`.
-It is written for day-to-day users who want to understand how Esperkit works, when to use each command, and what files Esperkit manages in the repository.
+It is written for day-to-day users who want to understand how EsperKit works, when to use each command, and what files EsperKit manages in the repository.
 
-Esperkit supports two working styles:
+EsperKit supports two working styles:
 
 - Spec-to-Code: define or revise the system spec first, then derive implementation work from it.
 - Plan-to-Spec: start from a direct request, implement in bounded increments, then sync the shipped result back into the spec.
 
-## What Esperkit Is
+## What EsperKit Is
 
-Esperkit has two parts:
+EsperKit has two parts:
 
 - The `esperkit` CLI, which performs deterministic setup and state changes.
 - A host instruction layer, exposed as skills or slash commands, which guides the AI agent through planning, review, execution, and sync.
@@ -43,7 +43,7 @@ It stores the implementation plan, progress, verification notes, and links back 
 
 ### 4. Working File
 
-Every meaningful step in Esperkit centers on a Markdown working file.
+Every meaningful step in EsperKit centers on a Markdown working file.
 That file is the shared review surface between you and the agent.
 
 Examples:
@@ -54,7 +54,7 @@ Examples:
 
 ## Command Surface
 
-Esperkit uses a small set of primary commands.
+EsperKit uses a small set of primary commands.
 The exact syntax depends on the host:
 
 - Claude-style slash commands: `/e:init`, `/e:spec`, `/e:atom`
@@ -191,7 +191,7 @@ flowchart TD
 
 ## Workflow 2: Plan-to-Spec
 
-Use this when you want to start from a direct request and let Esperkit structure the work from there.
+Use this when you want to start from a direct request and let EsperKit structure the work from there.
 
 There are two entry modes:
 
@@ -314,7 +314,7 @@ flowchart LR
 
 ### `esper:init`
 
-Initializes Esperkit in the current repository and creates project scaffolding.
+Initializes EsperKit in the current repository and creates project scaffolding.
 
 ### `esper:spec`
 
@@ -358,7 +358,7 @@ Use it when you need to force or retry syncing the shipped implementation back i
 
 Resumes work from current project state without rebuilding context manually.
 
-## What Esperkit Writes in the Repo
+## What EsperKit Writes in the Repo
 
 A typical repository layout looks like this:
 
@@ -471,7 +471,7 @@ esper:sync   # optional: force or retry spec sync
 
 ## Mental Model
 
-Esperkit is easiest to use if you remember three rules:
+EsperKit is easiest to use if you remember three rules:
 
 1. Every major step happens around a Markdown file.
 2. `esper:go` is the approval gate that advances the workflow.

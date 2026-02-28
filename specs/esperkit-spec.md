@@ -1,18 +1,18 @@
-# Esperkit Product Spec
+# EsperKit Product Spec
 
 Status: Draft
 Date: 2026-02-28
 
 ## Summary
 
-Esperkit is a tool-neutral workflow layer for AI-assisted software development. It has two product parts:
+EsperKit is a tool-neutral workflow layer for AI-assisted software development. It has two product parts:
 
 1. A CLI toolkit for installation, deterministic project-initialization primitives, local project-state management, and direct usage by coding agents.
-2. A skills and slash-command layer that gives coding agents operational instructions for how to use esperkit inside supported hosts.
+2. A skills and slash-command layer that gives coding agents operational instructions for how to use EsperKit inside supported hosts.
 
 Together, these two parts provide a durable project constitution, agent-facing system specs, structured increment artifacts, and verifiable delivery rules that can be used from coding agents, vibe-coding IDEs, and future external tools.
 
-Esperkit must support two complementary SDD workflows:
+EsperKit must support two complementary SDD workflows:
 
 1. Spec-to-Code: users shape and revise specs first, then coding agents plan and implement against those specs.
 2. Plan-to-Spec: users tell coding agents what they want directly, coding agents plan and implement the change, then sync the shipped increment back into specs.
@@ -23,9 +23,9 @@ Its core review loops should be centered on Markdown work files that both the us
 
 ## Workflow Usage
 
-This section is the source of truth for esperkit behavior. Later sections define the artifacts, commands, and requirements needed to support this workflow and should not contradict it.
+This section is the source of truth for EsperKit behavior. Later sections define the artifacts, commands, and requirements needed to support this workflow and should not contradict it.
 
-### 1. Install Esperkit Globally
+### 1. Install EsperKit Globally
 
 The user installs the CLI toolkit globally:
 
@@ -36,7 +36,7 @@ npm install -g esperkit
 This installs the `esperkit` CLI, which is the local entrypoint for:
 
 - installing host-specific skills and slash commands
-- initializing esperkit in a project
+- initializing EsperKit in a project
 - managing deterministic project state and scaffolding
 
 Artifacts:
@@ -61,7 +61,7 @@ Artifacts:
 - created or changed: host-specific instruction assets for the current environment
 - no spec files or increment files are authored here
 
-### 3. Initialize Esperkit in the Project
+### 3. Initialize EsperKit in the Project
 
 In the repository root, the user normally invokes the initialization skill or slash command, not the CLI directly.
 
@@ -96,7 +96,7 @@ This creates the deterministic project scaffolding:
 - the initial spec-tree directories under `spec_root`
 - placeholder or template files in the spec tree
 
-At this point, esperkit is initialized, but the specs are still scaffolding rather than a reviewed description of the current system.
+At this point, EsperKit is initialized, but the specs are still scaffolding rather than a reviewed description of the current system.
 
 Artifacts:
 
@@ -418,11 +418,11 @@ The current product has a useful planning model, but it has structural gaps:
 - Generated project assets can drift from newer skill versions.
 - Documented guarantees such as "fail loudly" are not always enforced in generated assets.
 
-These gaps make esperkit less effective as a durable workflow layer across Claude Code, Codex, Superset, and similar environments.
+These gaps make EsperKit less effective as a durable workflow layer across Claude Code, Codex, Superset, and similar environments.
 
 ## Goals
 
-1. Make esperkit the source of truth for project intent, system behavior, and implementation workflow across tools.
+1. Make EsperKit the source of truth for project intent, system behavior, and implementation workflow across tools.
 2. Add first-class spec support as a durable artifact, not just chat output or ad hoc markdown.
 3. Support both spec-to-code and plan-to-spec development.
 4. Support atomic work without forcing heavyweight planning structure.
@@ -432,11 +432,11 @@ These gaps make esperkit less effective as a durable workflow layer across Claud
 
 ## Non-Goals
 
-1. Esperkit is not a generic project management suite with assignments, time estimates, or dashboards.
-2. Esperkit is not a hosted orchestration platform.
-3. Esperkit does not need deep native integration with every external tool on day one.
-4. Esperkit does not replace CI/CD, issue trackers, or source control.
-5. Esperkit does not require every tiny edit to become a heavyweight work artifact.
+1. EsperKit is not a generic project management suite with assignments, time estimates, or dashboards.
+2. EsperKit is not a hosted orchestration platform.
+3. EsperKit does not need deep native integration with every external tool on day one.
+4. EsperKit does not replace CI/CD, issue trackers, or source control.
+5. EsperKit does not require every tiny edit to become a heavyweight work artifact.
 
 ## Design Principles
 
@@ -463,7 +463,7 @@ These gaps make esperkit less effective as a durable workflow layer across Claud
 
 ## Product Structure
 
-Esperkit must be designed explicitly as a two-part product.
+EsperKit must be designed explicitly as a two-part product.
 
 ### 1. CLI Toolkit
 
@@ -484,7 +484,7 @@ The skills and slash-command layer is the instruction layer. It is responsible f
 
 - telling coding agents how to operate on top of the CLI toolkit
 - guiding interviews, revisions, review loops, and execution flows
-- adapting esperkit workflow semantics to specific hosts
+- adapting EsperKit workflow semantics to specific hosts
 - guiding coding agents to analyze the current codebase and author or revise system specs
 
 This layer should not be the sole source of truth for project state. It should orchestrate behavior, while the CLI toolkit owns durable state transitions.
@@ -493,7 +493,7 @@ This layer should not be the sole source of truth for project state. It should o
 
 - The CLI toolkit must be usable on its own.
 - Skills and slash commands should be operational wrappers and host-specific guidance on top of the CLI toolkit and project artifacts.
-- If a host does not support skills or slash commands, the CLI toolkit must still make esperkit usable.
+- If a host does not support skills or slash commands, the CLI toolkit must still make EsperKit usable.
 - Skills and slash commands may be provider-specific, but the CLI toolkit and on-disk project model must remain tool-neutral.
 
 ## Core Concepts
@@ -508,7 +508,7 @@ Specs are like docs, but written for coding agents. They are a durable, structur
 
 ### Increment
 
-The primary work-storage artifact in esperkit. An increment is a bounded unit of delivery that stores what will change, why it matters, how it should be verified, and what part of the spec it touches. Increments can be small and atomic or larger and systematic.
+The primary work-storage artifact in EsperKit. An increment is a bounded unit of delivery that stores what will change, why it matters, how it should be verified, and what part of the spec it touches. Increments can be small and atomic or larger and systematic.
 
 ### Working File
 
@@ -528,7 +528,7 @@ A machine-readable summary of the current esper state so any tool can load the c
 
 The authoritative workflow behavior is defined in the `Workflow Usage` section above.
 
-Esperkit must support:
+EsperKit must support:
 
 - a spec-to-code flow built from `esper:spec`, then `esper:go`, then `esper:sync`
 - a plan-to-spec entry path through `esper:atom` and `esper:batch`
@@ -541,7 +541,7 @@ Esperkit must support:
 
 #### 1. Initialization
 
-The underlying CLI initialization primitive is `esperkit init`, but the normal user-facing project initialization flow should be invoked through an esperkit skill or slash command.
+The underlying CLI initialization primitive is `esperkit init`, but the normal user-facing project initialization flow should be invoked through an EsperKit skill or slash command.
 
 `esperkit init` must bootstrap the project deterministically.
 
@@ -714,11 +714,11 @@ The spec tree should support a simple lifecycle:
 - active
 - archived
 
-Semantic authoring and revision of spec contents must be performed by coding agents using esperkit skills or slash commands, not by the CLI toolkit alone.
+Semantic authoring and revision of spec contents must be performed by coding agents using EsperKit skills or slash commands, not by the CLI toolkit alone.
 
 #### 6. Spec Authoring From Existing Code
 
-When initializing an existing codebase, code-to-spec generation must be performed by coding agents using esperkit skills or slash commands, not by the CLI toolkit.
+When initializing an existing codebase, code-to-spec generation must be performed by coding agents using EsperKit skills or slash commands, not by the CLI toolkit.
 
 Those agent workflows should author a first-pass spec tree that summarizes:
 
@@ -836,7 +836,7 @@ Systematic work should be modeled by grouping increments rather than introducing
 
 #### 10. External Tool Interoperability
 
-Esperkit must work across coding agents and IDE-like tools.
+EsperKit must work across coding agents and IDE-like tools.
 
 Supported host categories:
 
@@ -956,7 +956,7 @@ Quick verification may run after edits, but its enforcement mode must be explici
 
 ## Upgrade Path
 
-Esperkit must provide a clear upgrade path for existing projects.
+EsperKit must provide a clear upgrade path for existing projects.
 
 ### Requirements
 
@@ -994,7 +994,7 @@ The `specs/` tree above is only the default. The actual root must come from `spe
 
 ## Proposed CLI Toolkit Surface
 
-The exact command names may change, but esperkit must support a CLI surface equivalent to:
+The exact command names may change, but EsperKit must support a CLI surface equivalent to:
 
 - `esperkit install`
 - `esperkit init`
@@ -1018,7 +1018,7 @@ CLI creation commands should be understood as deterministic scaffolding or state
 
 ## Proposed Skill and Slash-Command Surface
 
-Esperkit must also ship an instruction surface for coding agents.
+EsperKit must also ship an instruction surface for coding agents.
 
 This instruction layer should be explicit and opinionated, not just a thin bundle of generic prompts.
 
@@ -1050,7 +1050,7 @@ The primary instruction surface should be centered on a small set of commands.
 
 Purpose:
 
-- initialize esperkit in the current repository
+- initialize EsperKit in the current repository
 - guide the user through the first-time setup flow
 - hand off deterministic setup to the CLI toolkit
 
@@ -1339,9 +1339,9 @@ In practice, that means the instruction layer must support:
 
 ## Success Criteria
 
-1. A user can initialize esperkit in a repository through `esper:init` or `/e:init`, with the CLI handling deterministic setup underneath.
+1. A user can initialize EsperKit in a repository through `esper:init` or `/e:init`, with the CLI handling deterministic setup underneath.
 2. During initialization, the agent can collect workflow preferences and persist them for future decisions.
-3. A coding agent using esperkit skills can analyze the current codebase and draft the initial spec tree.
+3. A coding agent using EsperKit skills can analyze the current codebase and draft the initial spec tree.
 4. A user can use `esper:spec` or `/e:spec` to create and revise spec work files before implementation.
 5. A user can use `esper:go` or `/e:go` to approve the current work file and advance to the next stage, whether that means deriving an increment plan from specs or starting implementation from an approved plan.
 6. In plan-to-spec workflow, a user can start from a direct request, review the coding agent’s plan, then have the coding agent sync the shipped change back into specs.
@@ -1411,7 +1411,7 @@ In practice, that means the instruction layer must support:
 
 ## Decision Summary
 
-This spec defines esperkit as a cross-tool workflow layer with:
+This spec defines EsperKit as a cross-tool workflow layer with:
 
 - a two-part architecture: CLI toolkit plus skills/slash commands
 - a configurable agent-facing spec tree, usually rooted at `/specs`
@@ -1421,4 +1421,4 @@ This spec defines esperkit as a cross-tool workflow layer with:
 - tool-neutral runtime context for external integrations
 - versioned project assets and explicit migration
 
-That model resolves the current gaps while preserving esperkit's core value: structured, durable, agent-friendly development without locking the user into one host environment.
+That model resolves the current gaps while preserving EsperKit's core value: structured, durable, agent-friendly development without locking the user into one host environment.
