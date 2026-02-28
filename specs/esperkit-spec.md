@@ -336,14 +336,14 @@ Artifacts:
 
 #### 8. Sync the Shipped Increment Back Into the Specs
 
-After implementation, the coding agent should sync the shipped increment back into the relevant spec files so the specs remain the authoritative description of how the system works.
+After implementation, the coding agent should normally sync the shipped increment back into the relevant spec files automatically so the specs remain the authoritative description of how the system works.
 
 Examples:
 
 - `/e:sync`
 - `esper:sync`
 
-This sync should normally be proactive, but the user can invoke it explicitly when they want to force the post-implementation code-to-spec sync step.
+The explicit `esper:sync` command remains available when the user wants to force or retry the post-implementation code-to-spec sync step.
 
 Artifacts:
 
@@ -361,7 +361,7 @@ Across both workflows, the steady-state development loop is:
 2. Create or revise the current Markdown work file through `esper:spec`, `esper:atom`, or `esper:batch`.
 3. Use `esper:go` to approve the current work file and advance to the next stage.
 4. Let the active agent workflow proactively update specs, validate changes, and prepare PRs.
-5. Use `esper:review` for explicit implementation review and `esper:sync` for explicit post-implementation code-to-spec sync.
+5. Use `esper:review` for explicit implementation review, and use `esper:sync` only when you need to force or retry the post-implementation code-to-spec sync step.
 6. Repeat.
 
 ### D. Artifact State Summary
@@ -378,7 +378,7 @@ This table summarizes the expected artifact flow across the main workflow stages
 | Increment plan revision | `esper:atom` / `esper:batch` | `.esper/increments/active/<id>.md` | Optional `.esper/increments/pending/<child-id>.md` files in batch mode | Active increment work file and optional pending child increment files | Replaced or rewritten pending child increment files in batch mode, when the queue changes |
 | Plan approval to implementation | `esper:go` on an increment work file | `.esper/increments/active/<id>.md` | Optional commits and PR artifacts | Source files, active increment work file, and relevant spec files when behavior changes | None at this step |
 | Implementation review | `esper:review` | `.esper/increments/active/<id>.md` | None | Active increment work file with review findings; optional follow-up changes to source or spec files | None |
-| Post-implementation spec sync | `esper:sync` | `.esper/increments/active/<id>.md` | None | Relevant spec files, active increment work file, and `.esper/context.json` when the increment advances | Active increment moved to `.esper/increments/done/`, and optionally later to `.esper/increments/archived/` |
+| Post-implementation spec sync | Auto sync or `esper:sync` | `.esper/increments/active/<id>.md` | None | Relevant spec files, active increment work file, and `.esper/context.json` when the increment advances | Active increment moved to `.esper/increments/done/`, and optionally later to `.esper/increments/archived/` |
 
 ### E. Workflow Flowchart
 
@@ -397,7 +397,7 @@ flowchart TD
 
     G --> I[e:go<br/>Approve increment plan and implement]
     I --> J[e:review<br/>Verify implementation]
-    J --> K[e:sync<br/>Sync shipped code back to specs]
+    J --> K[Auto sync specs<br/>or e:sync]
     K --> L{More work?}
     L -->|Yes| D
     L -->|No| M[Done]
@@ -1264,7 +1264,7 @@ Primary CLI interactions:
 
 Purpose:
 
-- sync shipped code back into specs after implementation
+- run an explicit code-to-spec sync pass after implementation
 
 Expected behavior:
 
