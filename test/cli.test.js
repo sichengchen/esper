@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtemp, readdir, rm } from 'node:fs/promises'
+import { mkdtemp, readdir, rm, mkdir } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
@@ -54,17 +54,19 @@ test('updates existing skill directories without error', async () => {
 test('removes stale skill directories from previous versions', async () => {
   const tmp = await mkdtemp(join(tmpdir(), 'esper-test-'))
   try {
-    // Simulate stale skills from a previous version being present
-    const staleSkills = ['esper-build', 'esper-new', 'esper-done', 'esper-commit']
+    const staleSkills = [
+      'esper-build', 'esper-new', 'esper-done', 'esper-commit',
+      'esper-apply', 'esper-audit', 'esper-backlog', 'esper-explore',
+      'esper-finish', 'esper-fix', 'esper-phase', 'esper-plan',
+      'esper-revise', 'esper-ship', 'esper-yolo',
+    ]
     for (const skill of staleSkills) {
-      const { mkdir: mkdirSync } = await import('node:fs/promises')
-      await mkdirSync(join(tmp, skill), { recursive: true })
+      await mkdir(join(tmp, skill), { recursive: true })
     }
 
     const result = runCLI([], { ESPER_SKILLS_DIR: tmp })
     assert.equal(result.status, 0, `CLI exited with ${result.status}\n${result.stderr}`)
 
-    // Stale skills should be removed
     for (const skill of staleSkills) {
       assert.ok(!existsSync(join(tmp, skill)), `Expected stale skill ${skill} to be removed`)
     }
@@ -80,7 +82,6 @@ test('installs .sh scripts with execute permissions', async () => {
     const result = runCLI([], { ESPER_SKILLS_DIR: tmp })
     assert.equal(result.status, 0, `CLI exited with ${result.status}\n${result.stderr}`)
 
-    // Check that any .sh files in installed skills are executable
     const { stat } = await import('node:fs/promises')
     const installedSkills = await readdir(tmp)
     for (const skill of installedSkills) {
@@ -89,7 +90,6 @@ test('installs .sh scripts with execute permissions', async () => {
       for (const file of files) {
         if (file.endsWith('.sh')) {
           const s = await stat(join(skillDir, file))
-          // Check owner execute bit (0o100)
           assert.ok(s.mode & 0o100, `Expected ${skill}/${file} to be executable`)
         }
       }
@@ -172,4 +172,11 @@ test('interactive flag in non-tty mode falls back to non-interactive install', a
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }
+})
+
+test('unknown command prints usage', async () => {
+  const result = runCLI(['foobar'])
+  assert.notEqual(result.status, 0)
+  assert.ok(result.stderr.includes('Unknown command'))
+  assert.ok(result.stderr.includes('install|init|config|context|spec|increment'))
 })
