@@ -14,7 +14,12 @@ const CLAUDE_SKILLS_DIR = process.env.ESPER_CLAUDE_SKILLS_DIR
   ?? join(homedir(), '.claude', 'skills')
 const CODEX_HOME = process.env.CODEX_HOME ?? join(homedir(), '.codex')
 const CODEX_SKILLS_DIR = process.env.ESPER_CODEX_SKILLS_DIR ?? join(CODEX_HOME, 'skills')
-const REMOVED_SKILLS = ['esper-build', 'esper-new', 'esper-done', 'esper-commit']
+const REMOVED_SKILLS = [
+  'esper-build', 'esper-new', 'esper-done', 'esper-commit',
+  'esper-apply', 'esper-audit', 'esper-backlog', 'esper-explore',
+  'esper-finish', 'esper-fix', 'esper-phase', 'esper-plan',
+  'esper-revise', 'esper-ship', 'esper-yolo',
+]
 const VALID_PROVIDERS = new Set(['claude', 'codex', 'all'])
 const ANSI = {
   reset: '\x1b[0m',
@@ -264,6 +269,11 @@ async function main() {
   }
 
   switch (subcommand) {
+    case 'init': {
+      const init = await import('../lib/init.js')
+      const opts = parseFlags([action, ...rest].filter(Boolean))
+      return init.run(opts)
+    }
     case 'config': {
       const { check, get, set, checkGh } = await import('../lib/config.js')
       switch (action) {
@@ -277,29 +287,54 @@ async function main() {
       }
       break
     }
-    case 'plan': {
-      const plan = await import('../lib/plan.js')
+    case 'context': {
+      const context = await import('../lib/context.js')
+      switch (action) {
+        case 'get': return context.get()
+        default:
+          console.error('Usage: esperkit context <get>')
+          process.exit(1)
+      }
+      break
+    }
+    case 'spec': {
+      const spec = await import('../lib/spec.js')
+      switch (action) {
+        case 'index':    return spec.index()
+        case 'get':      return spec.get(rest[0])
+        case 'create':   return spec.create(rest[0])
+        case 'set-root': return spec.setRoot(rest[0])
+        case 'archive':  return spec.archive(rest[0])
+        case 'list':     return spec.list()
+        default:
+          console.error('Usage: esperkit spec <index|get|create|set-root|archive|list>')
+          process.exit(1)
+      }
+      break
+    }
+    case 'increment': {
+      const increment = await import('../lib/increment.js')
       switch (action) {
         case 'list': {
           const opts = parseFlags(rest)
-          return plan.list(opts)
+          return increment.list(opts)
         }
-        case 'get':      return plan.get(rest[0])
-        case 'next-id':  return plan.nextId()
-        case 'activate': return plan.activate(rest[0])
-        case 'suspend':  return plan.suspend(rest[0])
-        case 'finish':   return plan.finish(rest[0])
-        case 'archive':  return plan.archive(rest[0])
-        case 'set':           return plan.set(rest[0], rest[1], rest[2])
-        case 'create-issue':      return plan.createIssue(rest[0])
-        case 'create-sub-issue':  return plan.createSubIssue(rest[0])
-        case 'close-issue': {
-          const opts = parseFlags(rest.slice(1))
-          return plan.closeIssue(rest[0], opts.comment)
+        case 'get':      return increment.get(rest[0])
+        case 'next-id':  return increment.nextId()
+        case 'create': {
+          const opts = parseFlags(rest)
+          return increment.create(opts)
         }
-        case 'reopen-issue':      return plan.reopenIssue(rest[0])
+        case 'activate': return increment.activate(rest[0])
+        case 'finish':   return increment.finish(rest[0])
+        case 'archive':  return increment.archive(rest[0])
+        case 'group': {
+          const opts = parseFlags(rest)
+          return increment.group(opts)
+        }
+        case 'set':      return increment.set(rest[0], rest[1], rest[2])
         default:
-          console.error('Usage: esperkit plan <list|get|next-id|activate|suspend|finish|archive|set|create-issue|create-sub-issue|close-issue|reopen-issue>')
+          console.error('Usage: esperkit increment <list|get|next-id|create|activate|finish|archive|group|set>')
           process.exit(1)
       }
       break
@@ -320,14 +355,17 @@ async function main() {
       }
       break
     }
-    case 'backlog': {
-      const { display } = await import('../lib/backlog.js')
-      const opts = parseFlags([action, ...rest].filter(Boolean))
-      return display(opts)
+    case 'doctor': {
+      const doctor = await import('../lib/doctor.js')
+      return doctor.run()
+    }
+    case 'migrate': {
+      const migrate = await import('../lib/migrate.js')
+      return migrate.run()
     }
     default:
       console.error(`Unknown command: ${subcommand}`)
-      console.error('Usage: esperkit [install --provider claude|codex|all --interactive|config|plan|exploration|backlog]')
+      console.error('Usage: esperkit [install|init|config|context|spec|increment|exploration|doctor|migrate]')
       process.exit(1)
   }
 }
@@ -421,39 +459,39 @@ async function install(options = {}) {
   if (alreadyInit) {
     console.log('Done. esper is already set up in this project.')
     if (provider === 'claude') {
-      console.log('Open Claude Code here and run /esper:backlog to see your queue.')
+      console.log('Open Claude Code here and run /e:ctx to see your project context.')
     } else if (provider === 'codex') {
-      console.log('Open Codex here and run the `esper:backlog` skill to see your queue.')
+      console.log('Open Codex here and run the `esper:context` skill to see your project context.')
     } else {
-      console.log('Open Claude Code or Codex here and run /esper:backlog (Claude) or `esper:backlog` (Codex).')
+      console.log('Open Claude Code or Codex here and run /e:ctx (Claude) or `esper:context` (Codex).')
     }
   } else if (inGitRepo) {
     if (provider === 'codex') {
-      console.log('Done. Open Codex in this directory and run the `esper:init` skill with your project prompt.')
+      console.log('Done. Open Codex in this directory and run the `esper:init` skill.')
     } else if (provider === 'all') {
       console.log('Done. Open Claude Code or Codex in this directory and run:')
       console.log('')
-      console.log('  /esper:init "what you want to build"')
+      console.log('  /e:init')
       console.log('')
-      console.log('In Codex, run the `esper:init` skill with the same prompt.')
+      console.log('In Codex, run the `esper:init` skill.')
     } else {
       console.log('Done. Open Claude Code in this directory and run:')
       console.log('')
-      console.log('  /esper:init "what you want to build"')
+      console.log('  /e:init')
     }
   } else {
     if (provider === 'codex') {
-      console.log('Done. Navigate to your project directory, then open Codex and run the `esper:init` skill with your project prompt.')
+      console.log('Done. Navigate to your project directory, then open Codex and run the `esper:init` skill.')
     } else if (provider === 'all') {
       console.log('Done. Navigate to your project directory, then open Claude Code or Codex and run:')
       console.log('')
-      console.log('  /esper:init "what you want to build"')
+      console.log('  /e:init')
       console.log('')
-      console.log('In Codex, run the `esper:init` skill with the same prompt.')
+      console.log('In Codex, run the `esper:init` skill.')
     } else {
       console.log('Done. Navigate to your project directory, then open Claude Code and run:')
       console.log('')
-      console.log('  /esper:init "what you want to build"')
+      console.log('  /e:init')
     }
   }
 }
