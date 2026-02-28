@@ -152,3 +152,18 @@ test('spec archive — moves file and preserves relative path', async () => {
     await rm(tmp, { recursive: true, force: true })
   }
 })
+
+test('spec archive — rejects paths outside the spec tree', async () => {
+  const tmp = await setupProject()
+  await writeFile(join(tmp, 'outside.md'), '# outside\n')
+  try {
+    const result = runCLI(['spec', 'archive', '../outside.md'], tmp)
+    assert.equal(result.status, 1)
+    assert.ok(result.stderr.includes('Spec path must stay within'))
+    assert.ok(existsSync(join(tmp, 'outside.md')))
+    const content = await readFile(join(tmp, 'outside.md'), 'utf8')
+    assert.equal(content, '# outside\n')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})

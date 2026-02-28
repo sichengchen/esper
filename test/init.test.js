@@ -98,6 +98,7 @@ test('init — creates valid context.json', async () => {
     const ctx = JSON.parse(raw)
     assert.equal(ctx.schema_version, 1)
     assert.equal(ctx.spec_root, 'specs')
+    assert.equal(ctx.constitution_path, '.esper/CONSTITUTION.md')
     assert.equal(ctx.active_increment, null)
     assert.ok(Array.isArray(ctx.active_increment_scope))
   } finally {
