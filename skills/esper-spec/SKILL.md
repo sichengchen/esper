@@ -1,6 +1,6 @@
 ---
 name: esper:spec
-description: Create, review, or revise spec files. Opens a spec editing loop that continues until the user advances with /e:go.
+description: Create, review, or revise spec files. Opens a spec editing loop that continues until the user advances with `esper:go`.
 ---
 
 You are working on the project's spec tree — the authoritative documentation of system behavior.
@@ -44,7 +44,7 @@ When writing specs:
 
 Continue in the spec revision loop until:
 - The user explicitly says they're done with specs
-- The user invokes `/e:go` to advance to implementation
+- The user invokes `esper:go` to advance to implementation
 - The user switches to a different skill
 
 Do NOT automatically advance to implementation. Spec work is its own distinct phase.

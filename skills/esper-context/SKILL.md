@@ -7,7 +7,7 @@ You are displaying the current esper project context.
 
 ## Step 1: Read context
 
-Run `esperkit context get`. If it fails, tell the user to run `/e:init` first and stop.
+Run `esperkit context get`. If it fails, tell the user to run `esper:init` first and stop.
 
 Parse the JSON output.
 
@@ -45,11 +45,11 @@ Commands
 
 Based on the context, suggest what the user can do next:
 
-- **No active increment, specs exist**: "Run `/e:atom` to create an increment, or `/e:spec` to work on specs."
-- **No active increment, no specs**: "Run `/e:spec` to bootstrap your spec tree, or `/e:atom` to start building."
-- **Active increment, not started**: "Run `/e:go` to begin implementation."
-- **Active increment, in progress**: "Run `/e:continue` to resume work, or `/e:review` to check progress."
-- **Active increment, seems complete**: "Run `/e:go` to finish, or `/e:review` to verify before finishing."
+- **No active increment, specs exist**: "Run `esper:atom` to create an increment, or `esper:spec` to work on specs."
+- **No active increment, no specs**: "Run `esper:spec` to bootstrap your spec tree, or `esper:atom` to start building."
+- **Active increment, not started**: "Run `esper:go` to begin implementation."
+- **Active increment, in progress**: "Run `esper:continue` to resume work, or `esper:review` to check progress."
+- **Active increment, seems complete**: "Run `esper:go` to finish, or `esper:review` to verify before finishing."
 
 ## Available CLI commands
 

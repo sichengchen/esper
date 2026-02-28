@@ -9,7 +9,7 @@ You are reviewing the current implementation against the approved increment and 
 
 Run `esperkit context get` to determine the current state.
 
-If no active increment, tell the user: "No active increment to review. Run `/e:atom` or `/e:batch` first." and stop.
+If no active increment, tell the user: "No active increment to review. Run `esper:atom` or `esper:batch` first." and stop.
 
 ## Step 2: Read the increment and specs
 
@@ -53,9 +53,9 @@ Update the active increment file's `## Progress` section with findings:
 ## Step 6: Recommend next actions
 
 Based on findings:
-- If all scope items complete and verification passes: "Ready to finish. Run `/e:go` to complete."
-- If spec updates needed: "Run `/e:sync` to update specs before finishing."
-- If incomplete items remain: "Run `/e:continue` to resume implementation."
+- If all scope items complete and verification passes: "Ready to finish. Run `esper:go` to complete."
+- If spec updates needed: "Run `esper:sync` to update specs before finishing."
+- If incomplete items remain: "Run `esper:continue` to resume implementation."
 - If drift detected: Present the drift and ask the user how to resolve it.
 
 ## Available CLI commands

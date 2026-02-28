@@ -8,7 +8,7 @@ Date: 2026-02-28
 EsperKit is a tool-neutral workflow layer for AI-assisted software development. It has two product parts:
 
 1. A CLI toolkit for installation, deterministic project-initialization primitives, local project-state management, and direct usage by coding agents.
-2. A skills and slash-command layer that gives coding agents operational instructions for how to use EsperKit inside supported hosts.
+2. A skills and command layer that gives coding agents operational instructions for how to use EsperKit inside supported hosts.
 
 Together, these two parts provide a durable project constitution, agent-facing system specs, structured increment artifacts, and verifiable delivery rules that can be used from coding agents, vibe-coding IDEs, and future external tools.
 
@@ -35,7 +35,7 @@ npm install -g esperkit
 
 This installs the `esperkit` CLI, which is the local entrypoint for:
 
-- installing host-specific skills and slash commands
+- installing host-specific skills and commands
 - initializing EsperKit in a project
 - managing deterministic project state and scaffolding
 
@@ -52,7 +52,7 @@ In the target repository, the user runs:
 esperkit install
 ```
 
-This installs or updates the host-specific skills and slash-command assets used by coding agents in the current environment.
+This installs or updates the host-specific skills and command assets used by coding agents in the current environment.
 
 The CLI performs installation only. It does not analyze the codebase or author specs.
 
@@ -63,11 +63,10 @@ Artifacts:
 
 ### 3. Initialize EsperKit in the Project
 
-In the repository root, the user normally invokes the initialization skill or slash command, not the CLI directly.
+In the repository root, the user normally invokes the initialization skill command, not the CLI directly.
 
 Examples:
 
-- `/e:init`
 - `esper:init`
 
 That instruction-layer workflow should:
@@ -126,7 +125,6 @@ The user opens the relevant spec work file directly or through a spec-oriented h
 Examples:
 
 - edit the target spec files directly
-- use `/e:spec`
 - use `esper:spec`
 
 The coding agent must center the review loop on a Markdown work file.
@@ -176,7 +174,6 @@ After the specs are acceptable, the user explicitly signals that the current spe
 
 Examples:
 
-- `/e:go`
 - `esper:go`
 
 `esper:go` means: approve the current Markdown work file and advance to the next workflow stage.
@@ -191,8 +188,8 @@ When the current work file is a spec work file, the coding agent should:
 
 This plan may take one of two forms:
 
-- a single atomic increment via `esper:atom` / `/e:atom`
-- a queue of increments via `esper:batch` / `/e:batch`
+- a single atomic increment via `esper:atom`
+- a queue of increments via `esper:batch`
 
 The resulting increment or queue should be scoped by the relevant spec files and sections.
 
@@ -223,7 +220,6 @@ Once the increment plan is acceptable, the user invokes the same approval comman
 
 Examples:
 
-- `/e:go`
 - `esper:go`
 
 When the current work file is an increment work file, `esper:go` means: approve the current plan and begin implementation.
@@ -253,9 +249,7 @@ The user tells the coding agent what feature, fix, or change they want, using th
 
 Examples:
 
-- `/e:atom`
 - `esper:atom`
-- `/e:batch`
 - `esper:batch`
 
 Artifacts:
@@ -302,7 +296,6 @@ Once the increment plan is acceptable, the user explicitly approves it.
 
 Examples:
 
-- `/e:go`
 - `esper:go`
 
 When the current work file is an increment work file, `esper:go` means: approve the current plan and begin implementation.
@@ -326,7 +319,6 @@ After implementation, the user or agent can invoke an explicit verification pass
 
 Examples:
 
-- `/e:review`
 - `esper:review`
 
 `esper:review` means: review the implementation against the approved increment work file and the relevant spec files.
@@ -342,7 +334,6 @@ After implementation, the coding agent should normally sync the shipped incremen
 
 Examples:
 
-- `/e:sync`
 - `esper:sync`
 
 The explicit `esper:sync` command remains available when the user wants to force or retry the post-implementation code-to-spec sync step.
@@ -359,7 +350,7 @@ Artifacts:
 
 Across both workflows, the steady-state development loop is:
 
-1. Use `esper:context` or `/e:ctx` if the current state is unclear.
+1. Use `esper:context` if the current state is unclear.
 2. Create or revise the current Markdown work file through `esper:spec`, `esper:atom`, or `esper:batch`.
 3. Use `esper:go` to approve the current work file and advance to the next stage.
 4. Let the active agent workflow proactively update specs, validate changes, and prepare PRs.
@@ -387,24 +378,24 @@ This table summarizes the expected artifact flow across the main workflow stages
 ```mermaid
 flowchart TD
     A[Install CLI<br/>npm install -g esperkit] --> B[Install Host Layer<br/>esperkit install]
-    B --> C[Initialize Project<br/>e:init]
+    B --> C[Initialize Project<br/>esper:init]
     C --> D{Starting point?}
 
-    D -->|Spec-first| E[Revise Spec Work File<br/>e:spec]
-    E --> F[e:go<br/>Approve specs and derive increment plan]
+    D -->|Spec-first| E[Revise Spec Work File<br/>esper:spec]
+    E --> F[esper:go<br/>Approve specs and derive increment plan]
     F --> G[Revise Increment Work File]
 
-    D -->|Direct request| H[Create or Revise Increment Work File<br/>e:atom or e:batch]
+    D -->|Direct request| H[Create or Revise Increment Work File<br/>esper:atom or esper:batch]
     H --> G
 
-    G --> I[e:go<br/>Approve increment plan and implement]
-    I --> J[e:review<br/>Verify implementation]
-    J --> K[Auto sync specs<br/>or e:sync]
+    G --> I[esper:go<br/>Approve increment plan and implement]
+    I --> J[esper:review<br/>Verify implementation]
+    J --> K[Auto sync specs<br/>or esper:sync]
     K --> L{More work?}
     L -->|Yes| D
     L -->|No| M[Done]
 
-    N[e:ctx<br/>Check current state] -.-> D
+    N[esper:context<br/>Check current state] -.-> D
     N -.-> G
     N -.-> I
 ```
@@ -480,9 +471,9 @@ The CLI toolkit is the executable layer. It is responsible for:
 The CLI is the source of truth for persisted project state and filesystem changes.
 It is not responsible for codebase interpretation or semantic authoring of specs, increments, or other content that requires LLM judgment.
 
-### 2. Skills and Slash Commands
+### 2. Skills and Commands
 
-The skills and slash-command layer is the instruction layer. It is responsible for:
+The skills and command layer is the instruction layer. It is responsible for:
 
 - telling coding agents how to operate on top of the CLI toolkit
 - guiding interviews, revisions, review loops, and execution flows
@@ -494,9 +485,9 @@ This layer should not be the sole source of truth for project state. It should o
 ### Relationship Between the Two Parts
 
 - The CLI toolkit must be usable on its own.
-- Skills and slash commands should be operational wrappers and host-specific guidance on top of the CLI toolkit and project artifacts.
-- If a host does not support skills or slash commands, the CLI toolkit must still make EsperKit usable.
-- Skills and slash commands may be provider-specific, but the CLI toolkit and on-disk project model must remain tool-neutral.
+- Skills and commands should be operational wrappers and host-specific guidance on top of the CLI toolkit and project artifacts.
+- If a host does not support skills or commands, the CLI toolkit must still make EsperKit usable.
+- Skills and commands may be provider-specific, but the CLI toolkit and on-disk project model must remain tool-neutral.
 
 ## Core Concepts
 
@@ -543,7 +534,7 @@ EsperKit must support:
 
 #### 1. Initialization
 
-The underlying CLI initialization primitive is `esperkit init`, but the normal user-facing project initialization flow should be invoked through an EsperKit skill or slash command.
+The underlying CLI initialization primitive is `esperkit init`, but the normal user-facing project initialization flow should be invoked through an EsperKit skill command.
 
 `esperkit init` must bootstrap the project deterministically.
 
@@ -599,7 +590,7 @@ Those preferences should be saved into project state for future agent decisions.
 
 #### 2. Instruction-Layer Installation
 
-The CLI toolkit must install and update the skills and slash-command layer for supported hosts.
+The CLI toolkit must install and update the skills and command layer for supported hosts.
 
 It must:
 
@@ -719,11 +710,11 @@ The spec tree should support a simple lifecycle:
 - active
 - archived
 
-Semantic authoring and revision of spec contents must be performed by coding agents using EsperKit skills or slash commands, not by the CLI toolkit alone.
+Semantic authoring and revision of spec contents must be performed by coding agents using EsperKit skills or commands, not by the CLI toolkit alone.
 
 #### 6. Spec Authoring From Existing Code
 
-When initializing an existing codebase, code-to-spec generation must be performed by coding agents using EsperKit skills or slash commands, not by the CLI toolkit.
+When initializing an existing codebase, code-to-spec generation must be performed by coding agents using EsperKit skills or commands, not by the CLI toolkit.
 
 Those agent workflows should author a first-pass spec tree that summarizes:
 
@@ -1029,29 +1020,29 @@ This instruction layer should be explicit and opinionated, not just a thin bundl
 
 ### Naming Model
 
-The exact syntax may vary by host, but the user-facing command surface should be small and easy to type.
+The user-facing command surface should be small, explicit, and easy to type.
 
 Design rules:
 
-- slash commands should be short and ergonomic
+- commands should be short and ergonomic
 - the primary user-facing surface should prefer a small number of high-leverage commands
 - specialized sub-workflows may exist, but they should not be the default way users drive the system
 
 Recommended pattern:
 
-- short slash aliases for fast interactive use
-- slightly more explicit skill names for hosts that expose named skills
+- use the `esper:*` naming model consistently across hosts
+- keep the command set small and predictable
 
 Examples:
 
-- Claude-style slash commands: `/e:init`, `/e:spec`, `/e:atom`, `/e:batch`, `/e:go`, `/e:review`, `/e:sync`
-- Skill-style names in other hosts: `esper:init`, `esper:spec`, `esper:atom`, `esper:batch`, `esper:go`, `esper:review`, `esper:sync`
+- `esper:init`, `esper:spec`, `esper:atom`, `esper:batch`
+- `esper:go`, `esper:review`, `esper:sync`, `esper:continue`, `esper:context`
 
 ### Core Workflows
 
 The primary instruction surface should be centered on a small set of commands.
 
-#### 1. `esper:init` / `/e:init`
+#### 1. `esper:init`
 
 Purpose:
 
@@ -1072,7 +1063,7 @@ Primary CLI interactions:
 - `esperkit init`
 - `esperkit context get`
 
-#### 2. `esper:spec` / `/e:spec`
+#### 2. `esper:spec`
 
 Purpose:
 
@@ -1102,7 +1093,7 @@ Primary CLI interactions:
 - `esperkit spec get <file>`
 - `esperkit spec create <path>` when deterministic scaffolding is needed
 
-#### 3. `esper:go` / `/e:go`
+#### 3. `esper:go`
 
 Purpose:
 
@@ -1141,7 +1132,7 @@ Primary CLI interactions:
 - `esperkit increment activate <file>`
 - `esperkit increment list`
 
-#### 4. `esper:context` / `/e:ctx`
+#### 4. `esper:context`
 
 Purpose:
 
@@ -1157,7 +1148,7 @@ Primary CLI interactions:
 
 - `esperkit context get`
 
-#### 5. `esper:atom` / `/e:atom`
+#### 5. `esper:atom`
 
 Purpose:
 
@@ -1199,7 +1190,7 @@ Primary CLI interactions:
 - `esperkit spec index`
 - `esperkit spec get <file>`
 
-#### 6. `esper:batch` / `/e:batch`
+#### 6. `esper:batch`
 
 Purpose:
 
@@ -1243,7 +1234,7 @@ Primary CLI interactions:
 - `esperkit spec index`
 - `esperkit spec get <file>`
 
-#### 7. `esper:review` / `/e:review`
+#### 7. `esper:review`
 
 Purpose:
 
@@ -1265,7 +1256,7 @@ Primary CLI interactions:
 - `esperkit spec index`
 - `esperkit spec get <file>`
 
-#### 8. `esper:sync` / `/e:sync`
+#### 8. `esper:sync`
 
 Purpose:
 
@@ -1285,7 +1276,7 @@ Primary CLI interactions:
 - `esperkit spec index`
 - `esperkit spec get <file>`
 
-#### 9. `esper:continue` / `/e:continue`
+#### 9. `esper:continue`
 
 Purpose:
 
@@ -1331,8 +1322,8 @@ In practice, that means the instruction layer must support:
 
 ### Requirements
 
-- Skills and slash commands should translate user intent into CLI-backed state transitions.
-- Slash commands should be short and easy to input during active development.
+- Skills and commands should translate user intent into CLI-backed state transitions.
+- Commands should be short and easy to input during active development.
 - The primary command surface should stay small; most users should not need to memorize many specialized commands.
 - They should prefer reading project artifacts over relying on conversational memory.
 - They may vary by host syntax, but their workflow semantics should remain consistent across providers.
@@ -1344,17 +1335,17 @@ In practice, that means the instruction layer must support:
 
 ## Success Criteria
 
-1. A user can initialize EsperKit in a repository through `esper:init` or `/e:init`, with the CLI handling deterministic setup underneath.
+1. A user can initialize EsperKit in a repository through `esper:init`, with the CLI handling deterministic setup underneath.
 2. During initialization, the agent can collect workflow preferences and persist them for future decisions.
 3. A coding agent using EsperKit skills can analyze the current codebase and draft the initial spec tree.
-4. A user can use `esper:spec` or `/e:spec` to create and revise spec work files before implementation.
-5. A user can use `esper:go` or `/e:go` to approve the current work file and advance to the next stage, whether that means deriving an increment plan from specs or starting implementation from an approved plan.
+4. A user can use `esper:spec` to create and revise spec work files before implementation.
+5. A user can use `esper:go` to approve the current work file and advance to the next stage, whether that means deriving an increment plan from specs or starting implementation from an approved plan.
 6. In plan-to-spec workflow, a user can start from a direct request, review the coding agent’s plan, then have the coding agent sync the shipped change back into specs.
 7. Every review-and-revise loop is centered on a Markdown working file that the user can inspect and edit directly.
 8. A user can work in either single-job mode (`esper:atom`) or queued mode (`esper:batch`).
 9. In queued mode, a user can describe a high-level feature batch and review the proposed increment queue before execution begins.
 10. A user can create and complete increments without bypassing esper context.
-11. A user can use `esper:sync` or `/e:sync` to run explicit post-implementation code-to-spec synchronization.
+11. A user can use `esper:sync` to run explicit post-implementation code-to-spec synchronization.
 12. The active agent workflow proactively updates specs, runs relevant validation, and prepares PRs when project preferences indicate it should.
 13. An external tool can read one machine-readable runtime file and one human-readable workflow file to understand the current project state.
 14. The spec directory is configurable and defaults to `/specs`.
@@ -1365,7 +1356,7 @@ In practice, that means the instruction layer must support:
 
 ### Phase 1: Interoperability Foundation
 
-- Clarify the CLI toolkit vs skills/slash-command boundary
+- Clarify the CLI toolkit vs skills/command boundary
 - Add `esperkit install`
 - Add `esperkit init`
 - Add initialization-time preference capture and persistence
@@ -1418,7 +1409,7 @@ In practice, that means the instruction layer must support:
 
 This spec defines EsperKit as a cross-tool workflow layer with:
 
-- a two-part architecture: CLI toolkit plus skills/slash commands
+- a two-part architecture: CLI toolkit plus skills/commands
 - a configurable agent-facing spec tree, usually rooted at `/specs`
 - first-class support for both spec-to-code and plan-to-spec development
 - a unified increment model for both single-job and queued work

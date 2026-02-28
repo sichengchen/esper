@@ -14,7 +14,7 @@ EsperKit supports two working styles:
 EsperKit has two parts:
 
 - The `esperkit` CLI, which performs deterministic setup and state changes.
-- A host instruction layer, exposed as skills or slash commands, which guides the AI agent through planning, review, execution, and sync.
+- A host instruction layer, exposed as skills or commands, which guides the AI agent through planning, review, execution, and sync.
 
 The CLI owns durable project state on disk.
 The instruction layer owns the collaborative workflow.
@@ -55,12 +55,13 @@ Examples:
 ## Command Surface
 
 EsperKit uses a small set of primary commands.
-The exact syntax depends on the host:
+This manual uses the canonical `esper:*` form across hosts:
 
-- Claude-style slash commands: `/e:init`, `/e:spec`, `/e:atom`
-- Skill-style names: `esper:init`, `esper:spec`, `esper:atom`
+- `esper:init`
+- `esper:spec`
+- `esper:atom`
 
-This manual uses the `esper:*` form, but the workflow is the same.
+The workflow stays the same regardless of host integration details.
 
 ## Installation and First-Time Setup
 
@@ -80,7 +81,7 @@ In the repository root:
 esperkit install
 ```
 
-This installs or updates the host-specific skills or slash-command assets.
+This installs or updates the host-specific skills or command assets.
 It does not create project workflow files yet.
 
 ### Initialize the Project

@@ -88,9 +88,9 @@ Summarize the scaffolding:
 ## Step 6: Next steps
 
 If this is an existing codebase with code already written:
-- Suggest running `/e:spec` to bootstrap specs from the existing code
+- Suggest running `esper:spec` to bootstrap specs from the existing code
 - Explain that specs document what the system does and serves as the source of truth
 
 If this is a new project:
-- Suggest running `/e:spec` to write the initial spec
-- Or `/e:atom` to create the first increment directly
+- Suggest running `esper:spec` to write the initial spec
+- Or `esper:atom` to create the first increment directly

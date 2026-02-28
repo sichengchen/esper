@@ -9,7 +9,7 @@ You are synchronizing the spec tree with the shipped implementation.
 
 Run `esperkit context get` to determine the current state.
 
-If no active increment, tell the user: "No active increment to sync. Run `/e:atom` first." and stop.
+If no active increment, tell the user: "No active increment to sync. Run `esper:atom` first." and stop.
 
 ## Step 2: Read the increment and specs
 

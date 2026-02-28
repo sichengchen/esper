@@ -59,7 +59,7 @@ Both workflows use `esper:go` as the shared approval gate and `esper:continue` t
 | `esper:sync` | Force or retry post-implementation code-to-spec sync |
 | `esper:context` | Show current project state and next safe action |
 
-In Claude Code, these are invoked as slash commands: `/e:init`, `/e:spec`, `/e:atom`, `/e:go`, etc.
+Use the same `esper:*` command names across hosts, including Claude Code and Codex.
 
 ### CLI
 

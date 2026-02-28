@@ -17,16 +17,16 @@ Check:
 
 ### Branch A: No active increment — derive from specs
 
-If there is no active increment but the user has been working on specs (via `/e:spec`):
+If there is no active increment but the user has been working on specs (via `esper:spec`):
 1. Read the spec files that were being edited
 2. Identify what implementation work is needed based on the specs
 3. Ask the user: "What would you like to implement from these specs?"
 4. Based on the answer:
    - **Single task**: Create one increment via `esperkit increment create --title "..." --lane atomic --spec <file>`
-   - **Multiple tasks**: Suggest using `/e:batch` instead
+   - **Multiple tasks**: Suggest using `esper:batch` instead
 5. Activate the increment: `esperkit increment activate <filename>`
 6. Present the increment plan for review
-7. Stop here — do NOT begin implementation until the user confirms or runs `/e:go` again
+7. Stop here — do NOT begin implementation until the user confirms or runs `esper:go` again
 
 ### Branch B: Active increment in plan stage
 
@@ -50,7 +50,7 @@ If there is an active increment with progress recorded:
 3. When all scope items are complete and verification passes:
    - Ask the user if they want to finish the increment
    - If yes: run `esperkit increment finish <filename>`
-   - Suggest running `/e:sync` to update specs if needed
+   - Suggest running `esper:sync` to update specs if needed
 
 ## Step 3: Refuse if blocked
 

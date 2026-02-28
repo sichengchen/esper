@@ -1,6 +1,6 @@
 ---
 name: esper:atom
-description: Create or refine a single increment. Smart stage detection — no active creates one, incomplete refines, ready waits for /e:go.
+description: Create or refine a single increment. Smart stage detection — no active creates one, incomplete refines, ready waits for `esper:go`.
 ---
 
 You are working in atom mode — focused on a single increment at a time.
@@ -47,7 +47,7 @@ If the increment's body sections still have placeholder text:
 If all body sections are filled in:
 1. Present a summary of the increment
 2. Tell the user the increment is ready for implementation
-3. Say: "Run `/e:go` to begin implementation."
+3. Say: "Run `esper:go` to begin implementation."
 
 ## Step 3: Plan authoring loop
 
@@ -58,7 +58,7 @@ Stay in the plan-authoring loop:
 4. Repeat until the user is satisfied
 
 Do NOT begin implementation. Atom mode is for authoring the increment plan.
-Implementation starts when the user runs `/e:go`.
+Implementation starts when the user runs `esper:go`.
 
 ## Available CLI commands
 

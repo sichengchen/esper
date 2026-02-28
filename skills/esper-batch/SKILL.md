@@ -1,6 +1,6 @@
 ---
 name: esper:batch
-description: Decompose a feature set into a queue of increments. Creates a batch parent with child increments. Stays in plan mode until /e:go.
+description: Decompose a feature set into a queue of increments. Creates a batch parent with child increments. Stays in plan mode until `esper:go`.
 ---
 
 You are working in batch mode — decomposing a larger feature into a queue of increments.
@@ -62,7 +62,7 @@ This creates:
 ## Step 6: Stay in plan mode
 
 Present the created batch and children.
-Tell the user: "Run `/e:go` to begin implementing the first increment in the queue."
+Tell the user: "Run `esper:go` to begin implementing the first increment in the queue."
 
 Do NOT begin implementation. Batch mode is for planning the queue.
 
