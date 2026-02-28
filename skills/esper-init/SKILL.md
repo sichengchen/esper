@@ -17,6 +17,11 @@ When already set up:
   - **Re-run init**: Run `esperkit init` — it is non-destructive and only creates missing files.
   - **Reset everything**: Confirm with `AskUserQuestion`. If confirmed, delete `.esper/` and proceed from Step 1.
 
+Before scaffolding, check for root bootstrap docs:
+- If `AGENTS.md` exists, read it and preserve its non-Esper content.
+- If `CLAUDE.md` exists, read it and preserve its non-Esper content.
+- Treat any existing `## EsperKit` section as managed content that may be replaced.
+
 ## Step 1: Interview the user
 
 Use `AskUserQuestion` to interview the user. Cover these areas in 2–3 rounds.
@@ -60,11 +65,23 @@ Run `esperkit config set workflow_defaults '<json>'` with the workflow preferenc
 
 ## Step 5: Explain what was created
 
+If `AGENTS.md` or `CLAUDE.md` already existed:
+- Re-open the file after `esperkit init`.
+- Ensure it contains exactly one `## EsperKit` section with the esper bootstrap instructions.
+- If the file already has an `## EsperKit` section, replace only that section.
+- If the file has no `## EsperKit` section, append one near the end.
+- Preserve all non-Esper content outside that section.
+
+If `AGENTS.md` or `CLAUDE.md` did not exist:
+- Keep the scaffolded files from `esperkit init`.
+
 Summarize the scaffolding:
 - `.esper/esper.json` — project config
 - `.esper/context.json` — runtime context for agent interop
 - `.esper/CONSTITUTION.md` — project vision and constraints
 - `.esper/WORKFLOW.md` — how to work with esper
+- `AGENTS.md` — tool-neutral bootstrap instructions at the repo root
+- `CLAUDE.md` — Claude-specific bootstrap instructions at the repo root
 - `.esper/increments/` — increment lifecycle directories
 - `specs/` — spec tree (system, product, interfaces)
 

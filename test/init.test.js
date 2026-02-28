@@ -37,6 +37,8 @@ test('init — creates all expected directories and files', async () => {
     assert.ok(existsSync(join(tmp, 'specs', '_work')))
 
     // Files
+    assert.ok(existsSync(join(tmp, 'AGENTS.md')))
+    assert.ok(existsSync(join(tmp, 'CLAUDE.md')))
     assert.ok(existsSync(join(tmp, '.esper', 'esper.json')))
     assert.ok(existsSync(join(tmp, '.esper', 'context.json')))
     assert.ok(existsSync(join(tmp, '.esper', 'WORKFLOW.md')))
@@ -55,6 +57,7 @@ test('init — is non-destructive on second run', async () => {
     // Modify a file
     const { writeFile } = await import('node:fs/promises')
     await writeFile(join(tmp, '.esper', 'CONSTITUTION.md'), '# My Custom Constitution\n')
+    await writeFile(join(tmp, 'AGENTS.md'), '# Custom Agent Instructions\n')
 
     // Run again
     const result = runCLI(['init'], tmp)
@@ -64,6 +67,9 @@ test('init — is non-destructive on second run', async () => {
     // File should be preserved
     const content = await readFile(join(tmp, '.esper', 'CONSTITUTION.md'), 'utf8')
     assert.ok(content.includes('My Custom Constitution'))
+
+    const agentsContent = await readFile(join(tmp, 'AGENTS.md'), 'utf8')
+    assert.ok(agentsContent.includes('Custom Agent Instructions'))
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }
@@ -107,6 +113,29 @@ test('init — creates WORKFLOW.md with expected markers', async () => {
     assert.ok(content.includes('context.json'))
     assert.ok(content.includes('CONSTITUTION.md'))
     assert.ok(content.includes('increment'))
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('init — creates bootstrap docs with expected markers', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'esper-init-test-'))
+  try {
+    runCLI(['init'], tmp)
+
+    const agents = await readFile(join(tmp, 'AGENTS.md'), 'utf8')
+    assert.ok(agents.startsWith('# AGENTS'))
+    assert.ok(agents.includes('## EsperKit'))
+    assert.ok(agents.includes('.esper/context.json'))
+    assert.ok(agents.includes('.esper/WORKFLOW.md'))
+    assert.ok(agents.includes('spec_root'))
+    assert.ok(agents.includes('commands'))
+
+    const claude = await readFile(join(tmp, 'CLAUDE.md'), 'utf8')
+    assert.ok(claude.startsWith('# CLAUDE'))
+    assert.ok(claude.includes('## EsperKit'))
+    assert.ok(claude.includes('Claude Code'))
+    assert.ok(claude.includes('/e:init'))
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }

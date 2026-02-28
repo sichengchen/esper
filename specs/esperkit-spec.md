@@ -103,6 +103,8 @@ Artifacts:
 - created: `.esper/`
 - created: `.esper/context.json`
 - created: `.esper/WORKFLOW.md`
+- created: `AGENTS.md`
+- created: `CLAUDE.md`
 - created: `.esper/CONSTITUTION.md` or equivalent constitution file
 - created: `.esper/increments/pending/`
 - created: `.esper/increments/active/`
@@ -372,7 +374,7 @@ This table summarizes the expected artifact flow across the main workflow stages
 | --- | --- | --- | --- | --- | --- |
 | Global install | `npm install -g esperkit` | None | Global `esperkit` CLI install | None in the repo | None |
 | Host install | `esperkit install` | None | Host-specific instruction assets | Existing host-specific instruction assets may be updated | Replaced host-specific generated assets, if needed |
-| Project init | `esper:init` -> `esperkit init` | None | `.esper/`, `.esper/context.json`, `.esper/WORKFLOW.md`, `.esper/CONSTITUTION.md`, `.esper/increments/pending/`, `.esper/increments/active/`, `.esper/increments/done/`, `.esper/increments/archived/`, `<spec_root>/`, `<spec_root>/_work/`, template spec files | Project config state with workflow preferences | Replaced generated scaffolding, only when regeneration is explicitly requested |
+| Project init | `esper:init` -> `esperkit init` | None | `.esper/`, `.esper/context.json`, `.esper/WORKFLOW.md`, `AGENTS.md`, `CLAUDE.md`, `.esper/CONSTITUTION.md`, `.esper/increments/pending/`, `.esper/increments/active/`, `.esper/increments/done/`, `.esper/increments/archived/`, `<spec_root>/`, `<spec_root>/_work/`, template spec files | Project config state with workflow preferences | Replaced generated scaffolding, only when regeneration is explicitly requested |
 | Spec authoring | `esper:spec` | Target spec file(s) or `<spec_root>/_work/<topic>.md` | Optional temporary `_work` file | Active spec work file and relevant spec files | Temporary `_work` file may be removed after landing |
 | Spec approval to planning | `esper:go` on a spec work file | Approved spec work file | `.esper/increments/active/<atomic-id>.md`, or `.esper/increments/active/<batch-id>.md` plus `.esper/increments/pending/<child-id>.md` files | `.esper/context.json` and active increment work file(s) | None |
 | Increment plan revision | `esper:atom` / `esper:batch` | `.esper/increments/active/<id>.md` | Optional `.esper/increments/pending/<child-id>.md` files in batch mode | Active increment work file and optional pending child increment files | Replaced or rewritten pending child increment files in batch mode, when the queue changes |
@@ -553,7 +555,7 @@ It must:
 - create the `<spec_root>/_work/` directory used for temporary spec coordination files
 - create deterministic placeholder or template spec files
 - create `.esper/context.json`
-- write `.esper/WORKFLOW.md` or the equivalent tool-neutral bootstrap file from a deterministic template
+- write `.esper/WORKFLOW.md` plus deterministic root bootstrap docs for agent hosts
 - persist user workflow preferences captured by the instruction layer
 
 Constraints:
@@ -632,6 +634,7 @@ Requirements:
 The CLI toolkit must also write a deterministic human-readable bootstrap document such as:
 
 - `AGENTS.md`
+- `CLAUDE.md`
 - `.esper/WORKFLOW.md`
 
 That document must tell an external tool:
@@ -640,6 +643,8 @@ That document must tell an external tool:
 2. Whether an increment is active
 3. Which spec is authoritative for current work
 4. What verification commands are expected
+
+When `AGENTS.md` or `CLAUDE.md` already exists, the instruction layer should preserve user-authored content and replace or append only a bounded `## EsperKit` section.
 
 ### B. Spec System
 
@@ -1367,7 +1372,7 @@ In practice, that means the instruction layer must support:
 - Add `schema_version`
 - Add `spec_root`
 - Add `.esper/context.json`
-- Add `.esper/WORKFLOW.md` or equivalent bootstrap doc
+- Add `.esper/WORKFLOW.md` plus root bootstrap docs
 - Add migration support for generated assets
 
 ### Phase 2: Spec Foundation
@@ -1407,7 +1412,7 @@ In practice, that means the instruction layer must support:
 1. Should spec maintenance be enforced at increment finish, ship, or both?
 2. How strict should traceability be for very small increments?
 3. Should spec sections support stable requirement IDs by default?
-4. Should provider-specific bootstrap files be generated in addition to the tool-neutral bootstrap file?
+4. How much provider-specific customization should the generated bootstrap files contain beyond the shared core workflow?
 
 ## Decision Summary
 
