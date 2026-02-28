@@ -459,11 +459,11 @@ async function install(options = {}) {
   if (alreadyInit) {
     console.log('Done. esper is already set up in this project.')
     if (provider === 'claude') {
-      console.log('Open Claude Code here and run /e:ctx to see your project context.')
+      console.log('Open Claude Code here and run /esper:context to see your project context.')
     } else if (provider === 'codex') {
       console.log('Open Codex here and run the `esper:context` skill to see your project context.')
     } else {
-      console.log('Open Claude Code or Codex here and run /e:ctx (Claude) or `esper:context` (Codex).')
+      console.log('Open Claude Code or Codex here and run /esper:context (Claude) or `esper:context` (Codex).')
     }
   } else if (inGitRepo) {
     if (provider === 'codex') {
@@ -471,13 +471,13 @@ async function install(options = {}) {
     } else if (provider === 'all') {
       console.log('Done. Open Claude Code or Codex in this directory and run:')
       console.log('')
-      console.log('  /e:init')
+      console.log('  /esper:init')
       console.log('')
       console.log('In Codex, run the `esper:init` skill.')
     } else {
       console.log('Done. Open Claude Code in this directory and run:')
       console.log('')
-      console.log('  /e:init')
+      console.log('  /esper:init')
     }
   } else {
     if (provider === 'codex') {
@@ -485,13 +485,13 @@ async function install(options = {}) {
     } else if (provider === 'all') {
       console.log('Done. Navigate to your project directory, then open Claude Code or Codex and run:')
       console.log('')
-      console.log('  /e:init')
+      console.log('  /esper:init')
       console.log('')
       console.log('In Codex, run the `esper:init` skill.')
     } else {
       console.log('Done. Navigate to your project directory, then open Claude Code and run:')
       console.log('')
-      console.log('  /e:init')
+      console.log('  /esper:init')
     }
   }
 }
