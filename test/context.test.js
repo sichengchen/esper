@@ -3,11 +3,12 @@ import assert from 'node:assert/strict'
 import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { spawnSync } from 'node:child_process'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const CLI = join(__dirname, '..', 'bin', 'cli.js')
+const CONTEXT_MODULE = pathToFileURL(join(__dirname, '..', 'lib', 'context.js')).href
 
 function runCLI(args, cwd) {
   return spawnSync(process.execPath, [CLI, ...args], {
@@ -82,6 +83,63 @@ test('context get — includes spec_root and commands from config', async () => 
     const ctx = JSON.parse(result.stdout)
     assert.equal(ctx.spec_root, 'specs')
     assert.equal(ctx.commands.test, 'npm test')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('context build — prefers an active child over a batch wrapper', async () => {
+  const tmp = await setupProject()
+  await mkdir(join(tmp, '.esper', 'increments', 'active'), { recursive: true })
+  await writeFile(join(tmp, '.esper', 'increments', 'active', '001-batch-work.md'), `---
+id: 1
+title: Batch work
+status: active
+type: batch
+lane: systematic
+parent: null
+depends_on: null
+priority: 1
+created: 2026-02-28
+spec: null
+spec_section: null
+---
+
+# Batch work
+
+## Queue
+- 002: Child work
+`)
+  await writeFile(join(tmp, '.esper', 'increments', 'active', '002-child-work.md'), `---
+id: 2
+title: Child work
+status: active
+type: feature
+lane: atomic
+parent: 1
+depends_on: null
+priority: 1
+created: 2026-02-28
+spec: product/behavior.md
+spec_section: null
+---
+
+# Child work
+`)
+  try {
+    const result = spawnSync(process.execPath, [
+      '--input-type=module',
+      '-e',
+      `import { build } from ${JSON.stringify(CONTEXT_MODULE)}; const ctx = await build(); console.log(JSON.stringify(ctx));`,
+    ], {
+      cwd: tmp,
+      encoding: 'utf8',
+    })
+    assert.equal(result.status, 0)
+
+    const ctx = JSON.parse(result.stdout)
+    assert.equal(ctx.active_increment, '002-child-work.md')
+    assert.deepEqual(ctx.active_increment_scope, ['product/behavior.md'])
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }

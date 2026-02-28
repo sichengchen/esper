@@ -224,7 +224,7 @@ test('increment set — exits 1 for missing increment', async () => {
 
 // --- group ---
 
-test('increment group — creates parent in active and children in pending', async () => {
+test('increment group — creates a parent wrapper and activates the first child', async () => {
   const tmp = await setupProject({})
   await mkdir(join(tmp, '.esper', 'increments', 'active'), { recursive: true })
   await mkdir(join(tmp, '.esper', 'increments', 'pending'), { recursive: true })
@@ -237,6 +237,7 @@ test('increment group — creates parent in active and children in pending', asy
     assert.equal(result.status, 0)
     const parentFilename = result.stdout.trim()
     assert.ok(existsSync(join(tmp, '.esper', 'increments', 'active', parentFilename)))
+    assert.ok(existsSync(join(tmp, '.esper', 'increments', 'active', '002-child-a.md')))
 
     // Check parent content
     const parentContent = await readFile(join(tmp, '.esper', 'increments', 'active', parentFilename), 'utf8')
@@ -245,10 +246,47 @@ test('increment group — creates parent in active and children in pending', asy
     assert.ok(parentContent.includes('Child A'))
     assert.ok(parentContent.includes('Child B'))
 
-    // Check children exist in pending
+    const firstChildContent = await readFile(join(tmp, '.esper', 'increments', 'active', '002-child-a.md'), 'utf8')
+    assert.ok(firstChildContent.includes('status: active'))
+    assert.ok(firstChildContent.includes('## Scope'))
+
+    // Check only remaining children stay in pending
     const { readdir } = await import('node:fs/promises')
-    const pending = await readdir(join(tmp, '.esper', 'increments', 'pending'))
-    assert.equal(pending.length, 2)
+    const pending = (await readdir(join(tmp, '.esper', 'increments', 'pending'))).sort()
+    assert.deepEqual(pending, ['003-child-b.md'])
+
+    const ctx = JSON.parse(await readFile(join(tmp, '.esper', 'context.json'), 'utf8'))
+    assert.equal(ctx.active_increment, '002-child-a.md')
+    assert.deepEqual(ctx.active_increment_scope, [])
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('increment finish — advances to the next batch child', async () => {
+  const tmp = await setupProject({})
+  await mkdir(join(tmp, '.esper', 'increments', 'active'), { recursive: true })
+  await mkdir(join(tmp, '.esper', 'increments', 'pending'), { recursive: true })
+  try {
+    const children = JSON.stringify([
+      { title: 'Child A', type: 'feature', spec: 'product/alpha.md' },
+      { title: 'Child B', type: 'fix', spec: 'product/beta.md' },
+    ])
+    const grouped = runCLI(['increment', 'group', '--title', 'Batch work', '--children', children], tmp)
+    assert.equal(grouped.status, 0)
+
+    const finished = runCLI(['increment', 'finish', '002-child-a.md'], tmp)
+    assert.equal(finished.status, 0)
+    assert.ok(existsSync(join(tmp, '.esper', 'increments', 'done', '002-child-a.md')))
+    assert.ok(existsSync(join(tmp, '.esper', 'increments', 'active', '003-child-b.md')))
+    assert.ok(!existsSync(join(tmp, '.esper', 'increments', 'pending', '003-child-b.md')))
+
+    const nextChildContent = await readFile(join(tmp, '.esper', 'increments', 'active', '003-child-b.md'), 'utf8')
+    assert.ok(nextChildContent.includes('status: active'))
+
+    const ctx = JSON.parse(await readFile(join(tmp, '.esper', 'context.json'), 'utf8'))
+    assert.equal(ctx.active_increment, '003-child-b.md')
+    assert.deepEqual(ctx.active_increment_scope, ['product/beta.md'])
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }
