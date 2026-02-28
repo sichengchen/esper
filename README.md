@@ -10,59 +10,46 @@ Works with Claude Code and Codex. Zero runtime dependencies.
 
 ```bash
 npm install -g esperkit
-```
-
-Then install the host instruction layer in your repo:
-
-```bash
 esperkit install
 ```
 
-Initialize the project through the agent:
+Then initialize through the agent:
 
 ```
 esper:init
 ```
 
-This creates the `.esper/` directory, a constitution, spec scaffolding, and workflow config.
+This interviews you, creates the `.esper/` directory with a constitution, spec scaffolding, and workflow config.
 
-## Two Workflows
+## Workflows
 
 EsperKit supports two complementary development styles.
 
-### Spec-to-Code
-
-Define or revise the system spec first, then derive implementation from it.
+**Spec-to-Code** — define or revise the system spec first, then derive implementation from it.
 
 ```
-esper:spec          # open or create the spec working file
-                    # revise with the agent until accurate
-esper:go            # approve specs → derive increment plan
-                    # revise the plan until acceptable
-esper:go            # approve plan → implement
-esper:review        # verify implementation (optional)
+esper:spec    →  open or create the spec working file, revise with the agent
+esper:go      →  approve specs, derive increment plan
+esper:go      →  approve plan, implement
+esper:review  →  verify implementation
 ```
 
-### Plan-to-Spec
-
-Start from a direct request, implement in bounded increments, then sync back into specs.
+**Plan-to-Spec** — start from a direct request, implement in bounded increments, then sync back into specs.
 
 ```
-esper:atom          # single bounded task
-esper:batch         # queued series of related increments
-                    # revise the plan until acceptable
-esper:go            # approve plan → implement
-esper:review        # verify implementation (optional)
-esper:sync          # force spec sync if needed (usually automatic)
+esper:atom    →  single bounded task (or esper:batch for a queue)
+esper:go      →  approve plan, implement
+esper:review  →  verify implementation
+esper:sync    →  force spec sync if needed (usually automatic)
 ```
+
+Both workflows use `esper:go` as the shared approval gate and `esper:continue` to resume interrupted sessions.
 
 ## Commands
 
-### Agent Commands (Skills / Slash Commands)
-
 | Command | What it does |
 |---|---|
-| `esper:init` | Interview → scaffold project → write constitution |
+| `esper:init` | Interview, scaffold project, write constitution |
 | `esper:spec` | Open or create the spec working file for authoring and revision |
 | `esper:atom` | Create a single bounded increment from a direct request |
 | `esper:batch` | Create a queued series of related increments |
@@ -74,31 +61,30 @@ esper:sync          # force spec sync if needed (usually automatic)
 
 In Claude Code, these are invoked as slash commands: `/e:init`, `/e:spec`, `/e:atom`, `/e:go`, etc.
 
-### CLI Commands
+### CLI
 
 | Command | What it does |
 |---|---|
 | `esperkit install` | Install or update host-specific skills |
 | `esperkit init` | Create deterministic project scaffolding |
-| `esperkit config <action>` | Read or write project config |
+| `esperkit config` | Read or write project config |
 | `esperkit context get` | Print runtime context as JSON |
-| `esperkit spec <action>` | Manage the spec tree (index, get, create, list) |
-| `esperkit increment <action>` | Manage increments (list, create, activate, finish, archive) |
-| `esperkit exploration <action>` | Manage explorations |
+| `esperkit spec` | Manage the spec tree (index, get, create, list) |
+| `esperkit increment` | Manage increments (list, create, activate, finish, archive) |
 | `esperkit doctor` | Run project health checks |
 | `esperkit migrate` | Migrate project state to the latest schema |
 
 ## Core Concepts
 
-**Constitution** — a durable project-level document describing what the project is and is not, key technical decisions, testing strategy, and development principles.
+**Constitution** — durable project-level document describing what the project is and is not, key technical decisions, testing strategy, and principles.
 
-**Specs** — the long-lived system description for agents and humans. Describes architecture, behavior, interfaces, and constraints. Not temporary task notes.
+**Specs** — long-lived system description for agents and humans. Architecture, behavior, interfaces, constraints. Not temporary task notes.
 
-**Increments** — bounded units of delivery. Each stores what will change, why, how to verify it, and which specs it touches. Can be atomic (single task) or systematic (batch queue).
+**Increments** — bounded units of delivery. Each stores what will change, why, how to verify it, and which specs it touches. Atomic (single task) or systematic (batch queue).
 
-**Working file** — the Markdown file that serves as the shared review surface between you and the agent at each workflow step. You can chat, edit it directly, or leave comments inside it.
+**Working file** — the Markdown file that serves as the shared review surface between you and the agent. Chat, edit directly, or leave comments inside it.
 
-## What EsperKit Creates
+## Project Structure
 
 ```
 .esper/
@@ -118,16 +104,7 @@ In Claude Code, these are invoked as slash commands: `/e:init`, `/e:spec`, `/e:a
 └── ...                     # organized by domain
 ```
 
-## Daily Loop
-
-1. Run `esper:context` if the current state is unclear.
-2. Create or revise the working file through `esper:spec`, `esper:atom`, or `esper:batch`.
-3. Run `esper:go` to approve and advance.
-4. Use `esper:review` for explicit verification.
-5. Specs sync automatically after implementation; use `esper:sync` to force or retry.
-6. Resume later with `esper:continue`.
-
-## How to Choose the Right Entry Command
+## Choosing the Right Entry
 
 | Situation | Command |
 |---|---|
@@ -144,6 +121,11 @@ In Claude Code, these are invoked as slash commands: `/e:init`, `/e:spec`, `/e:a
 - **AI-native by default** — simple intent-level commands; the agent handles the responsible next steps
 - **Zero dependencies** — installs instantly with no dependency tree
 - **Fail loudly** — verification steps that are advertised as blocking must block
+
+## Docs
+
+- [User Manual](docs/esperkit-user-manual.md) — day-to-day usage guide covering both workflows, all commands, and best practices
+- [Product Spec](specs/esperkit-spec.md) — full specification defining artifacts, requirements, and the workflow model
 
 ## License
 
