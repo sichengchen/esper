@@ -196,3 +196,63 @@ flowchart TD
     R -->|Yes| D
     R -->|No| S[Done]
 ```
+
+## Detailed Multi-Agent Flowchart
+
+Loop inventory:
+
+- spec revision loop: the user and agent keep revising the spec work file until the spec is approved
+- orchestration readiness loop: execution stops and returns to spec work when ambiguity, conflict, or missing approval is discovered
+- task dispatch loop: the orchestrator keeps dispatching ready task packets until the current repair round is fully integrated
+- worker red-green loop: each worker iterates on failing tests and implementation until the task packet satisfies its acceptance criteria
+- review-repair loop: reviewer findings become repair tasks and send the run back through task dispatch
+- human escalation loop: blocked or over-budget runs return to the human, who can resolve the issue and resume or change scope and return to spec authoring
+
+```mermaid
+flowchart TD
+    A[Open Spec Work File<br/>esper:spec] --> B[User and Agent Revise Spec]
+    B --> C{Spec approved?}
+    C -->|No| B
+    C -->|Yes| D[esper:go<br/>Approve spec]
+
+    D --> E[Materialize Parent Increment<br/>as execution ledger]
+    E --> F[Session bootstrap<br/>run baseline checks]
+    F --> G{Ambiguity, conflict,<br/>or missing approval?}
+    G -->|Yes| H[Return to spec authoring]
+    H --> B
+    G -->|No| I[Freeze approved spec<br/>and create run]
+
+    I --> J[Build task queue<br/>and mark ready tasks]
+    J --> K{Ready task exists?}
+    K -->|No| L[Reviewer evaluates<br/>merged candidate]
+    K -->|Yes| M[Dispatch task packet<br/>to worker]
+
+    M --> N[Worker reads task scope,<br/>files, and acceptance criteria]
+    N --> O[Worker derives or updates<br/>failing tests from approved behavior]
+    O --> P{Task tests passing<br/>and acceptance met?}
+    P -->|No| Q[Worker implements,<br/>re-runs checks, and refines]
+    Q --> O
+    P -->|Yes| R[Worker returns task result]
+
+    R --> S[Orchestrator integrates task result<br/>into candidate]
+    S --> T{More ready tasks<br/>in this round?}
+    T -->|Yes| K
+    T -->|No| L
+
+    L --> U{Review result?}
+    U -->|Pass| V[Human evaluates final candidate]
+    U -->|Findings| W[Persist review record<br/>and create repair tasks]
+    W --> X{Repair allowed<br/>within run limits?}
+    X -->|Yes| J
+    X -->|No| Y[Escalate to human]
+
+    Y --> Z{Human decision?}
+    Z -->|Resolve operational issue<br/>within approved scope| J
+    Z -->|Change scope or requirements| H
+    Z -->|Cancel or stop| AA[Run ends escalated]
+
+    V --> AB{Accepted?}
+    AB -->|Yes| AC[esper:review / esper:sync<br/>close out increment]
+    AB -->|Needs follow-up<br/>within approved scope| W
+    AB -->|Needs scope change| H
+```
