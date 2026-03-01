@@ -29,8 +29,7 @@ EsperKit supports two complementary development styles.
 
 ```
 esper:spec    →  open or create the spec working file, revise with the agent
-esper:go      →  approve specs, derive increment plan
-esper:go      →  approve plan, implement
+esper:go      →  approve spec and begin execution (no second approval gate)
 esper:review  →  verify implementation
 ```
 
@@ -53,7 +52,7 @@ Both workflows use `esper:go` as the shared approval gate and `esper:continue` t
 | `esper:spec` | Open or create the spec working file for authoring and revision |
 | `esper:atom` | Create a single bounded increment from a direct request |
 | `esper:batch` | Create a queued series of related increments |
-| `esper:go` | Approve the current working file and advance to the next stage |
+| `esper:go` | Cross the active approval boundary and advance the workflow |
 | `esper:continue` | Resume interrupted work from current project state |
 | `esper:review` | Verify implementation against the approved plan and specs |
 | `esper:sync` | Force or retry post-implementation code-to-spec sync |
@@ -69,8 +68,9 @@ Use the same `esper:*` command names across hosts, including Claude Code and Cod
 | `esperkit init` | Create deterministic project scaffolding |
 | `esperkit config` | Read or write project config |
 | `esperkit context get` | Print runtime context as JSON |
-| `esperkit spec` | Manage the spec tree (index, get, create, list) |
-| `esperkit increment` | Manage increments (list, create, activate, finish, archive) |
+| `esperkit spec` | Manage the spec tree (index, get, create, set-root, archive) |
+| `esperkit increment` | Manage increments (list, get, create, activate, finish, set, group) |
+| `esperkit run` | Manage autonomous runs (create, get, list, stop) |
 | `esperkit doctor` | Run project health checks |
 | `esperkit migrate` | Migrate project state to the latest schema |
 
@@ -80,7 +80,11 @@ Use the same `esper:*` command names across hosts, including Claude Code and Cod
 
 **Specs** — long-lived system description for agents and humans. Architecture, behavior, interfaces, constraints. Not temporary task notes.
 
-**Increments** — bounded units of delivery. Each stores what will change, why, how to verify it, and which specs it touches. Atomic (single task) or systematic (batch queue).
+**Increments** — bounded units of delivery. Each stores what will change, why, how to verify it, and which specs it touches. Single-job mode (one atomic increment) or queued mode (a series of increments processed sequentially).
+
+**Runs** — machine-readable autonomous execution records derived from an approved scope contract and its corresponding parent increment.
+
+**Task packets** — bounded work items inside a run, subordinate to the parent increment.
 
 **Working file** — the Markdown file that serves as the shared review surface between you and the agent. Chat, edit directly, or leave comments inside it.
 
@@ -92,11 +96,16 @@ Use the same `esper:*` command names across hosts, including Claude Code and Cod
 ├── context.json            # machine-readable runtime state
 ├── CONSTITUTION.md         # project vision and constraints
 ├── WORKFLOW.md             # agent bootstrap instructions
-└── increments/
-    ├── pending/            # queued work
-    ├── active/             # current working increment (max 1)
-    ├── done/               # completed, not yet archived
-    └── archived/           # closed historical increments
+├── increments/
+│   ├── pending/            # queued work
+│   ├── active/             # current working increment (max 1)
+│   ├── done/               # completed, not yet archived
+│   └── archived/           # closed historical increments
+└── runs/                   # autonomous execution records
+    └── <run-id>/
+        ├── run.json
+        ├── tasks/
+        └── reviews/
 
 <spec_root>/                # default: specs/
 ├── index.md                # spec tree entrypoint
@@ -108,24 +117,24 @@ Use the same `esper:*` command names across hosts, including Claude Code and Cod
 
 | Situation | Command |
 |---|---|
-| Architecture or behavior needs design before coding | `esper:spec` |
+| Architecture or behavior needs design before coding (approved spec goes directly to execution) | `esper:spec` |
 | Small, bounded task with a known outcome | `esper:atom` |
 | Multiple related changes that should be queued | `esper:batch` |
 | Returning after a break or state is unclear | `esper:context` |
 
 ## Design Principles
 
-- **Tool-neutral** — project state is readable without depending on one vendor's runtime
-- **Specs are durable** — the spec tree lives in files, stays revisable, and remains aligned with shipped work
-- **Progressive structure** — small work stays light; large work gets more rigor
-- **AI-native by default** — simple intent-level commands; the agent handles the responsible next steps
-- **Zero dependencies** — installs instantly with no dependency tree
-- **Fail loudly** — verification steps that are advertised as blocking must block
+- **Tool-neutral first** — project state must remain readable without dependence on one vendor runtime
+- **Specs are durable** — the spec tree must live in files, be revisable, and stay aligned with shipped behavior
+- **One contract at a time** — in Spec-to-Code, the approved spec is authoritative; in Plan-to-Spec, one parent increment is authoritative
+- **Frozen inputs for autonomy** — autonomous runs review against persisted artifacts, not conversation history
+- **Bounded autonomy** — automated loops require explicit stop conditions and escalation rules
+- **Human-readable behavior** — the spec tree must make intended and current behavior easy for a user to inspect quickly
 
 ## Docs
 
 - [User Manual](docs/esperkit-user-manual.md) — day-to-day usage guide covering both workflows, all commands, and best practices
-- [Product Spec](specs/esperkit-spec.md) — full specification defining artifacts, requirements, and the workflow model
+- [Spec Index](specs/index.md) — entrypoint to the split spec tree covering core, workflow, state, CLI, skills, and patterns
 
 ## License
 

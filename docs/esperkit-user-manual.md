@@ -1,7 +1,7 @@
 # EsperKit User Manual
 
 This manual introduces the revised EsperKit workflow for AI-assisted software development.
-It tracks the workflow model defined in `specs/esperkit-spec.md`.
+It tracks the workflow model defined in the spec tree under `specs/` (see `specs/index.md`).
 It is written for day-to-day users who want to understand how EsperKit works, when to use each command, and what files EsperKit manages in the repository.
 
 EsperKit supports two working styles:
@@ -41,16 +41,32 @@ They are not temporary task notes.
 An increment is a bounded unit of work.
 It stores the implementation plan, progress, verification notes, and links back to the relevant specs.
 
-### 4. Working File
+### 4. Behavior Descriptions
+
+A behavior description is a durable spec artifact that explains externally observable behavior in user-reviewable terms.
+
+When behavior is testable, the spec should prefer concrete scenarios with explicit preconditions, a clear trigger, and explicit expected outcomes. Approved behavior descriptions are the preferred source for behavior-driven test-first work.
+
+### 5. Working File
 
 Every meaningful step in EsperKit centers on a Markdown working file.
 That file is the shared review surface between you and the agent.
 
-Examples:
+Default rules:
 
-- a spec file
-- a temporary spec coordination file under `_work/`
-- an active increment file
+- In Spec-to-Code, the working file is the target spec file or a temporary `_work/` file; after approval, the parent increment becomes the execution ledger.
+- In atomic Plan-to-Spec, the active increment is the working file.
+- In batch Plan-to-Spec, the parent increment is the working file.
+
+### 6. Runs
+
+A run is a machine-readable autonomous execution record derived from the approved scope contract and its corresponding parent increment.
+
+Run artifacts are stored under `.esper/runs/<run-id>/` with a `run.json`, `tasks/`, and `reviews/` subdirectory.
+
+### 7. Task Packets
+
+A task packet is a bounded work item inside a run. It is subordinate to the parent increment and never becomes a competing top-level contract.
 
 ## Command Surface
 
@@ -59,9 +75,15 @@ This manual uses the canonical `esper:*` form across hosts:
 
 - `esper:init`
 - `esper:spec`
+- `esper:go`
 - `esper:atom`
+- `esper:batch`
+- `esper:review`
+- `esper:sync`
+- `esper:continue`
+- `esper:context`
 
-The workflow stays the same regardless of host integration details.
+The primary command surface stays small. The workflow stays the same regardless of host integration details.
 
 ## Installation and First-Time Setup
 
@@ -96,6 +118,7 @@ esper:init
 
 Typical generated artifacts:
 
+- `.esper/esper.json`
 - `.esper/context.json`
 - `.esper/WORKFLOW.md`
 - `.esper/CONSTITUTION.md`
@@ -103,6 +126,7 @@ Typical generated artifacts:
 - `.esper/increments/active/`
 - `.esper/increments/done/`
 - `.esper/increments/archived/`
+- `.esper/runs/`
 - the spec root and its `_work/` coordination area
 
 ### Setup Flow
@@ -144,7 +168,7 @@ You can provide feedback by:
 - editing the spec file directly
 - leaving comments in the working file
 
-### Step 3. Approve the Spec and Derive an Increment Plan
+### Step 3. Approve the Spec and Begin Execution
 
 Run:
 
@@ -155,25 +179,26 @@ esper:go
 When the active working file is a spec file, `esper:go` means:
 
 - approve the current spec work
-- derive an implementation plan
-- create an atomic increment or a batch queue
-- stop at plan review, not coding
+- derive a parent increment as an execution ledger
+- begin execution immediately unless ambiguity, conflict, or missing approval is discovered
 
-### Step 4. Review the Derived Increment
+There is no second approval gate for a derived increment plan in Spec-to-Code. The approved spec is the sole source of scope and requirements.
 
-The agent creates or updates the active increment Markdown file.
-You review and revise that plan until it is acceptable.
+If scope must change, the workflow returns to spec authoring and requires spec approval again.
 
-### Step 5. Approve the Increment and Start Implementation
+### Step 4. Execution
 
-Run `esper:go` again.
+For interactive execution:
 
-When the active working file is now an increment file, `esper:go` means:
+- run the configured baseline test command first when available
+- prefer red-green loops for bounded, testable changes
+- derive failing tests from approved behavior descriptions or scenarios when practical
 
-- approve the plan
-- begin implementation
-- validate changes
-- keep specs aligned if behavior changes
+For autonomous execution:
+
+- freeze the approved spec snapshot and the derived execution ledger
+- decompose work into bounded task packets
+- preserve approved scope throughout the run
 
 ### Spec-to-Code Flow
 
@@ -182,12 +207,12 @@ flowchart TD
     A[esper:spec<br/>Open spec working file] --> B[Revise spec with agent]
     B --> C{Spec approved?}
     C -->|No| B
-    C -->|Yes| D[esper:go<br/>Derive increment plan]
-    D --> E[Review increment working file]
-    E --> F{Plan approved?}
-    F -->|No| E
-    F -->|Yes| G[esper:go<br/>Implement]
-    G --> H[Review and sync]
+    C -->|Yes| D[esper:go<br/>Approve spec and begin execution]
+    D --> E{Execution mode?}
+    E -->|Interactive| F[Lead agent implements]
+    E -->|Autonomous| G[Orchestrator creates run<br/>workers implement task packets]
+    F --> H[Review and sync<br/>esper:review / esper:sync]
+    G --> H
 ```
 
 ## Workflow 2: Plan-to-Spec
@@ -230,8 +255,10 @@ The agent should provide a queue preview that shows:
 - planned increments
 - execution order
 - high-level scope of each increment
-- expected spec impact
-- validation approach
+- relevant spec files or sections expected to change
+- expected validation approach
+- planned agent roles for orchestration, implementation, and review when autonomous execution is enabled
+- autonomous stop conditions when autonomous execution is enabled
 
 ### Approve and Implement
 
@@ -280,7 +307,7 @@ flowchart TD
     C --> D
     D --> E{Plan approved?}
     E -->|No| D
-    E -->|Yes| F[esper:go<br/>Implement]
+    E -->|Yes| F[esper:go<br/>Approve plan and implement]
     F --> G[esper:review]
     G --> H[Auto sync specs<br/>or esper:sync]
     H --> I[Move increment to done]
@@ -291,24 +318,27 @@ flowchart TD
 Once a project is initialized, the day-to-day loop is simple:
 
 1. If you are unsure of the current state, run `esper:context`.
-2. Create or revise the current working file through `esper:spec`, `esper:atom`, or `esper:batch`.
-3. Run `esper:go` to approve the current working file and advance to the next stage.
-4. Use `esper:review` for explicit implementation verification.
-5. Let the agent sync specs automatically after implementation, and use `esper:sync` only when you need to force or retry that step.
-6. Resume later with `esper:continue` when needed.
+2. Re-establish current state with configured baseline checks before active execution resumes.
+3. Create or revise the current working file through `esper:spec`, `esper:atom`, or `esper:batch`.
+4. Run `esper:go` to cross the active approval boundary and advance the workflow.
+5. Let the workflow proactively validate, maintain specs, and emit explanations when review risk is high.
+6. Use `esper:review` for explicit implementation verification.
+7. Use `esper:sync` for post-implementation spec maintenance, or let the agent sync automatically.
+8. Resume later with `esper:continue` when needed.
 
 ### Daily Loop Flow
 
 ```mermaid
 flowchart LR
-    A[esper:context] --> B[Author or revise working file]
-    B --> C[esper:go]
-    C --> D[Agent advances workflow]
-    D --> E[esper:review]
-    E --> F[Auto sync specs<br/>or esper:sync]
-    F --> G{More work?}
-    G -->|Yes| A
-    G -->|No| H[Stop]
+    A[esper:context] --> B[Baseline checks]
+    B --> C[Author or revise working file]
+    C --> D[esper:go]
+    D --> E[Agent advances workflow]
+    E --> F[esper:review]
+    F --> G[Auto sync specs<br/>or esper:sync]
+    G --> H{More work?}
+    H -->|Yes| A
+    H -->|No| I[Stop]
 ```
 
 ## Primary Commands
@@ -325,17 +355,21 @@ Use this when the spec should lead the work.
 ### `esper:go`
 
 Shared approval command.
-It approves the current working file and advances the workflow.
+It crosses the active approval boundary and advances the workflow.
 
-- If the active file is a spec: derive the increment plan.
-- If the active file is an increment: start implementation.
+- If the active file is a spec: approve the spec, materialize a derived execution ledger, and begin execution (no second approval gate).
+- If the active file is an increment: approve the plan in Plan-to-Spec and begin implementation.
+- When resuming active execution, re-establishes current state with configured baseline checks when available.
+- For bounded, testable changes, prefers red-green work derived from approved behavior descriptions or scenarios.
 
 ### `esper:context`
 
 Summarizes current project state, including:
 
 - active increment
+- active run, if any
 - spec root
+- expected commands
 - likely next safe action
 
 ### `esper:atom`
@@ -349,15 +383,19 @@ Main entrypoint for queued, multi-increment work.
 ### `esper:review`
 
 Runs a focused review against the approved plan and relevant specs.
+Identifies drift, regressions, missing spec maintenance, and scope creep.
+May request explanation artifacts when correctness alone is not sufficient for safe review.
 
 ### `esper:sync`
 
-Runs an explicit code-to-spec sync pass.
+Reconciles shipped behavior back into the durable spec tree.
 Use it when you need to force or retry syncing the shipped implementation back into the specs.
+Behavior-changing work must update behavior descriptions and concrete scenarios before close-out.
 
 ### `esper:continue`
 
 Resumes work from current project state without rebuilding context manually.
+Restores confidence with configured baseline checks before active execution resumes.
 
 ## What EsperKit Writes in the Repo
 
@@ -365,17 +403,24 @@ A typical repository layout looks like this:
 
 ```text
 .esper/
+├── esper.json
 ├── context.json
-├── WORKFLOW.md
 ├── CONSTITUTION.md
+├── WORKFLOW.md
 ├── increments/
 │   ├── pending/
 │   ├── active/
 │   ├── done/
 │   └── archived/
+├── runs/
+│   └── <run-id>/
+│       ├── run.json
+│       ├── tasks/
+│       └── reviews/
 └── ...
 
 <spec_root>/
+├── index.md
 ├── _work/
 └── ...
 ```
@@ -421,13 +466,17 @@ Use `esper:context` when:
 - Expect spec sync to happen automatically after implementation; use `esper:sync` when you need to force or retry it.
 - Prefer `esper:atom` for small changes and `esper:batch` only when the queue is genuinely useful.
 - Use `esper:continue` instead of re-explaining context to the agent.
+- For bounded, testable changes, prefer red-green loops derived from approved behavior descriptions or scenarios.
+- Behavior-changing work must update behavior descriptions and concrete scenarios before close-out.
 
 ## Common Mistakes
 
 ### Editing Code Before the Plan Is Approved
 
-If you are still revising the increment file, stay in the planning loop.
+In Plan-to-Spec, if you are still revising the increment file, stay in the planning loop.
 Use `esper:go` only when you want execution to begin.
+
+In Spec-to-Code, remember that `esper:go` on an approved spec begins execution directly — there is no second plan-approval gate.
 
 ### Letting Specs Drift After Plan-First Work
 
@@ -446,10 +495,9 @@ Batch mode adds coordination overhead by design.
 ```text
 esper:init
 esper:spec
-esper:go
-esper:go
+esper:go       # approve spec and begin execution directly
 esper:review
-esper:sync   # optional: force a final code-to-spec pass
+esper:sync     # optional: force a final code-to-spec pass
 ```
 
 ### Example B: Direct Small Change
@@ -475,7 +523,7 @@ esper:sync   # optional: force or retry spec sync
 EsperKit is easiest to use if you remember three rules:
 
 1. Every major step happens around a Markdown file.
-2. `esper:go` is the approval gate that advances the workflow.
+2. `esper:go` crosses the active approval boundary — one gate, not two, in Spec-to-Code.
 3. Specs must stay aligned with shipped code.
 
 If you follow those rules, the rest of the command set stays small and predictable.
