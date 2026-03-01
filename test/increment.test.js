@@ -222,6 +222,29 @@ test('increment create — creates file in pending', async () => {
   }
 })
 
+test('increment create — includes execution_mode field', async () => {
+  const tmp = await setupProject({})
+  await mkdir(join(tmp, '.esper', 'increments', 'pending'), { recursive: true })
+  try {
+    const result = runCLI(['increment', 'create', '--title', 'New fields test', '--lane', 'atomic', '--type', 'feature'], tmp)
+    assert.equal(result.status, 0)
+    const filename = result.stdout.trim()
+    const content = await readFile(join(tmp, '.esper', 'increments', 'pending', filename), 'utf8')
+    assert.ok(content.includes('execution_mode: interactive'))
+    // run_id and spec_version are null by default, so they are omitted from frontmatter
+    assert.ok(!content.includes('run_id:'))
+    assert.ok(!content.includes('spec_version:'))
+
+    // Verify via JSON get that the fields are in the frontmatter when read
+    const getResult = runCLI(['increment', 'get', filename], tmp)
+    assert.equal(getResult.status, 0)
+    const json = JSON.parse(getResult.stdout)
+    assert.equal(json.execution_mode, 'interactive')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
 test('increment next-id — finds max across all directories', async () => {
   const tmp = await setupProject({
     pending: { '001-first.md': INC_A },

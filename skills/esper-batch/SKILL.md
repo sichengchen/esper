@@ -24,6 +24,7 @@ Break the feature set into a queue of increments:
 2. Order them by dependency (what must come first)
 3. Each increment should be small enough for a single implementation session
 4. Identify which spec files each increment touches
+5. Consider the `increment_policy.max_files_per_atomic_increment` limit from config
 
 For each increment, define:
 - **Title**: concise, imperative
@@ -31,6 +32,7 @@ For each increment, define:
 - **Lane**: atomic (usually, unless it's a cross-cutting refactor)
 - **Spec**: which spec file is relevant
 - **Priority**: execution order (1 = first)
+- **Execution mode**: `interactive` (default) or `autonomous`
 
 ## Step 4: Present the queue
 
@@ -48,6 +50,11 @@ Include for each:
 - Verification approach
 - PR behavior (per workflow_defaults)
 
+**If any increment uses `autonomous` execution mode**, also show:
+- Planned agent roles for orchestration, implementation, and review (from `agent_roles` config)
+- Stop conditions (from `autonomous_run_policy` config)
+- The frozen spec inputs that will be used during the run
+
 ## Step 5: Create the batch
 
 Once the user approves the queue, create it:
@@ -58,6 +65,9 @@ Build the children JSON array and run:
 This creates:
 - A parent batch increment in `active/` (systematic lane)
 - Child increments in `pending/` (one per queue item)
+
+If any child uses autonomous execution, set the execution_mode:
+`esperkit increment set <filename> execution_mode autonomous`
 
 ## Step 6: Stay in plan mode
 
@@ -72,5 +82,8 @@ Do NOT begin implementation. Batch mode is for planning the queue.
 - `esperkit increment list` — list all increments
 - `esperkit increment group --title "..." --children '<json>'` — create batch
 - `esperkit increment activate <file>` — activate first child
+- `esperkit increment set <file> <field> <value>` — update increment field
 - `esperkit spec index` — show spec tree
 - `esperkit spec get <file>` — read a spec
+- `esperkit config get agent_roles` — read agent role mappings
+- `esperkit config get autonomous_run_policy` — read run policy

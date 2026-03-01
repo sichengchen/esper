@@ -24,7 +24,7 @@ Before scaffolding, check for root bootstrap docs:
 
 ## Step 1: Interview the user
 
-Use `AskUserQuestion` to interview the user. Cover these areas in 2–3 rounds.
+Use `AskUserQuestion` to interview the user. Cover these areas in 3–4 rounds.
 
 **Round 1 — Project vision**:
 - What is this project and what problem does it solve?
@@ -37,11 +37,25 @@ Use `AskUserQuestion` to interview the user. Cover these areas in 2–3 rounds.
 - What command starts the dev server?
 
 **Round 3 — Workflow preferences** (use AskUserQuestion with these as options):
-- Default work mode: `atom` (single-increment focus) or `batch` (multi-increment queue)?
-- Commit granularity: `per-increment` or `per-file`?
-- PR policy: `explicit-only` (user triggers) or `auto-per-increment`?
+- Commit behavior: how commits should be scoped and when to create them
+- PR behavior: when to create PRs and how to group them
 - Validation mode: `blocking` (must pass before advancing) or `advisory`?
 - Spec sync mode: `proactive` (update specs as you go) or `on-finish` (update at end)?
+- Review behavior: when to require review passes
+
+**Round 4 — Multi-agent preferences** (use AskUserQuestion):
+- Enable autonomous execution? (yes/no — default: no)
+- If yes, ask about agent roles:
+  - Orchestrator provider: which agent/tool handles planning and coordination? (e.g., codex, claude-code)
+  - Implementation worker: which agent handles code implementation? (e.g., claude-code, codex)
+  - Reviewer: which agent handles review passes? (e.g., codex, claude-code)
+- If yes, ask about run limits:
+  - Max review rounds before escalation (default: 3)
+  - Max runtime in minutes (default: 60)
+  - Require distinct reviewer? (default: yes)
+  - Allow parallel tasks? (default: no)
+
+If the user declines autonomous execution, skip agent role questions and use defaults.
 
 ## Step 2: Write CONSTITUTION.md
 
@@ -61,7 +75,19 @@ Run `esperkit init` with any options from the interview (e.g., `--spec_root` if 
 
 Run `esperkit config set commands '<json>'` with the test/lint/typecheck/dev commands from the interview.
 
-Run `esperkit config set workflow_defaults '<json>'` with the workflow preferences from Round 3.
+Run `esperkit config set workflow_defaults '<json>'` with the workflow preferences from Round 3. Use prompt-style instruction strings:
+- `planning`: when to use atom vs batch
+- `commits`: commit scoping and granularity guidance
+- `pull_requests`: PR creation and grouping guidance
+- `validation`: enforcement behavior
+- `spec_sync`: code-to-spec synchronization timing
+- `review`: review timing and rigor
+- `retention`: increment close-out and archival guidance
+
+If multi-agent preferences were collected in Round 4:
+- Run `esperkit config set agent_roles '<json>'` with the role mappings
+- Run `esperkit config set autonomous_run_policy '<json>'` with the run limits
+- Optionally set `provider_defaults` for provider-specific guidance
 
 ## Step 5: Explain what was created
 
@@ -76,13 +102,14 @@ If `AGENTS.md` or `CLAUDE.md` did not exist:
 - Keep the scaffolded files from `esperkit init`.
 
 Summarize the scaffolding:
-- `.esper/esper.json` — project config
+- `.esper/esper.json` — project config (including agent roles and run policy if configured)
 - `.esper/context.json` — runtime context for agent interop
 - `.esper/CONSTITUTION.md` — project vision and constraints
 - `.esper/WORKFLOW.md` — how to work with esper
 - `AGENTS.md` — tool-neutral bootstrap instructions at the repo root
 - `CLAUDE.md` — Claude-specific bootstrap instructions at the repo root
 - `.esper/increments/` — increment lifecycle directories
+- `.esper/runs/` — autonomous execution records
 - `specs/` — spec tree (system, product, interfaces)
 
 ## Step 6: Next steps

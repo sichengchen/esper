@@ -88,6 +88,66 @@ test('context get — includes spec_root and commands from config', async () => 
   }
 })
 
+test('context build — includes active_run and active_execution_mode', async () => {
+  const tmp = await setupProject()
+  try {
+    const result = spawnSync(process.execPath, [
+      '--input-type=module',
+      '-e',
+      `import { build } from ${JSON.stringify(CONTEXT_MODULE)}; const ctx = await build(); console.log(JSON.stringify(ctx));`,
+    ], {
+      cwd: tmp,
+      encoding: 'utf8',
+    })
+    assert.equal(result.status, 0)
+    const ctx = JSON.parse(result.stdout)
+    assert.equal(ctx.active_run, null)
+    assert.equal(ctx.active_execution_mode, 'interactive')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('context build — derives active_execution_mode from increment', async () => {
+  const tmp = await setupProject()
+  await mkdir(join(tmp, '.esper', 'increments', 'active'), { recursive: true })
+  await writeFile(join(tmp, '.esper', 'increments', 'active', '001-auto-work.md'), `---
+id: 1
+title: Auto work
+status: active
+type: feature
+lane: atomic
+execution_mode: autonomous
+parent: null
+depends_on: null
+priority: 1
+created: 2026-03-01
+spec: null
+spec_section: null
+run_id: null
+spec_version: null
+---
+
+# Auto work
+`)
+  try {
+    const result = spawnSync(process.execPath, [
+      '--input-type=module',
+      '-e',
+      `import { build } from ${JSON.stringify(CONTEXT_MODULE)}; const ctx = await build(); console.log(JSON.stringify(ctx));`,
+    ], {
+      cwd: tmp,
+      encoding: 'utf8',
+    })
+    assert.equal(result.status, 0)
+    const ctx = JSON.parse(result.stdout)
+    assert.equal(ctx.active_execution_mode, 'autonomous')
+    assert.equal(ctx.active_increment, '001-auto-work.md')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
 test('context build — prefers an active child over a batch wrapper', async () => {
   const tmp = await setupProject()
   await mkdir(join(tmp, '.esper', 'increments', 'active'), { recursive: true })

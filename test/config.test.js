@@ -20,30 +20,28 @@ async function setupEsperProject(config) {
   const tmp = await mkdtemp(join(tmpdir(), 'esper-config-test-'))
   await mkdir(join(tmp, '.esper'), { recursive: true })
   const esperConfig = config ?? {
-    schema_version: 1,
+    schema_version: 2,
     backlog_mode: 'local',
     spec_root: 'specs',
     commands: { test: '', lint: '', typecheck: '', dev: '' },
     workflow_defaults: {
-      commit_granularity: 'per-increment',
-      auto_commit: false,
-      pr_policy: 'explicit-only',
-      pr_grouping: 'per-increment',
-      validation_mode: 'blocking',
-      spec_sync_mode: 'proactive',
-      default_work_mode: 'atom',
-      auto_review_before_sync: false,
-      increment_retention_policy: 'keep',
+      planning: 'Default to atom.',
+      commits: 'One commit per increment.',
+      pull_requests: 'One PR per increment.',
+      validation: 'Run tests before marking complete.',
+      spec_sync: 'Sync specs proactively.',
+      review: 'Review before sync.',
+      retention: 'Keep in done.',
     },
   }
   await writeFile(join(tmp, '.esper', 'esper.json'), JSON.stringify(esperConfig, null, 2) + '\n')
   await writeFile(join(tmp, '.esper', 'context.json'), JSON.stringify({
-    schema_version: esperConfig.schema_version ?? 1,
+    schema_version: esperConfig.schema_version ?? 2,
     spec_root: esperConfig.spec_root ?? 'specs',
     constitution_path: null,
     active_increment: null,
     active_increment_scope: [],
-    workflow_mode: esperConfig.workflow_defaults?.default_work_mode ?? 'atom',
+    workflow_mode: 'atom',
     commands: esperConfig.commands ?? { test: '', lint: '', typecheck: '', dev: '' },
   }, null, 2) + '\n')
   return tmp
@@ -75,7 +73,7 @@ test('config get — prints full JSON when no key given', async () => {
     const result = runCLI(['config', 'get'], tmp)
     assert.equal(result.status, 0)
     const json = JSON.parse(result.stdout)
-    assert.equal(json.schema_version, 1)
+    assert.equal(json.schema_version, 2)
     assert.equal(json.spec_root, 'specs')
     assert.equal(json.backlog_mode, 'local')
   } finally {
@@ -112,9 +110,9 @@ test('config get — reads workflow_defaults', async () => {
     const result = runCLI(['config', 'get', 'workflow_defaults'], tmp)
     assert.equal(result.status, 0)
     const json = JSON.parse(result.stdout)
-    assert.equal(json.commit_granularity, 'per-increment')
-    assert.equal(json.default_work_mode, 'atom')
-    assert.equal(json.auto_commit, false)
+    assert.equal(json.planning, 'Default to atom.')
+    assert.equal(json.commits, 'One commit per increment.')
+    assert.equal(json.review, 'Review before sync.')
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }
@@ -167,19 +165,125 @@ test('config set — parses JSON values', async () => {
   }
 })
 
-test('config set — refreshes workflow mode in context.json', async () => {
+test('config set — supports dot-notation for nested keys', async () => {
   const tmp = await setupEsperProject()
   try {
     const result = runCLI([
       'config',
       'set',
-      'workflow_defaults',
-      '{"default_work_mode":"batch","commit_granularity":"per-increment"}',
+      'workflow_defaults.planning',
+      'Always use batch mode.',
     ], tmp)
     assert.equal(result.status, 0)
+    assert.equal(result.stdout.trim(), 'Always use batch mode.')
 
-    const ctx = JSON.parse(await readFile(join(tmp, '.esper', 'context.json'), 'utf8'))
-    assert.equal(ctx.workflow_mode, 'batch')
+    const raw = await readFile(join(tmp, '.esper', 'esper.json'), 'utf8')
+    const json = JSON.parse(raw)
+    assert.equal(json.workflow_defaults.planning, 'Always use batch mode.')
+    // Other keys preserved
+    assert.equal(json.workflow_defaults.commits, 'One commit per increment.')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('config get — reads new config sections via dot-notation', async () => {
+  const config = {
+    schema_version: 2,
+    backlog_mode: 'local',
+    spec_root: 'specs',
+    commands: { test: '', lint: '', typecheck: '', dev: '' },
+    workflow_defaults: { planning: 'Default to atom.', commits: 'One per increment.', pull_requests: '', validation: '', spec_sync: '', review: '', retention: '' },
+    spec_policy: { maintenance: 'Always update specs.', approval: 'Require approval.', drift: 'Fail on drift.' },
+    increment_policy: { sizing: 'Small.', batching: 'Batch when needed.', execution: 'Interactive default.', max_files_per_atomic_increment: 8 },
+    agent_roles: {
+      orchestrator: { provider: 'codex', host: 'codex', fresh_invocation: true, launch: { command: 'codex', args: [], env: {}, workdir_strategy: 'repo-root', permission_profile: 'default' } },
+      implementer: { provider: 'claude-code', host: 'claude-code', fresh_invocation: true, launch: { command: 'claude', args: ['code'], env: {}, workdir_strategy: 'task-worktree', permission_profile: 'bypass' } },
+      reviewer: { provider: 'codex', host: 'codex', fresh_invocation: true, launch: { command: 'codex', args: [], env: {}, workdir_strategy: 'task-worktree', permission_profile: 'read-heavy' } },
+    },
+    autonomous_run_policy: { enabled: true, max_review_rounds: 3, max_runtime_minutes: 60, max_cost: null, require_distinct_reviewer: true, allow_parallel_tasks: true },
+    provider_defaults: {},
+  }
+  const tmp = await setupEsperProject(config)
+  try {
+    // Top-level section
+    let result = runCLI(['config', 'get', 'spec_policy'], tmp)
+    assert.equal(result.status, 0)
+    const sp = JSON.parse(result.stdout)
+    assert.equal(sp.maintenance, 'Always update specs.')
+
+    // Dot-notation
+    result = runCLI(['config', 'get', 'agent_roles.orchestrator.provider'], tmp)
+    assert.equal(result.status, 0)
+    assert.equal(result.stdout.trim(), 'codex')
+
+    result = runCLI(['config', 'get', 'autonomous_run_policy.max_review_rounds'], tmp)
+    assert.equal(result.status, 0)
+    assert.equal(result.stdout.trim(), '3')
+
+    result = runCLI(['config', 'get', 'increment_policy.max_files_per_atomic_increment'], tmp)
+    assert.equal(result.status, 0)
+    assert.equal(result.stdout.trim(), '8')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('config set — sets nested key via dot-notation', async () => {
+  const config = {
+    schema_version: 2,
+    backlog_mode: 'local',
+    spec_root: 'specs',
+    commands: { test: '', lint: '', typecheck: '', dev: '' },
+    workflow_defaults: { planning: '', commits: '', pull_requests: '', validation: '', spec_sync: '', review: '', retention: '' },
+    agent_roles: {
+      orchestrator: { provider: '', host: '', fresh_invocation: true, launch: {} },
+      implementer: { provider: '', host: '', fresh_invocation: true, launch: {} },
+      reviewer: { provider: '', host: '', fresh_invocation: true, launch: {} },
+    },
+    autonomous_run_policy: { enabled: false, max_review_rounds: 3, max_runtime_minutes: 60, max_cost: null, require_distinct_reviewer: true, allow_parallel_tasks: false },
+  }
+  const tmp = await setupEsperProject(config)
+  try {
+    let result = runCLI(['config', 'set', 'agent_roles.orchestrator.provider', 'codex'], tmp)
+    assert.equal(result.status, 0)
+
+    const raw = await readFile(join(tmp, '.esper', 'esper.json'), 'utf8')
+    const json = JSON.parse(raw)
+    assert.equal(json.agent_roles.orchestrator.provider, 'codex')
+    // Other fields preserved
+    assert.equal(json.agent_roles.implementer.provider, '')
+
+    result = runCLI(['config', 'set', 'autonomous_run_policy.enabled', 'true'], tmp)
+    assert.equal(result.status, 0)
+    const raw2 = await readFile(join(tmp, '.esper', 'esper.json'), 'utf8')
+    const json2 = JSON.parse(raw2)
+    assert.equal(json2.autonomous_run_policy.enabled, true)
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('init — creates new config sections in esper.json', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'esper-config-test-'))
+  try {
+    const result = spawnSync(process.execPath, [join(dirname(fileURLToPath(import.meta.url)), '..', 'bin', 'cli.js'), 'init'], { cwd: tmp, encoding: 'utf8' })
+    assert.equal(result.status, 0)
+    const raw = await readFile(join(tmp, '.esper', 'esper.json'), 'utf8')
+    const config = JSON.parse(raw)
+
+    // New sections exist
+    assert.ok(config.spec_policy)
+    assert.equal(typeof config.spec_policy.maintenance, 'string')
+    assert.ok(config.increment_policy)
+    assert.equal(typeof config.increment_policy.max_files_per_atomic_increment, 'number')
+    assert.ok(config.agent_roles)
+    assert.ok(config.agent_roles.orchestrator)
+    assert.ok(config.agent_roles.implementer)
+    assert.ok(config.agent_roles.reviewer)
+    assert.ok(config.autonomous_run_policy)
+    assert.equal(config.autonomous_run_policy.enabled, false)
+    assert.ok(config.provider_defaults !== undefined)
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }
