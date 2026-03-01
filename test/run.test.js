@@ -87,6 +87,59 @@ test('run create — creates run directory and run.json', async () => {
   }
 })
 
+test('run create — reads stop_conditions from autonomous_run_policy', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'esper-run-test-'))
+  await mkdir(join(tmp, '.esper', 'increments', 'active'), { recursive: true })
+  await mkdir(join(tmp, '.esper', 'runs'), { recursive: true })
+  await writeFile(join(tmp, '.esper', 'esper.json'), JSON.stringify({
+    schema_version: 2,
+    spec_root: 'specs',
+    commands: { test: 'npm test' },
+    workflow_defaults: {},
+    autonomous_run_policy: {
+      enabled: true,
+      max_review_rounds: 5,
+      max_runtime_minutes: 120,
+      max_cost: 50,
+      require_distinct_reviewer: true,
+      allow_parallel_tasks: true,
+    },
+  }, null, 2) + '\n')
+  await writeFile(join(tmp, '.esper', 'context.json'), JSON.stringify({
+    schema_version: 2,
+    spec_root: 'specs',
+    active_increment: '001-test-work.md',
+    active_increment_scope: [],
+    active_run: null,
+    active_execution_mode: 'interactive',
+    workflow_mode: 'atom',
+    commands: { test: 'npm test' },
+  }, null, 2) + '\n')
+  await writeFile(join(tmp, '.esper', 'increments', 'active', '001-test-work.md'), `---
+id: 1
+title: Test work
+status: active
+type: feature
+lane: atomic
+execution_mode: autonomous
+spec: specs/test.md
+---
+# Test work
+`)
+  try {
+    const result = runCLI(['run', 'create', '001-test-work.md'], tmp)
+    assert.equal(result.status, 0, `Failed:\n${result.stderr}`)
+    const runId = result.stdout.trim()
+
+    const runData = JSON.parse(await readFile(join(tmp, '.esper', 'runs', runId, 'run.json'), 'utf8'))
+    assert.equal(runData.stop_conditions.max_review_rounds, 5)
+    assert.equal(runData.stop_conditions.max_runtime_minutes, 120)
+    assert.equal(runData.stop_conditions.max_cost, 50)
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
 test('run create — exits 1 for missing increment', async () => {
   const tmp = await setupProject()
   try {
