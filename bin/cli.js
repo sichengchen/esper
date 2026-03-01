@@ -355,6 +355,24 @@ async function main() {
       }
       break
     }
+    case 'run': {
+      const run = await import('../lib/run.js')
+      switch (action) {
+        case 'create':       return run.create(rest[0])
+        case 'get':          return run.get(rest[0])
+        case 'list':         return run.list()
+        case 'stop':         return run.stop(rest[0], rest[1])
+        case 'add-task':     return run.addTask(rest[0], rest[1])
+        case 'get-task':     return run.getTask(rest[0], rest[1])
+        case 'list-tasks':   return run.listTasks(rest[0])
+        case 'add-review':   return run.addReview(rest[0], rest[1])
+        case 'list-reviews': return run.listReviews(rest[0])
+        default:
+          console.error('Usage: esperkit run <create|get|list|stop|add-task|get-task|list-tasks|add-review|list-reviews>')
+          process.exit(1)
+      }
+      break
+    }
     case 'doctor': {
       const doctor = await import('../lib/doctor.js')
       return doctor.run()
@@ -365,7 +383,7 @@ async function main() {
     }
     default:
       console.error(`Unknown command: ${subcommand}`)
-      console.error('Usage: esperkit [install|init|config|context|spec|increment|exploration|doctor|migrate]')
+      console.error('Usage: esperkit [install|init|config|context|spec|increment|run|exploration|doctor|migrate]')
       process.exit(1)
   }
 }

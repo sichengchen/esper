@@ -35,7 +35,7 @@ test('migrate — adds schema_version to a v0.x project', async () => {
     assert.equal(result.status, 0)
     const raw = await readFile(join(tmp, '.esper', 'esper.json'), 'utf8')
     const config = JSON.parse(raw)
-    assert.equal(config.schema_version, 1)
+    assert.equal(config.schema_version, 2)
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }
@@ -58,7 +58,7 @@ test('migrate — creates context.json', async () => {
     runCLI(['migrate'], tmp)
     assert.ok(existsSync(join(tmp, '.esper', 'context.json')))
     const ctx = JSON.parse(await readFile(join(tmp, '.esper', 'context.json'), 'utf8'))
-    assert.equal(ctx.schema_version, 1)
+    assert.equal(ctx.schema_version, 2)
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }
@@ -119,6 +119,54 @@ test('migrate — does not overwrite existing files', async () => {
     runCLI(['migrate'], tmp)
     const ctx = JSON.parse(await readFile(join(tmp, '.esper', 'context.json'), 'utf8'))
     assert.equal(ctx.custom, true, 'Should not overwrite existing context.json')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('migrate — creates runs directory', async () => {
+  const tmp = await setupLegacyProject()
+  try {
+    runCLI(['migrate'], tmp)
+    assert.ok(existsSync(join(tmp, '.esper', 'runs')))
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('migrate — adds new config sections to v1 project', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'esper-migrate-test-'))
+  await mkdir(join(tmp, '.esper'), { recursive: true })
+  // v1 project with old-style workflow_defaults
+  await writeFile(join(tmp, '.esper', 'esper.json'), JSON.stringify({
+    schema_version: 1,
+    backlog_mode: 'local',
+    spec_root: 'specs',
+    commands: { test: 'npm test' },
+    workflow_defaults: {
+      default_work_mode: 'atom',
+      commit_granularity: 'per-increment',
+    },
+  }, null, 2) + '\n')
+  try {
+    const result = runCLI(['migrate'], tmp)
+    assert.equal(result.status, 0)
+    const raw = await readFile(join(tmp, '.esper', 'esper.json'), 'utf8')
+    const config = JSON.parse(raw)
+
+    // Schema upgraded
+    assert.equal(config.schema_version, 2)
+
+    // workflow_defaults migrated to prompt-style
+    assert.equal(typeof config.workflow_defaults.planning, 'string')
+    assert.equal(config.workflow_defaults.default_work_mode, undefined)
+
+    // New sections added
+    assert.ok(config.spec_policy)
+    assert.ok(config.increment_policy)
+    assert.ok(config.agent_roles)
+    assert.ok(config.autonomous_run_policy)
+    assert.ok(config.provider_defaults !== undefined)
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }
