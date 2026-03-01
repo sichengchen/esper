@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# TEMPLATE — this file is not used directly.
-# /esper:init generates a project-specific version at .esper/hooks/verify-quick.sh
+# TEMPLATE SOURCE — this file is not used directly.
+# `esperkit init` generates a project-specific version at `.esper/hooks/verify-quick.sh`
 # with the user's actual commands written as literal strings (no eval, no dynamic reading).
 #
 # Generated output example:
