@@ -2,10 +2,8 @@
   "schema_version": 1,
   "spec_root": "specs",
   "constitution_path": ".esper/CONSTITUTION.md",
-  "active_increment": "001-generate-esper-hook-scripts-during-init.md",
-  "active_increment_scope": [
-    "specs/esperkit-spec.md"
-  ],
+  "active_increment": null,
+  "active_increment_scope": [],
   "workflow_mode": "atom",
   "commands": {
     "test": "npm test"

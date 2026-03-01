@@ -1,13 +1,14 @@
 ---
 id: 1
 title: Generate .esper hook scripts during init
-status: active
+status: done
 type: fix
 lane: atomic
 priority: 1
 created: 2026-03-01
 spec: specs/esperkit-spec.md
 spec_section: Initialize EsperKit in the Project
+finished_at: 2026-03-01
 ---
 # Generate .esper hook scripts during init
 
