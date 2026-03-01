@@ -51,6 +51,7 @@ If there is an active increment with progress recorded:
    - Ask the user if they want to finish the increment
    - If yes: run `esperkit increment finish <filename>`
    - Suggest running `esper:sync` to update specs if needed
+   - Then check for batch continuation (see Step 4)
 
 ## Step 3: Refuse if blocked
 
@@ -58,6 +59,18 @@ Before advancing, check:
 - If the increment file has unresolved comments (lines starting with `> TODO:` or `> FIXME:`), refuse to advance
 - Tell the user to resolve the comments first
 - List the unresolved items
+
+## Step 4: Batch auto-loop
+
+After finishing a child increment, check if it belongs to a batch (has a `parent:` field in its frontmatter).
+
+If yes:
+1. Run `esperkit context get` to check if a new `active_increment` was auto-activated
+2. If a new child is active, loop back to **Step 2** — read the new increment and continue implementation
+3. Repeat until no more children remain (i.e. `active_increment` is null or points to the parent)
+4. When the batch is fully complete, finish the parent increment if still active
+
+This loop runs automatically — do NOT ask the user to run `esper:go` again between children. The user already approved the full queue during `esper:batch`.
 
 ## Available CLI commands
 
