@@ -289,6 +289,22 @@ test('init — creates new config sections in esper.json', async () => {
   }
 })
 
+test('config set — refreshes context.json on any mutation', async () => {
+  const tmp = await setupEsperProject()
+  try {
+    // Modify a key that isn't commands or spec_root
+    const result = runCLI(['config', 'set', 'backlog_mode', 'github'], tmp)
+    assert.equal(result.status, 0)
+
+    // context.json should still exist and be valid
+    const ctx = JSON.parse(await readFile(join(tmp, '.esper', 'context.json'), 'utf8'))
+    assert.ok(ctx.schema_version)
+    assert.equal(ctx.spec_root, 'specs')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
 test('install remains the default when no subcommand given', async () => {
   const tmp = await mkdtemp(join(tmpdir(), 'esper-config-test-'))
   try {

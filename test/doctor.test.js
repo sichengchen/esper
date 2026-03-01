@@ -66,3 +66,38 @@ test('doctor — warns when test command is empty', async () => {
     await rm(tmp, { recursive: true, force: true })
   }
 })
+
+test('doctor — checks runs directory and config completeness', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'esper-doctor-test-'))
+  try {
+    runCLI(['init'], tmp)
+    const result = runCLI(['doctor'], tmp)
+    assert.equal(result.status, 0)
+    assert.ok(result.stdout.includes('runs/ exists'))
+    assert.ok(result.stdout.includes('workflow_defaults complete'))
+    assert.ok(result.stdout.includes('autonomous_run_policy configured'))
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('doctor — warns when workflow_defaults slots are missing', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'esper-doctor-test-'))
+  try {
+    runCLI(['init'], tmp)
+    // Overwrite config with incomplete workflow_defaults
+    const { writeFile } = await import('node:fs/promises')
+    await writeFile(join(tmp, '.esper', 'esper.json'), JSON.stringify({
+      schema_version: 2,
+      spec_root: 'specs',
+      commands: { test: 'npm test' },
+      workflow_defaults: { planning: 'Default.' },
+    }, null, 2) + '\n')
+    const result = runCLI(['doctor'], tmp)
+    assert.ok(result.stdout.includes('workflow_defaults missing:'))
+    assert.ok(result.stdout.includes('session_bootstrap'))
+    assert.ok(result.stdout.includes('autonomous_run_policy section missing'))
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})

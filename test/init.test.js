@@ -89,7 +89,10 @@ test('init — creates valid esper.json with schema_version', async () => {
     assert.equal(config.spec_root, 'specs')
     assert.ok(config.workflow_defaults)
     assert.equal(typeof config.workflow_defaults.planning, 'string')
+    assert.equal(typeof config.workflow_defaults.session_bootstrap, 'string')
+    assert.equal(typeof config.workflow_defaults.implementation_style, 'string')
     assert.equal(typeof config.workflow_defaults.commits, 'string')
+    assert.equal(typeof config.workflow_defaults.explanations, 'string')
   } finally {
     await rm(tmp, { recursive: true, force: true })
   }

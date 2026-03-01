@@ -291,3 +291,38 @@ test('increment finish — advances to the next batch child', async () => {
     await rm(tmp, { recursive: true, force: true })
   }
 })
+
+test('increment finish — auto-finishes batch parent when last child completes', async () => {
+  const tmp = await setupProject({})
+  await mkdir(join(tmp, '.esper', 'increments', 'active'), { recursive: true })
+  await mkdir(join(tmp, '.esper', 'increments', 'pending'), { recursive: true })
+  try {
+    const children = JSON.stringify([
+      { title: 'Only Child', type: 'feature' },
+    ])
+    const grouped = runCLI(['increment', 'group', '--title', 'Single batch', '--children', children], tmp)
+    assert.equal(grouped.status, 0)
+    const parentFilename = grouped.stdout.trim()
+
+    // Finish the only child
+    const finished = runCLI(['increment', 'finish', '002-only-child.md'], tmp)
+    assert.equal(finished.status, 0)
+
+    // Child moved to done
+    assert.ok(existsSync(join(tmp, '.esper', 'increments', 'done', '002-only-child.md')))
+
+    // Parent also moved to done
+    assert.ok(!existsSync(join(tmp, '.esper', 'increments', 'active', parentFilename)))
+    assert.ok(existsSync(join(tmp, '.esper', 'increments', 'done', parentFilename)))
+
+    const parentContent = await readFile(join(tmp, '.esper', 'increments', 'done', parentFilename), 'utf8')
+    assert.ok(parentContent.includes('status: done'))
+    assert.ok(parentContent.includes('finished_at:'))
+
+    // Context cleared
+    const ctx = JSON.parse(await readFile(join(tmp, '.esper', 'context.json'), 'utf8'))
+    assert.equal(ctx.active_increment, null)
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
