@@ -313,6 +313,110 @@ flowchart TD
     H --> I[Move increment to done]
 ```
 
+## Autonomous Multi-Agent Execution
+
+EsperKit supports a bounded autonomous execution mode for approved Spec-to-Code work. In this mode, multiple agents collaborate under strict scope and safety rules.
+
+### Roles
+
+Three named roles participate in autonomous execution:
+
+- **Orchestrator** — decomposes the approved scope into task packets, dispatches work, integrates results, and is the only role that mutates shared `.esper/` control state.
+- **Implementer (worker)** — receives a task packet, reads its scope and acceptance criteria, derives or updates failing tests from approved behavior, and implements until the task passes.
+- **Reviewer** — evaluates the merged candidate against the approved scope. The reviewer must be role-distinct from the implementation worker for a given change set.
+
+Roles may map to different providers or hosts. Configuration lives in `agent_roles` in `.esper/esper.json`.
+
+### How a Run Works
+
+1. The user approves the spec with `esper:go`.
+2. The orchestrator materializes a parent increment as an execution ledger, freezes the approved spec snapshot, and creates a run.
+3. The orchestrator builds a task queue of bounded task packets and marks ready tasks.
+4. Ready tasks are dispatched to workers. Each worker:
+   - reads the task scope, affected files, and acceptance criteria
+   - derives or updates failing tests from the approved behavior descriptions
+   - iterates on implementation until tests pass and acceptance criteria are met
+   - returns the task result
+5. The orchestrator integrates each task result into a merged candidate.
+6. When no more ready tasks remain in the current round, the reviewer evaluates the merged candidate.
+7. If the reviewer finds issues, findings become repair tasks and the run returns to task dispatch.
+8. If the reviewer passes the candidate, the human evaluates the final result.
+9. The human may accept, request follow-up within approved scope, or return to spec authoring for scope changes.
+
+### Loops
+
+The autonomous workflow has several nested loops:
+
+- **Task dispatch loop** — the orchestrator keeps dispatching ready task packets until the current round is fully integrated.
+- **Worker red-green loop** — each worker iterates on failing tests and implementation until the task packet satisfies its acceptance criteria.
+- **Review-repair loop** — reviewer findings become repair tasks and send the run back through task dispatch.
+- **Human escalation loop** — blocked or over-budget runs return to the human, who can resolve the issue and resume or change scope and return to spec authoring.
+
+### Rules
+
+- Autonomous execution starts only after the governing spec is approved.
+- The approved spec snapshot remains the sole authoritative source of scope and requirements.
+- The parent increment remains the active human-facing execution ledger.
+- Task packets are run artifacts, not concurrent active increments.
+- The run stops and escalates when it hits configured limits or finds ambiguity.
+
+### Configuration
+
+The `autonomous_run_policy` section in `.esper/esper.json` controls:
+
+- `enabled` — whether autonomous execution is available
+- `max_review_rounds` — maximum review-repair cycles before escalation
+- `max_runtime_minutes` — time budget for a run
+- `max_cost` — cost budget for a run
+- `require_distinct_reviewer` — enforce role separation between worker and reviewer
+- `allow_parallel_tasks` — allow concurrent task execution
+
+### Run Storage
+
+Run artifacts are stored under `.esper/runs/<run-id>/`:
+
+- `run.json` — machine-readable run record
+- `tasks/` — task packet artifacts
+- `reviews/` — review records
+
+### Multi-Agent Flow
+
+```mermaid
+flowchart TD
+    A[esper:go<br/>Approve spec] --> B[Materialize parent increment<br/>as execution ledger]
+    B --> C[Freeze approved spec<br/>and create run]
+    C --> D[Build task queue<br/>and mark ready tasks]
+    D --> E{Ready task exists?}
+    E -->|Yes| F[Dispatch task packet<br/>to worker]
+    E -->|No| G[Reviewer evaluates<br/>merged candidate]
+
+    F --> H[Worker derives failing tests<br/>from approved behavior]
+    H --> I{Tests passing and<br/>acceptance met?}
+    I -->|No| J[Worker implements<br/>and re-runs checks]
+    J --> H
+    I -->|Yes| K[Worker returns task result]
+
+    K --> L[Orchestrator integrates<br/>task result into candidate]
+    L --> E
+
+    G --> M{Review result?}
+    M -->|Pass| N[Human evaluates<br/>final candidate]
+    M -->|Findings| O[Create repair tasks]
+    O --> P{Within run limits?}
+    P -->|Yes| D
+    P -->|No| Q[Escalate to human]
+
+    Q --> R{Human decision?}
+    R -->|Resolve and resume| D
+    R -->|Change scope| S[Return to spec authoring]
+    R -->|Cancel| T[Run ends escalated]
+
+    N --> U{Accepted?}
+    U -->|Yes| V[esper:review / esper:sync<br/>close out increment]
+    U -->|Needs follow-up| O
+    U -->|Needs scope change| S
+```
+
 ## Shared Daily Loop
 
 Once a project is initialized, the day-to-day loop is simple:

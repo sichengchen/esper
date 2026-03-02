@@ -2,9 +2,9 @@
 
 [![npm](https://img.shields.io/npm/v/esperkit)](https://www.npmjs.com/package/esperkit)
 
-Tool-neutral, simple workflow layer for spec-driven software development. Gives coding agents a durable project constitution, system specs, structured increments, and verifiable delivery rules.
+Tool-neutral workflow layer for spec-driven software development. Gives coding agents a durable project constitution, system specs, structured increments, bounded multi-agent execution, and verifiable delivery rules.
 
-Works with Claude Code and Codex.
+Works with Claude Code and Codex. Supports single-agent interactive work and multi-agent autonomous runs across providers.
 
 ## Install
 
@@ -23,7 +23,30 @@ This interviews you, creates the `.esper/` directory with a constitution, spec s
 
 ## Workflows
 
-EsperKit supports two complementary development styles.
+EsperKit supports two complementary development styles. Spec-to-Code supports both interactive (single-agent) and autonomous (multi-agent) execution.
+
+```mermaid
+flowchart LR
+    D{Starting point?}
+
+    D -->|Spec-first| E[Revise spec]
+    D -->|Direct request| P[Plan increment]
+
+    E --> G[Approve]
+    P --> G
+
+    G --> M{Execution mode?}
+
+    M -->|Interactive| H[Agent implements] --> O
+
+    M -->|Autonomous| I[Orchestrator splits tasks]
+    I --> J[Workers implement in parallel]
+    J --> K{Reviewer evaluates}
+    K -->|Fail| J
+    K -->|Pass| O
+
+    O[Review & sync] -->|More work| D
+```
 
 **Spec-to-Code** — define or revise the system spec first, then derive implementation from it.
 
