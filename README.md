@@ -13,6 +13,12 @@ npm install -g esperkit
 esperkit install
 ```
 
+To install skills into the current project instead of the global agent directory:
+
+```bash
+esperkit install --project
+```
+
 Then initialize through the agent:
 
 ```
@@ -20,6 +26,16 @@ esper:init
 ```
 
 This interviews you, creates the `.esper/` directory with a constitution, spec scaffolding, and workflow config.
+
+## Uninstall
+
+Remove all esper skills from the agent directory:
+
+```bash
+esperkit uninstall
+```
+
+Supports `--provider claude|codex|all` to target specific hosts.
 
 ## Workflows
 
@@ -88,6 +104,8 @@ Use the same `esper:*` command names across hosts, including Claude Code and Cod
 | Command | What it does |
 |---|---|
 | `esperkit install` | Install or update host-specific skills |
+| `esperkit install --project` | Install skills into the current project |
+| `esperkit uninstall` | Remove esper skills from agent directory |
 | `esperkit init` | Create deterministic project scaffolding |
 | `esperkit config` | Read or write project config |
 | `esperkit context get` | Print runtime context as JSON |

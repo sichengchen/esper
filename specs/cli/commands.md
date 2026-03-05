@@ -21,6 +21,8 @@ It does not own semantic authoring of specs, increments, or review findings.
 EsperKit exposes a CLI surface equivalent to:
 
 - `esperkit install`
+- `esperkit install --project`
+- `esperkit uninstall`
 - `esperkit init`
 - `esperkit config get [key]`
 - `esperkit config set <key> <value>`

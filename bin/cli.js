@@ -108,33 +108,26 @@ function shouldUseTui(options = {}) {
   return Boolean(process.stdin.isTTY && process.stdout.isTTY && !process.env.CI)
 }
 
-async function promptProvider() {
-  const options = [
-    { id: 'claude', label: 'Claude Code', path: CLAUDE_SKILLS_DIR },
-    { id: 'codex', label: 'Codex', path: CODEX_SKILLS_DIR },
-  ]
-  const selected = new Set(['claude'])
+function tuiSelect({ title, subtitle, items, multiSelect = false, defaultSelected }) {
+  const selected = new Set(defaultSelected ?? (multiSelect ? [items[0].id] : []))
   let cursorIndex = 0
   let error = ''
-
-  function providerFromSelection() {
-    const hasClaude = selected.has('claude')
-    const hasCodex = selected.has('codex')
-    if (hasClaude && hasCodex) return 'all'
-    if (hasCodex) return 'codex'
-    return 'claude'
-  }
 
   function render() {
     cursorTo(process.stdout, 0, 0)
     clearScreenDown(process.stdout)
-    console.log(`${bold(cyan('esperkit installer'))}`)
-    console.log(dim('Use up/down to move, space to select, enter to install.\n'))
-    for (let i = 0; i < options.length; i++) {
-      const item = options[i]
+    console.log(`${bold(cyan(title))}`)
+    console.log(dim(`${subtitle}\n`))
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
       const pointer = i === cursorIndex ? cyan('>') : ' '
-      const mark = selected.has(item.id) ? green('[x]') : dim('[ ]')
-      console.log(` ${pointer} ${mark} ${bold(item.label)} ${dim(`(${item.path})`)}`)
+      if (multiSelect) {
+        const mark = selected.has(item.id) ? green('[x]') : dim('[ ]')
+        console.log(` ${pointer} ${mark} ${bold(item.label)}${item.hint ? ' ' + dim(item.hint) : ''}`)
+      } else {
+        const mark = i === cursorIndex ? cyan('●') : dim('○')
+        console.log(` ${pointer} ${mark} ${bold(item.label)}${item.hint ? ' ' + dim(item.hint) : ''}`)
+      }
     }
     if (error) {
       console.log(`\n${red(error)}`)
@@ -161,26 +154,26 @@ async function promptProvider() {
     const onKeypress = (_str, key) => {
       if (key.ctrl && key.name === 'c') {
         cleanup()
-        reject(new Error('Installation cancelled by user'))
+        reject(new Error('Cancelled by user'))
         return
       }
 
       if (key.name === 'up' || key.name === 'k') {
-        cursorIndex = (cursorIndex - 1 + options.length) % options.length
+        cursorIndex = (cursorIndex - 1 + items.length) % items.length
         error = ''
         render()
         return
       }
 
       if (key.name === 'down' || key.name === 'j') {
-        cursorIndex = (cursorIndex + 1) % options.length
+        cursorIndex = (cursorIndex + 1) % items.length
         error = ''
         render()
         return
       }
 
-      if (key.name === 'space') {
-        const id = options[cursorIndex].id
+      if (key.name === 'space' && multiSelect) {
+        const id = items[cursorIndex].id
         if (selected.has(id)) {
           selected.delete(id)
         } else {
@@ -192,14 +185,18 @@ async function promptProvider() {
       }
 
       if (key.name === 'return' || key.name === 'enter') {
-        if (selected.size === 0) {
-          error = 'Select at least one provider before installing.'
-          render()
-          return
+        if (multiSelect) {
+          if (selected.size === 0) {
+            error = 'Select at least one option.'
+            render()
+            return
+          }
+          cleanup()
+          resolve(selected)
+        } else {
+          cleanup()
+          resolve(items[cursorIndex].id)
         }
-        const provider = providerFromSelection()
-        cleanup()
-        resolve(provider)
       }
     }
 
@@ -212,6 +209,39 @@ async function promptProvider() {
     process.stdout.write('\n')
     render()
   })
+}
+
+async function promptAction() {
+  const items = [
+    { id: 'install', label: 'Install', hint: '(global — ~/.claude/skills/)' },
+    { id: 'install-project', label: 'Install to project', hint: '(.claude/skills/ in current repo)' },
+    { id: 'uninstall', label: 'Uninstall', hint: '(remove esper skills)' },
+  ]
+  return tuiSelect({
+    title: 'esperkit',
+    subtitle: 'Use up/down to move, enter to select.',
+    items,
+  })
+}
+
+async function promptProvider() {
+  const items = [
+    { id: 'claude', label: 'Claude Code', hint: `(${CLAUDE_SKILLS_DIR})` },
+    { id: 'codex', label: 'Codex', hint: `(${CODEX_SKILLS_DIR})` },
+  ]
+  const selected = await tuiSelect({
+    title: 'esperkit installer',
+    subtitle: 'Use up/down to move, space to select, enter to install.',
+    items,
+    multiSelect: true,
+    defaultSelected: ['claude'],
+  })
+
+  const hasClaude = selected.has('claude')
+  const hasCodex = selected.has('codex')
+  if (hasClaude && hasCodex) return 'all'
+  if (hasCodex) return 'codex'
+  return 'claude'
 }
 
 function resolveProvider(options = {}) {
@@ -234,13 +264,22 @@ async function selectProvider(options = {}) {
   return { provider, usedTui: true }
 }
 
-function resolveInstallTargets(provider) {
+function resolveInstallTargets(provider, { project = false } = {}) {
+  let claudeDir = CLAUDE_SKILLS_DIR
+  let codexDir = CODEX_SKILLS_DIR
+
+  if (project) {
+    const cwd = process.cwd()
+    claudeDir = join(cwd, '.claude', 'skills')
+    codexDir = join(cwd, '.codex', 'skills')
+  }
+
   const byProvider = {
-    claude: [{ name: 'Claude Code', dir: CLAUDE_SKILLS_DIR }],
-    codex: [{ name: 'Codex', dir: CODEX_SKILLS_DIR }],
+    claude: [{ name: 'Claude Code', dir: claudeDir }],
+    codex: [{ name: 'Codex', dir: codexDir }],
     all: [
-      { name: 'Claude Code', dir: CLAUDE_SKILLS_DIR },
-      { name: 'Codex', dir: CODEX_SKILLS_DIR },
+      { name: 'Claude Code', dir: claudeDir },
+      { name: 'Codex', dir: codexDir },
     ],
   }
 
@@ -261,11 +300,26 @@ const argv = process.argv.slice(2)
 const [subcommand, action, ...rest] = argv
 
 async function main() {
-  if (!subcommand || subcommand === 'install' || subcommand.startsWith('--')) {
-    const installArgs = subcommand === 'install'
-      ? [action, ...rest].filter(Boolean)
-      : argv
-    return install(parseFlags(installArgs))
+  if (!subcommand || subcommand.startsWith('--')) {
+    if (shouldUseTui(parseFlags(argv))) {
+      const actionId = await promptAction()
+      if (actionId === 'install') {
+        return install({ ...parseFlags(argv), _fromWizard: true })
+      } else if (actionId === 'install-project') {
+        return install({ ...parseFlags(argv), project: true, _fromWizard: true })
+      } else if (actionId === 'uninstall') {
+        return uninstall({ ...parseFlags(argv), _fromWizard: true })
+      }
+    }
+    return install(parseFlags(argv))
+  }
+
+  if (subcommand === 'install') {
+    return install(parseFlags([action, ...rest].filter(Boolean)))
+  }
+
+  if (subcommand === 'uninstall') {
+    return uninstall(parseFlags([action, ...rest].filter(Boolean)))
   }
 
   switch (subcommand) {
@@ -383,7 +437,7 @@ async function main() {
     }
     default:
       console.error(`Unknown command: ${subcommand}`)
-      console.error('Usage: esperkit [install|init|config|context|spec|increment|run|exploration|doctor|migrate]')
+      console.error('Usage: esperkit [install|uninstall|init|config|context|spec|increment|run|exploration|doctor|migrate]')
       process.exit(1)
   }
 }
@@ -391,8 +445,16 @@ async function main() {
 // --- Install handler ---
 
 async function install(options = {}) {
+  const projectMode = isTruthy(options.project)
+  if (projectMode) {
+    const inGitRepo = existsSync(join(process.cwd(), '.git'))
+    if (!inGitRepo) {
+      console.error('Error: --project requires a git repository (no .git directory found)')
+      process.exit(1)
+    }
+  }
   const { provider, usedTui } = await selectProvider(options)
-  const targets = resolveInstallTargets(provider)
+  const targets = resolveInstallTargets(provider, { project: projectMode })
   const manyTargets = targets.length > 1
 
   if (usedTui) {
@@ -511,6 +573,55 @@ async function install(options = {}) {
       console.log('')
       console.log('  /esper:init')
     }
+  }
+}
+
+// --- Uninstall handler ---
+
+async function uninstall(options = {}) {
+  const { provider } = await selectProvider(options)
+  const targets = resolveInstallTargets(provider)
+
+  console.log('Uninstalling esperkit skills...\n')
+
+  const skillsSource = join(PACKAGE_ROOT, 'skills')
+  const knownSkills = await readdir(skillsSource)
+  const allSkills = [...knownSkills, ...REMOVED_SKILLS]
+
+  let totalRemoved = 0
+
+  for (const target of targets) {
+    if (targets.length > 1) {
+      console.log(`→ ${target.name}: ${target.dir}`)
+    }
+
+    if (!existsSync(target.dir)) {
+      console.log('  (no skills directory found)')
+      console.log('')
+      continue
+    }
+
+    let removedFromTarget = 0
+    for (const skill of allSkills) {
+      const dest = join(target.dir, skill)
+      if (existsSync(dest)) {
+        await rm(dest, { recursive: true, force: true })
+        console.log(`  - ${skill}`)
+        removedFromTarget++
+      }
+    }
+
+    if (removedFromTarget === 0) {
+      console.log('  (no esper skills found)')
+    }
+    totalRemoved += removedFromTarget
+    console.log('')
+  }
+
+  if (totalRemoved === 0) {
+    console.log('Nothing to uninstall.')
+  } else {
+    console.log(`Removed ${totalRemoved} skill${totalRemoved === 1 ? '' : 's'}.`)
   }
 }
 

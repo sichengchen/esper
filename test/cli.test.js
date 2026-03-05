@@ -11,10 +11,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const CLI = join(__dirname, '..', 'bin', 'cli.js')
 const SKILLS_SOURCE = join(__dirname, '..', 'skills')
 
-function runCLI(args = [], env = {}) {
+function runCLI(args = [], env = {}, opts = {}) {
   return spawnSync(process.execPath, [CLI, ...args], {
     env: { ...process.env, ...env },
     encoding: 'utf8',
+    ...opts,
   })
 }
 
@@ -174,9 +175,131 @@ test('interactive flag in non-tty mode falls back to non-interactive install', a
   }
 })
 
+// --- Uninstall tests ---
+
+test('uninstall removes all installed esper skills', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'esper-test-'))
+  try {
+    // Install first
+    let result = runCLI([], { ESPER_SKILLS_DIR: tmp })
+    assert.equal(result.status, 0, `Install failed\n${result.stderr}`)
+
+    const skillsBefore = await readdir(tmp)
+    assert.ok(skillsBefore.length > 0, 'Expected skills to be installed')
+
+    // Uninstall
+    result = runCLI(['uninstall'], { ESPER_CLAUDE_SKILLS_DIR: tmp })
+    assert.equal(result.status, 0, `Uninstall failed\n${result.stderr}`)
+
+    const remaining = (await readdir(tmp)).filter(d => d.startsWith('esper-'))
+    assert.equal(remaining.length, 0, `Expected all esper skills removed, found: ${remaining}`)
+    assert.ok(result.stdout.includes('Removed'), 'Expected removal summary')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('uninstall with provider=codex only removes from codex target', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'esper-test-'))
+  const claudeDir = join(tmp, 'claude-skills')
+  const codexHome = join(tmp, 'codex-home')
+  const codexSkills = join(codexHome, 'skills')
+  try {
+    // Install to both
+    let result = runCLI(['install', '--provider', 'all'], {
+      ESPER_CLAUDE_SKILLS_DIR: claudeDir,
+      CODEX_HOME: codexHome,
+    })
+    assert.equal(result.status, 0)
+
+    // Uninstall only codex
+    result = runCLI(['uninstall', '--provider', 'codex'], {
+      ESPER_CLAUDE_SKILLS_DIR: claudeDir,
+      CODEX_HOME: codexHome,
+    })
+    assert.equal(result.status, 0)
+
+    // Codex should be empty of esper skills
+    const codexRemaining = (await readdir(codexSkills)).filter(d => d.startsWith('esper-'))
+    assert.equal(codexRemaining.length, 0, 'Expected codex skills removed')
+
+    // Claude should still have skills
+    const claudeRemaining = await readdir(claudeDir)
+    assert.ok(claudeRemaining.length > 0, 'Expected claude skills to remain')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('uninstall exits cleanly when nothing to remove', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'esper-test-'))
+  try {
+    const result = runCLI(['uninstall'], { ESPER_CLAUDE_SKILLS_DIR: tmp })
+    assert.equal(result.status, 0)
+    assert.ok(result.stdout.includes('Nothing to uninstall'))
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('uninstall also removes stale skills from previous versions', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'esper-test-'))
+  try {
+    // Create a stale skill directory
+    await mkdir(join(tmp, 'esper-build'), { recursive: true })
+
+    const result = runCLI(['uninstall'], { ESPER_CLAUDE_SKILLS_DIR: tmp })
+    assert.equal(result.status, 0)
+    assert.ok(!existsSync(join(tmp, 'esper-build')), 'Expected stale skill removed')
+    assert.ok(result.stdout.includes('esper-build'), 'Expected stale skill in output')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+// --- Project install tests ---
+
+test('install --project installs skills to project-local directory', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'esper-test-'))
+  const projectSkills = join(tmp, '.claude', 'skills')
+  try {
+    await mkdir(join(tmp, '.git'), { recursive: true })
+
+    const result = runCLI(['install', '--project'], {
+      ESPER_CLAUDE_SKILLS_DIR: join(tmp, 'global-should-not-be-used'),
+    }, { cwd: tmp })
+    assert.equal(result.status, 0, `CLI exited with ${result.status}\n${result.stderr}`)
+
+    const expectedSkills = await readdir(SKILLS_SOURCE)
+    const installedSkills = await readdir(projectSkills)
+    for (const skill of expectedSkills) {
+      assert.ok(installedSkills.includes(skill), `Expected ${skill} to be installed in project`)
+    }
+
+    // Global dir should not exist
+    assert.ok(!existsSync(join(tmp, 'global-should-not-be-used')), 'Global dir should not be created')
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('install --project errors when not in a git repo', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'esper-test-'))
+  try {
+    // No .git directory
+    const result = runCLI(['install', '--project'], {
+      ESPER_CLAUDE_SKILLS_DIR: tmp,
+    }, { cwd: tmp })
+    assert.notEqual(result.status, 0)
+    assert.ok(result.stderr.includes('--project requires a git repository'))
+  } finally {
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
 test('unknown command prints usage', async () => {
   const result = runCLI(['foobar'])
   assert.notEqual(result.status, 0)
   assert.ok(result.stderr.includes('Unknown command'))
-  assert.ok(result.stderr.includes('install|init|config|context|spec|increment'))
+  assert.ok(result.stderr.includes('install|uninstall|init|config|context|spec|increment'))
 })
