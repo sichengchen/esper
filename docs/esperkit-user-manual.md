@@ -106,6 +106,24 @@ esperkit install
 This installs or updates the host-specific skills or command assets.
 It does not create project workflow files yet.
 
+To install skills into the current project instead of the global agent directory:
+
+```bash
+esperkit install --project
+```
+
+This places skills under `.claude/skills/` (or `.codex/skills/`) inside the project. Requires a git repository.
+
+### Uninstall
+
+To remove all esper skills from the agent directory:
+
+```bash
+esperkit uninstall
+```
+
+Supports `--provider claude|codex|all` to target specific hosts.
+
 ### Initialize the Project
 
 Run the initialization workflow through the host:
